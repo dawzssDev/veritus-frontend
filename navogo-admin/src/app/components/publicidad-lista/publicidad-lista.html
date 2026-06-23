@@ -1,0 +1,150 @@
+<div class="dashboard-container">
+
+  <!-- Header Mejorado -->
+  <div class="header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="title">
+          <mat-icon>campaign</mat-icon>
+          Publicidad
+        </h1>
+        <p>Gestiona tus campañas publicitarias y promociones</p>
+      </div>
+      <div class="header-actions">
+        <button mat-stroked-button [matMenuTriggerFor]="exportMenu" matTooltip="Exportar datos">
+          <mat-icon>download</mat-icon>
+          Exportar
+        </button>
+        <mat-menu #exportMenu="matMenu">
+          <button mat-menu-item (click)="exportExcel()">
+            <mat-icon>table_view</mat-icon>
+            Descargar Excel
+          </button>
+          <button mat-menu-item (click)="exportPDF()">
+            <mat-icon>picture_as_pdf</mat-icon>
+            Descargar PDF
+          </button>
+        </mat-menu>
+        <button mat-raised-button (click)="open()" matTooltip="Crear una nueva campaña">
+          <mat-icon>add</mat-icon>
+          Agregar Nueva Campaña
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Card con Tabla -->
+  <div class="content-card">
+    
+    <!-- Estado de carga -->
+    <div *ngIf="isLoading" class="state-card">
+      <div class="state-card__icon-wrap state-card__icon-wrap--spin">
+        <mat-icon>hourglass_empty</mat-icon>
+      </div>
+      <div>
+        <h3 class="state-card__title">Cargando publicidad</h3>
+        <p class="state-card__sub">Obteniendo datos...</p>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading" class="table-container">
+      <table mat-table [dataSource]="dataSource" matSort class="custom-table">
+
+        <!-- Columna Nombre con Imagen -->
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Campaña </th>
+          <td mat-cell *matCellDef="let row"> 
+            <div class="cell-with-image">
+              <img
+                *ngIf="row.imagen"
+                [src]="row.imagen_url"
+                alt="{{ row.nombre }}"
+                class="product-image"
+              />
+              <div class="product-info">
+                <span class="product-name">{{ row.nombre }}</span>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Columna Descripción -->
+        <ng-container matColumnDef="descripcion">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripción </th>
+          <td mat-cell *matCellDef="let row"> 
+            <span class="description-text" [matTooltip]="row.descripcion">{{ row.descripcion }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Columna Estatus con Badge -->
+        <ng-container matColumnDef="estatus">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+          <td mat-cell *matCellDef="let row"> 
+            <span [ngClass]="{
+              'status-badge': true,
+              'status-active': row.estatus === 'activo' || row.estatus === 1,
+              'status-inactive': row.estatus === 'inactivo' || row.estatus === 0
+            }">
+              <mat-icon>{{ (row.estatus === 'activo' || row.estatus === 1) ? 'check_circle' : 'cancel' }}</mat-icon>
+              {{ (row.estatus === 'activo' || row.estatus === 1) ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Columna Acciones -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef> Acciones </th>
+          <td mat-cell *matCellDef="let row">
+            <div class="actions-cell">
+              <button 
+                mat-mini-fab 
+                class="edit-btn"
+                (click)="openById(row.id)"
+                matTooltip="Editar campaña"
+                aria-label="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button 
+                mat-mini-fab 
+                class="delete-btn"
+                (click)="delete(row.id)"
+                matTooltip="Eliminar campaña"
+                aria-label="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Definición de Filas -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        
+        <!-- Estado Sin Datos -->
+        <tr class="mat-row no-data" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+            <div class="empty-state">
+              <mat-icon>campaign</mat-icon>
+              <h3>No hay campañas publicitarias</h3>
+              <p>Comienza creando tu primera campaña</p>
+              <button mat-raised-button color="primary" (click)="open()">
+                <mat-icon>add</mat-icon>
+                Agregar Campaña
+              </button>
+            </div>
+          </td>
+        </tr>
+
+      </table>
+    </div>
+
+    <!-- Paginador -->
+    <mat-paginator 
+      [pageSizeOptions]="[5, 10, 25, 50]" 
+      [pageSize]="10"
+      showFirstLastButtons
+      aria-label="Seleccionar página">
+    </mat-paginator>
+  </div>
+
+</div>

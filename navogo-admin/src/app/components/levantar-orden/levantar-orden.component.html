@@ -1,0 +1,318 @@
+<div class="levantar-orden-container">
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-overlay">
+      <mat-spinner [diameter]="60"></mat-spinner>
+      <p>Cargando menú...</p>
+    </div>
+  }
+
+  <!-- Main Content -->
+  @if (!isLoading()) {
+    <div class="main-content" [class.vista-productos]="vistaMovil() === 'productos'" [class.vista-orden]="vistaMovil() === 'orden'">
+
+      <!-- PANEL IZQUIERDO - Catálogo de Productos -->
+      <div class="panel-productos" [class.oculto-movil]="vistaMovil() === 'orden'">
+        
+        <!-- Barra de búsqueda -->
+        <div class="search-bar">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-icon matPrefix>search</mat-icon>
+            <input 
+              matInput 
+              placeholder="Buscar producto..."
+              [value]="busqueda()"
+              (input)="onBusquedaChange($any($event.target).value)">
+            @if (busqueda()) {
+              <button mat-icon-button matSuffix (click)="limpiarBusqueda()">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Tabs de categorías -->
+        <div class="categorias-tabs">
+          <mat-chip-listbox 
+            [value]="categoriaActiva()"
+            (change)="seleccionarCategoria($event.value)"
+            class="chips-container">
+            <mat-chip-option value="todos" [selected]="categoriaActiva() === 'todos'">
+              <mat-icon>restaurant</mat-icon>
+              Todos
+            </mat-chip-option>
+            @for (categoria of obtenerCategoriasUnicas(); track categoria) {
+              <mat-chip-option 
+                [value]="categoria"
+                [selected]="categoriaActiva() === categoria">
+                {{ categoria }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        </div>
+
+        <!-- Grilla de productos -->
+        <div class="productos-grid">
+          @for (producto of productosFiltrados(); track trackByProductId($index, producto)) {
+            <div class="producto-card" (click)="viewProduct(producto)">
+              <!-- Imagen del producto -->
+              <div class="producto-imagen">
+                @if (producto.imagen_url) {
+                  <img [src]="producto.imagen_url" [alt]="producto.nombre">
+                } @else {
+                  <div class="imagen-placeholder">
+                    <mat-icon>restaurant</mat-icon>
+                  </div>
+                }
+                
+                <!-- Badge de cantidad en orden -->
+                @if (obtenerCantidadEnOrden(producto.id) > 0) {
+                  <span class="cantidad-badge">
+                    {{ obtenerCantidadEnOrden(producto.id) }}
+                  </span>
+                }
+
+                <!-- Badge de descuento -->
+                @if (tieneDescuentoActivo(producto)) {
+                  <span class="descuento-badge">
+                    -{{ calcularPorcentajeDescuento(producto) }}%
+                  </span>
+                }
+              </div>
+
+              <!-- Info del producto -->
+              <div class="producto-info">
+                <h3 class="producto-nombre">{{ producto.nombre }}</h3>
+                <div class="producto-precio">
+                  @if (tieneDescuentoActivo(producto)) {
+                    <span class="precio-original">${{ producto.precio | number:'1.2-2' }}</span>
+                    <span class="precio-con-descuento">
+                      ${{ obtenerPrecioConDescuento(producto) | number:'1.2-2' }}
+                    </span>
+                  } @else {
+                    <span class="precio-actual">${{ producto.precio | number:'1.2-2' }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-state">
+              <mat-icon>search_off</mat-icon>
+              <p>No se encontraron productos</p>
+            </div>
+          }
+        </div>
+
+      </div>
+
+      <!-- PANEL DERECHO - Detalles de la Orden -->
+      <div class="panel-orden" [class.oculto-movil]="vistaMovil() === 'productos'">
+        
+        <!-- Header del panel -->
+        <div class="orden-header">
+          <button mat-icon-button class="btn-volver-movil" (click)="irAProductos()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <h2>
+            <mat-icon>receipt_long</mat-icon>
+            Levantar Orden
+          </h2>
+          @if (modoSplit) {
+            <div class="split-badge">
+              <mat-icon>call_split</mat-icon>
+              Mesa {{ mesaSplitId }} — Cuenta adicional
+            </div>
+          }
+        </div>
+
+        <!-- Selector de mesa (obligatorio) -->
+        <div class="seleccion-mesa">
+          @if (!mesaSeleccionada()) {
+            <button 
+              mat-raised-button 
+              color="primary" 
+              class="btn-seleccionar-mesa"
+              (click)="abrirSeleccionMesa()">
+              <mat-icon>table_restaurant</mat-icon>
+              Seleccionar Mesa
+            </button>
+            <p class="mensaje-mesa">Selecciona la mesa para continuar</p>
+          } @else {
+            <div class="mesa-seleccionada-card">
+              <div class="mesa-info-header">
+                <div class="mesa-identificador">
+                  <mat-icon>table_restaurant</mat-icon>
+                  <span class="identificador">{{ mesaSeleccionada()!.identificador }}</span>
+                </div>
+                <button 
+                  mat-icon-button 
+                  (click)="abrirSeleccionMesa()"
+                  [disabled]="modoSplit"
+                  matTooltip="Cambiar mesa">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </div>
+              <div class="mesa-detalles">
+                <span class="detalle">
+                  <mat-icon>person</mat-icon>
+                  {{ mesaSeleccionada()!.capacidad }} personas
+                </span>
+                @if (mesaSeleccionada()!.zona) {
+                  <span class="detalle">
+                    <mat-icon>place</mat-icon>
+                    {{ mesaSeleccionada()!.zona }}
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Lista de productos en la orden -->
+        <div class="orden-productos">
+          @if (orden().length === 0) {
+            <div class="orden-vacia">
+              <mat-icon>add_shopping_cart</mat-icon>
+              <p>No hay productos en la orden</p>
+              <small>Selecciona productos del menú</small>
+            </div>
+          } @else {
+            <div class="productos-lista">
+              @for (item of orden(); track trackByProductoId($index, item); let idx = $index) {
+                <div class="orden-item">
+                  <div class="item-principal">
+                    <!-- Imagen del producto -->
+                    <div class="item-imagen">
+                      @if (item.producto.imagen_url) {
+                        <img [src]="item.producto.imagen_url" [alt]="item.producto.nombre">
+                      } @else {
+                        <div class="imagen-placeholder">
+                          <mat-icon>restaurant</mat-icon>
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Info del producto -->
+                    <div class="item-info">
+                      <h4 class="item-nombre">{{ item.producto.nombre }}</h4>
+                      <div class="item-precio-unitario">
+                        ${{ obtenerPrecioConDescuento(item.producto) | number:'1.2-2' }} c/u
+                      </div>
+
+                      <!-- Link para agregar nota o mostrar nota existente -->
+                      <div class="item-nota-container">
+                        @if (item.nota && item.nota.trim()) {
+                          <p class="nota-texto">
+                            <mat-icon inline>note</mat-icon>
+                            {{ item.nota }}
+                          </p>
+                          <a class="link-editar-nota" (click)="abrirDialogNota(idx)">
+                            Editar nota
+                          </a>
+                        } @else {
+                          <a class="link-agregar-nota" (click)="abrirDialogNota(idx)">
+                            <mat-icon inline>add</mat-icon>
+                            Agregar nota
+                          </a>
+                        }
+                      </div>
+
+                      <!-- Complementos/Selecciones -->
+                      @if (item.selections && item.selections.length > 0) {
+                        <div class="item-selections">
+                          @for (sel of item.selections; track $index) {
+                            <div class="selection-item">
+                              <span class="selection-label">{{ sel.groupTitle }}:</span>
+                              <span class="selection-value">{{ sel.extra }}</span>
+                            </div>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Controles de cantidad -->
+                    <div class="item-controles">
+                      <div class="cantidad-controls">
+                        <button 
+                          mat-icon-button 
+                          (click)="disminuirCantidad(idx)"
+                          [disabled]="item.cantidad <= 1">
+                          <mat-icon>remove</mat-icon>
+                        </button>
+                        <span class="cantidad">{{ item.cantidad }}</span>
+                        <button mat-icon-button (click)="aumentarCantidad(idx)">
+                          <mat-icon>add</mat-icon>
+                        </button>
+                      </div>
+                      <div class="item-subtotal">
+                        ${{ calcularSubtotalItem(item) | number:'1.2-2' }}
+                      </div>
+                      <button 
+                        mat-icon-button 
+                        color="warn"
+                        (click)="eliminarDeOrden(idx)"
+                        class="btn-eliminar">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Resumen y botón de enviar -->
+        <div class="orden-footer">
+          <div class="resumen">
+            <div class="resumen-item total">
+              <span class="label">Total de la orden:</span>
+              <span class="valor">${{ subtotal() | number:'1.2-2' }}</span>
+            </div>
+            <div class="info-pago-pendiente">
+              <mat-icon>info</mat-icon>
+              <span>El pago se procesará cuando el cliente solicite la cuenta</span>
+            </div>
+          </div>
+
+          <button 
+            mat-raised-button 
+            color="primary"
+            class="btn-levantar-orden"
+            [disabled]="!ordenValida()"
+            (click)="levantarOrden()">
+            <mat-icon>send</mat-icon>
+            Levantar Orden
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- Botón flotante móvil -->
+    <button 
+      mat-fab 
+      color="primary"
+      class="btn-ver-orden-movil"
+      [class.oculto]="vistaMovil() === 'orden'"
+      (click)="irAOrden()"
+      [matBadge]="orden().length"
+      [matBadgeHidden]="orden().length === 0"
+      matBadgeColor="warn">
+      <mat-icon>receipt_long</mat-icon>
+    </button>
+  }
+
+  <!-- Modal de detalle de producto -->
+  <app-product-detail-dialog
+    [(open)]="showProductModal"
+    [productId]="selectedProductId()"
+    [canAdd]="true"
+    (addToCart)="onAddFromDetail($event)">
+  </app-product-detail-dialog>
+
+</div>

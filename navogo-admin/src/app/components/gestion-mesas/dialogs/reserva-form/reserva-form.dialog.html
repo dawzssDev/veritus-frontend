@@ -1,0 +1,189 @@
+<!-- ─── Header ─────────────────────────────────────────────── -->
+<div mat-dialog-title class="res-dialog-header">
+  <div class="res-header-icon">
+    <mat-icon>event_available</mat-icon>
+  </div>
+  <div class="res-header-text">
+    <h2>{{ esEdicion() ? 'Editar reserva' : 'Nueva reserva' }}</h2>
+    <p>{{ esEdicion() ? 'Modifica los datos de la reserva' : 'Completa la información para crear la reserva' }}</p>
+  </div>
+  <button mat-icon-button mat-dialog-close [disabled]="guardando()" class="btn-cerrar">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<!-- ─── Content ───────────────────────────────────────────────── -->
+<mat-dialog-content class="res-dialog-body">
+  <form [formGroup]="form" class="res-form">
+
+    <!-- Sección: Fecha y Horario -->
+    <div class="res-section">
+      <p class="res-section-label">
+        <mat-icon>schedule</mat-icon>
+        Fecha y horario
+      </p>
+
+      <div class="campo-row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Fecha *</mat-label>
+          <mat-icon matPrefix>calendar_today</mat-icon>
+          <input
+            matInput
+            [matDatepicker]="picker"
+            [value]="fechaDate"
+            [matDatepickerFilter]="filtroFecha"
+            (dateChange)="onFechaCambio($event.value)"
+            readonly
+          />
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Hora de inicio *</mat-label>
+          <mat-icon matPrefix>schedule</mat-icon>
+          <mat-select formControlName="hora_inicio" (selectionChange)="verificarDisponibilidad()">
+            @for (h of horasOpciones; track h.valor) {
+              <mat-option [value]="h.valor">{{ h.label }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Sección: Mesa -->
+    <div class="res-section">
+      <p class="res-section-label">
+        <mat-icon>table_restaurant</mat-icon>
+        Mesa
+        @if (buscandoDisp()) {
+          <span class="verificando">· Verificando disponibilidad...</span>
+        }
+      </p>
+
+      @if (disponibilidad().length > 0) {
+        <div class="mesas-disponibilidad">
+          @for (mesa of disponibilidad(); track mesa.id) {
+            <button
+              type="button"
+              class="mesa-opcion"
+              [class.mesa-opcion--disponible]="mesa.disponible"
+              [class.mesa-opcion--ocupada]="!mesa.disponible"
+              [class.mesa-opcion--seleccionada]="form.get('mesa_id')?.value === mesa.id"
+              [disabled]="!mesa.disponible"
+              (click)="form.patchValue({ mesa_id: mesa.id })"
+            >
+              <mat-icon>{{ mesa.disponible ? 'check_circle' : 'cancel' }}</mat-icon>
+              <span class="mesa-id">Mesa {{ mesa.identificador }}</span>
+              @if (mesa.zona) {
+                <span class="mesa-zona">{{ mesa.zona }}</span>
+              }
+              <span class="mesa-cap">{{ mesa.capacidad }}p</span>
+            </button>
+          }
+        </div>
+      } @else {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="campo-full">
+          <mat-label>Seleccionar mesa *</mat-label>
+          <mat-icon matPrefix>table_restaurant</mat-icon>
+          <mat-select formControlName="mesa_id">
+            @for (mesa of mesas(); track mesa.id) {
+              <mat-option [value]="mesa.id">
+                Mesa {{ mesa.identificador }}
+                @if (mesa.zona) { · {{ mesa.zona }} }
+                ({{ mesa.capacidad }} personas)
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <p class="campo-hint">
+          <mat-icon>info</mat-icon>
+          Selecciona fecha y hora para ver disponibilidad en tiempo real
+        </p>
+      }
+    </div>
+
+    <!-- Sección: Datos del cliente -->
+    <div class="res-section">
+      <p class="res-section-label">
+        <mat-icon>person</mat-icon>
+        Datos del cliente
+      </p>
+
+      <div class="campo-row" style="margin-bottom: 12px;">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Nombre *</mat-label>
+          <mat-icon matPrefix>badge</mat-icon>
+          <input matInput formControlName="nombre_cliente" placeholder="Nombre completo" />
+          @if (form.get('nombre_cliente')?.hasError('required') && form.get('nombre_cliente')?.touched) {
+            <mat-error>El nombre es requerido</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Teléfono</mat-label>
+          <mat-icon matPrefix>phone</mat-icon>
+          <input matInput type="tel" formControlName="telefono_cliente" placeholder="10 dígitos" />
+        </mat-form-field>
+      </div>
+
+      <div class="campo-row" style="margin-bottom: 12px;">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Email</mat-label>
+          <mat-icon matPrefix>email</mat-icon>
+          <input matInput type="email" formControlName="email_cliente" placeholder="correo@ejemplo.com" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Número de personas *</mat-label>
+          <mat-icon matPrefix>people</mat-icon>
+          <input matInput type="number" formControlName="num_personas" min="1" max="50" />
+          @if (form.get('num_personas')?.hasError('required') && form.get('num_personas')?.touched) {
+            <mat-error>Campo requerido</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="campo-full">
+        <mat-label>Notas (opcional)</mat-label>
+        <mat-icon matPrefix>sticky_note_2</mat-icon>
+        <textarea
+          matInput
+          formControlName="notas"
+          rows="2"
+          placeholder="Alergias, preferencias, ocasión especial..."
+        ></textarea>
+      </mat-form-field>
+    </div>
+
+    @if (error()) {
+      <div class="res-section">
+        <div class="form-error">
+          <mat-icon>error_outline</mat-icon>
+          {{ error() }}
+        </div>
+      </div>
+    }
+
+  </form>
+</mat-dialog-content>
+
+<!-- ─── Actions ───────────────────────────────────────────────── -->
+<div class="res-dialog-actions">
+  <button mat-button mat-dialog-close [disabled]="guardando()" class="btn-cancelar">
+    Cancelar
+  </button>
+  <button
+    class="btn-guardar"
+    [disabled]="form.invalid || guardando()"
+    (click)="guardar()"
+  >
+    @if (guardando()) {
+      <span class="spinner-btn"></span>
+      Guardando...
+    } @else {
+      <mat-icon>event_available</mat-icon>
+      {{ esEdicion() ? 'Guardar cambios' : 'Crear reserva' }}
+    }
+  </button>
+</div>

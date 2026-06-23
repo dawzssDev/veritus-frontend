@@ -1,0 +1,265 @@
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">
+      <button mat-icon-button type="button" (click)="cancel()" aria-label="Volver" class="btn-back">
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      </button>
+      <div class="page-title-text">
+        <div class="page-title-main">{{ title }}</div>
+        <div class="page-title-sub">{{ pageSubtitle }}</div>
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submitType()" class="form-container">
+
+    <!-- Imagen/Logo de la empresa -->
+    <mat-card class="section-card logo-section">
+      <div class="logo-header">
+        <mat-icon>business</mat-icon>
+        <h3>Logo de la empresa</h3>
+      </div>
+      
+      <div class="logo-content">
+        <div class="logo-preview">
+          @if (getDisplayImageUrl()) {
+            <img [src]="getDisplayImageUrl()" alt="Logo de la empresa" class="logo-image" />
+          } @else {
+            <div class="logo-placeholder">
+              <mat-icon>add_photo_alternate</mat-icon>
+              <span>Sin imagen</span>
+            </div>
+          }
+        </div>
+        
+        <div class="logo-actions">
+          <div class="logo-info">
+            <p class="logo-info-title">Selecciona el logo de tu empresa</p>
+            <p class="logo-info-subtitle">Formatos aceptados: JPG, PNG. Tamaño recomendado: 500x500px</p>
+          </div>
+          <label for="file-upload" class="file-upload-label">
+            <mat-icon>cloud_upload</mat-icon>
+            <span>{{ getDisplayImageUrl() ? 'Cambiar imagen' : 'Seleccionar imagen' }}</span>
+          </label>
+          <input 
+            id="file-upload" 
+            type="file" 
+            (change)="onFileSelected($event)" 
+            accept="image/*" 
+            class="file-input-hidden" 
+          />
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Datos básicos -->
+    <mat-card class="section-card">
+      <div class="section-header">
+        <mat-icon>store</mat-icon>
+        <h3>Información básica</h3>
+      </div>
+      
+      <div class="form-grid-full">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre de la empresa</mat-label>
+          <input matInput formControlName="nombre" placeholder="Ej: Restaurante El Buen Sazón" />
+          <mat-icon matPrefix>business_center</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid-full">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descripción</mat-label>
+          <textarea 
+            matInput 
+            formControlName="descripcion" 
+            placeholder="Breve descripción de tu negocio" 
+            rows="3"
+          ></textarea>
+          <mat-icon matPrefix>description</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Teléfono</mat-label>
+          <input matInput formControlName="telefono" type="tel" placeholder="Ej: 3121234567" />
+          <mat-icon matPrefix>phone</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Dirección</mat-label>
+          <input matInput formControlName="direccion" type="text" placeholder="Se llenará automáticamente al seleccionar en el mapa" />
+          <mat-icon matPrefix>location_on</mat-icon>
+          <mat-hint>Puedes editar la dirección si lo necesitas</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <!-- Selector de ubicación en el mapa -->
+      <div class="location-picker-section">
+        <div class="location-info">
+          <div class="location-label">
+            <mat-icon>place</mat-icon>
+            <span>Ubicación en el mapa</span>
+          </div>
+          <p class="location-coordinates">{{ getLocationText() }}</p>
+        </div>
+        <button 
+          mat-raised-button 
+          color="accent" 
+          type="button" 
+          (click)="openLocationPicker()"
+          class="btn-select-location">
+          <mat-icon>map</mat-icon>
+          {{ (selectedLatitude && selectedLongitude) ? 'Cambiar ubicación' : 'Seleccionar en el mapa' }}
+        </button>
+      </div>
+    </mat-card>
+
+    <!-- Métodos de pago -->
+    <mat-card class="section-card">
+      <div class="section-header">
+        <mat-icon>payments</mat-icon>
+        <h3>Métodos de pago</h3>
+      </div>
+      
+      <div class="form-grid payment-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Pago en efectivo</mat-label>
+          <mat-select formControlName="pago_efectivo">
+            <mat-option [value]="1">
+              <mat-icon class="option-icon">check_circle</mat-icon>
+              Activo
+            </mat-option>
+            <mat-option [value]="0">
+              <mat-icon class="option-icon">cancel</mat-icon>
+              Desactivado
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>money</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Pago con tarjeta</mat-label>
+          <mat-select formControlName="pago_tarjeta">
+            <mat-option [value]="1">
+              <mat-icon class="option-icon">check_circle</mat-icon>
+              Activo
+            </mat-option>
+            <mat-option [value]="0">
+              <mat-icon class="option-icon">cancel</mat-icon>
+              Desactivado
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>credit_card</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Pago por transferencia</mat-label>
+          <mat-select formControlName="pago_transferencia">
+            <mat-option [value]="1">
+              <mat-icon class="option-icon">check_circle</mat-icon>
+              Activo
+            </mat-option>
+            <mat-option [value]="0">
+              <mat-icon class="option-icon">cancel</mat-icon>
+              Desactivado
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>account_balance</mat-icon>
+        </mat-form-field>
+      </div>
+    </mat-card>
+
+    @if (isTransferActive()) {
+      <mat-card class="section-card bank-section">
+        <div class="section-header">
+          <mat-icon>account_balance_wallet</mat-icon>
+          <h3>Datos bancarios</h3>
+        </div>
+        
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Titular de la cuenta</mat-label>
+            <input matInput formControlName="titular" type="text" placeholder="Nombre completo del titular" />
+            <mat-icon matPrefix>person</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Banco</mat-label>
+            <input matInput formControlName="banco" type="text" placeholder="Nombre del banco" />
+            <mat-icon matPrefix>account_balance</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="form-grid-full">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>CLABE interbancaria</mat-label>
+            <input matInput formControlName="clabe" type="text" inputmode="numeric" placeholder="18 dígitos" maxlength="18" />
+            <mat-icon matPrefix>tag</mat-icon>
+            <mat-hint>Ingresa los 18 dígitos de la CLABE</mat-hint>
+          </mat-form-field>
+        </div>
+      </mat-card>
+    }
+
+    <!-- Horario de trabajo -->
+    <mat-card class="section-card">
+      <div class="section-header">
+        <mat-icon>schedule</mat-icon>
+        <h3>Horario de atención</h3>
+      </div>
+
+      <div formGroupName="horarios" class="schedule-list">
+        @for (d of diasSemana; track d.key) {
+          <div class="schedule-row" [formGroupName]="d.key" [class.schedule-row--closed]="!isDayOpen(d.key)">
+            <div class="schedule-day">
+              <mat-icon class="schedule-day-icon">event</mat-icon>
+              <span>{{ d.label }}</span>
+            </div>
+
+            <mat-slide-toggle formControlName="is_open" class="schedule-toggle">
+              {{ isDayOpen(d.key) ? 'Abierto' : 'Cerrado' }}
+            </mat-slide-toggle>
+
+            <div class="schedule-times">
+              <mat-form-field appearance="outline" class="time-field">
+                <mat-label>Apertura</mat-label>
+                <input matInput type="time" formControlName="open" [disabled]="!isDayOpen(d.key)" />
+                <mat-icon matPrefix>login</mat-icon>
+              </mat-form-field>
+
+              <span class="time-separator">—</span>
+
+              <mat-form-field appearance="outline" class="time-field">
+                <mat-label>Cierre</mat-label>
+                <input matInput type="time" formControlName="close" [disabled]="!isDayOpen(d.key)" />
+                <mat-icon matPrefix>logout</mat-icon>
+              </mat-form-field>
+            </div>
+          </div>
+        }
+      </div>
+    </mat-card>
+
+    <!-- Acciones -->
+    <div class="acciones-container">
+      <button mat-stroked-button type="button" (click)="cancel()" class="btn-cancel">
+        <mat-icon>close</mat-icon>
+        Cancelar
+      </button>
+      <button mat-raised-button color="primary" type="submit" class="btn-submit">
+        <mat-icon>{{ id > 0 ? 'save' : 'add_business' }}</mat-icon>
+        {{ nameButton }}
+      </button>
+    </div>
+  </form>
+</div>
+
+<!-- Diálogo de selección de ubicación -->
+<app-location-picker-dialog
+  [(open)]="showLocationPicker"
+  [initialLat]="selectedLatitude"
+  [initialLng]="selectedLongitude"
+  (saved)="onLocationSaved($event)">
+</app-location-picker-dialog>

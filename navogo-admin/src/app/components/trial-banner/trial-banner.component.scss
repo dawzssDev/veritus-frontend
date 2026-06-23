@@ -1,0 +1,170 @@
+.trial-banner {
+  width: 100%;
+  background: linear-gradient(135deg, #1A1A11 0%, #0F4D2A 100%);
+  color: white;
+  padding: 8px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 101; // justo encima del contenido, debajo del header
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: background 0.3s;
+
+  // Advertencia (4-7 días): amarillo
+  &--advertencia {
+    background: linear-gradient(135deg, #854F0B 0%, #d97706 100%);
+  }
+
+  // Urgente (0-3 días): rojo
+  &--urgente {
+    background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 100%);
+    animation: pulso-banner 2s ease-in-out infinite;
+  }
+
+  @media (max-width: 600px) {
+    padding: 8px 14px;
+    position: relative; // no sticky en móvil para no ocupar espacio
+  }
+}
+
+@keyframes pulso-banner {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.9; }
+}
+
+.trial-banner__contenido {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  max-width: 1200px;
+  width: 100%;
+  flex-wrap: wrap;
+
+  @media (max-width: 600px) {
+    gap: 10px;
+  }
+}
+
+// Ícono
+.trial-icono {
+  flex-shrink: 0;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    opacity: 0.9;
+  }
+}
+
+// Texto
+.trial-texto {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.trial-mensaje {
+  font-size: 13px;
+  font-weight: 600;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (max-width: 600px) {
+    white-space: normal;
+    font-size: 12px;
+  }
+}
+
+.trial-fecha {
+  font-size: 11px;
+  color: rgba(255,255,255,0.65);
+
+  @media (max-width: 600px) { display: none; }
+}
+
+// Barra de progreso
+.trial-progreso {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+
+  @media (max-width: 480px) { display: none; }
+
+  &__barra {
+    width: 120px;
+    height: 6px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    overflow: hidden;
+
+    @media (max-width: 768px) { width: 80px; }
+  }
+
+  &__fill {
+    height: 100%;
+    background: white;
+    border-radius: 20px;
+    transition: width 0.5s ease;
+    min-width: 4px;
+  }
+
+  &__label {
+    font-size: 12px;
+    font-weight: 700;
+    color: white;
+    white-space: nowrap;
+    min-width: 40px;
+    text-align: right;
+  }
+}
+
+// Botón CTA
+.trial-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: white;
+  color: #1A1A11;
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    background: #f0f0f0;
+    transform: scale(1.02);
+  }
+
+  .trial-banner--urgente & {
+    background: white;
+    color: #dc2626;
+  }
+
+  .trial-banner--advertencia & {
+    background: white;
+    color: #854F0B;
+  }
+
+  @media (max-width: 360px) {
+    padding: 5px 10px;
+    span { display: none; }
+  }
+}

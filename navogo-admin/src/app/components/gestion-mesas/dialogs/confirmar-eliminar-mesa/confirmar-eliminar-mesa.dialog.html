@@ -1,0 +1,49 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <mat-icon class="warning-icon">warning</mat-icon>
+    <h2 mat-dialog-title>¿Eliminar mesa?</h2>
+  </div>
+
+  <mat-dialog-content>
+    <p class="mensaje-principal">
+      Estás a punto de eliminar <strong>'{{ mesa.identificador }}'</strong>. 
+      Esta acción no se puede deshacer.
+    </p>
+
+    @if (tieneComandaActiva) {
+      <div class="advertencia-activa">
+        <mat-icon>info</mat-icon>
+        <div class="advertencia-contenido">
+          <strong>Esta mesa tiene una comanda activa</strong>
+          <p>Asegúrate de cerrar la cuenta antes de eliminar la mesa.</p>
+        </div>
+      </div>
+    }
+
+    @if (errorMensaje()) {
+      <div class="error-banner">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMensaje() }}</span>
+      </div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button 
+      mat-stroked-button 
+      (click)="cancelar()"
+      [disabled]="eliminando()">
+      Cancelar
+    </button>
+    <button 
+      mat-raised-button 
+      color="warn" 
+      (click)="eliminar()"
+      [disabled]="!puedeEliminar || eliminando()">
+      @if (eliminando()) {
+        <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
+      }
+      <span>Eliminar</span>
+    </button>
+  </mat-dialog-actions>
+</div>

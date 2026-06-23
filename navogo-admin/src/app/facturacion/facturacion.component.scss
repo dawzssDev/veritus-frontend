@@ -1,0 +1,815 @@
+/* Skeleton loader */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-label { height: 12px; width: 60%; margin-bottom: 8px; }
+.skeleton-valor { height: 28px; width: 80%; margin-bottom: 6px; }
+.skeleton-sub   { height: 12px; width: 50%; }
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Sin suscripción */
+.sin-suscripcion mat-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px;
+  gap: 12px;
+  text-align: center;
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.4;
+  }
+}
+
+/* Error guardado en dialog */
+.error-guardado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(220,38,38,0.06);
+  border: 1px solid rgba(220,38,38,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #dc2626;
+  margin-top: 12px;
+}
+
+/* Spinner pequeño en botón del dialog */
+.btn-spinner-small {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding: 15px;
+}
+
+.text-secondary {
+  color: var(--mat-sys-on-surface-variant, rgba(0, 0, 0, 0.6));
+}
+
+.resumen-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 15px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metric-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0 0 6px;
+}
+
+.metric-valor {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  &.text-warning {
+    color: #854f0b;
+  }
+}
+
+.metric-sub {
+  margin: 0;
+}
+
+.alerta-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.alerta-icon {
+  flex-shrink: 0;
+}
+
+.alerta-texto {
+  flex: 1;
+  min-width: 0;
+}
+
+.alerta-titulo {
+  margin: 0 0 2px;
+  font-weight: 600;
+  color: #854f0b;
+}
+.alerta-sub {
+  margin: 0;
+  color: #854f0b;
+  opacity: 0.8;
+}
+
+.btn-pagar {
+  background: #854f0b !important;
+  color: white !important;
+  flex-shrink: 0;
+}
+
+.historial-card {
+  margin-bottom: 24px;
+  padding: 15px;
+
+  mat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 16px 12px;
+  }
+}
+
+.historial-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.campo-busqueda {
+  width: 260px;
+  @media (max-width: 600px) {
+    width: 100%;
+  }
+}
+
+.tabla-content {
+  padding: 0 !important;
+}
+
+.fila-tabla {
+  cursor: pointer;
+}
+
+.folio-code {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--mat-sys-surface-variant);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+.concepto-nombre {
+  margin: 0 0 2px;
+}
+
+.plan-chip {
+  font-size: 10px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  background: rgba(28, 140, 64, 0.1) !important;
+  color: #1c8c40 !important;
+}
+
+.fecha-cell {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.total-cell {
+  font-weight: 700;
+}
+
+.acciones-cell {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.btn-pdf-icon {
+  color: #a32d2d !important;
+}
+
+.tabla-vacia {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px;
+  color: var(--mat-sys-on-surface-variant);
+
+  .vacio-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 12px;
+    opacity: 0.4;
+  }
+
+  p {
+    margin: 0 0 12px;
+  }
+}
+
+// Dialog styles
+.dialog-container {
+  min-width: 0;
+}
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 8px 8px 24px;
+}
+
+.dialog-title-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dialog-body {
+  padding: 20px 24px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 60vh;
+}
+
+.dialog-estatus {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fecha-pago-label {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.dialog-campo {
+  &__label {
+    margin: 0 0 4px;
+    color: var(--mat-sys-on-surface-variant);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  &__valor {
+    margin: 0;
+  }
+}
+
+.dialog-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dialog-importes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.importe-fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.importe-total {
+  padding-top: 8px;
+}
+
+.total-amount {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #1c8c40;
+}
+
+.metodo-pago-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  .metodo-icon {
+    color: #1c8c40;
+    font-size: 18px;
+  }
+}
+
+.btn-pdf {
+  background: #a32d2d !important;
+  color: white !important;
+}
+
+.btn-whatsapp {
+  background: #25d366 !important;
+  color: white !important;
+  text-decoration: none;
+}
+
+// Datos fiscales
+.info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--mat-sys-primary-container);
+  border-radius: 8px;
+  padding: 12px 14px;
+
+  p {
+    margin: 0;
+  }
+  a {
+    color: #1c8c40;
+  }
+}
+
+.fiscal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  .campo-full {
+    grid-column: 1 / -1;
+  }
+  @media (max-width: 400px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Sección de suscripción activa */
+.suscripcion-card {
+  border-left: 4px solid #1C8C40 !important;
+  margin-bottom: 20px;
+
+  &--cancelada {
+    border-left-color: #9ca3af !important;
+    opacity: 0.8;
+  }
+}
+
+.suscripcion-layout {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.suscripcion-info {
+  flex: 1;
+  min-width: 0;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  &__icono {
+    color: #1C8C40;
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+
+  &__titulo {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 2px;
+  }
+
+  &__sub {
+    font-size: 13px;
+    color: var(--mat-sys-on-surface-variant);
+    margin: 0;
+  }
+}
+
+.suscripcion-detalles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+}
+
+.detalle-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  &__label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--mat-sys-on-surface-variant);
+  }
+
+  &__valor {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+
+    &--alerta { color: #185FA5; }
+  }
+}
+
+/* Acción de cancelar */
+.suscripcion-accion {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  flex-shrink: 0;
+
+  @media (max-width: 600px) {
+    align-items: flex-start;
+    width: 100%;
+  }
+}
+
+.btn-cancelar {
+  white-space: nowrap;
+}
+
+.suscripcion-accion__hint {
+  font-size: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+  text-align: right;
+
+  @media (max-width: 600px) { text-align: left; }
+}
+
+.cancelada-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #9ca3af;
+  font-weight: 500;
+
+  mat-icon { color: #9ca3af; }
+}
+
+/* Overlay del dialog de confirmación */
+.confirmacion-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.confirmacion-dialog {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 440px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: slideUp 0.2s ease;
+
+  @media (max-width: 480px) {
+    padding: 24px;
+    border-radius: 12px;
+  }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(16px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.confirmacion-icono {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(133,79,11,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.confirmacion-titulo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  text-align: center;
+}
+
+.confirmacion-desc {
+  font-size: 14px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.confirmacion-info {
+  background: var(--color-background-secondary);
+  border-radius: 10px;
+  padding: 14px 16px;
+
+  &__titulo {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0 0 10px;
+  }
+}
+
+.confirmacion-lista {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.confirmacion-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(220,38,38,0.06);
+  border: 1px solid rgba(220,38,38,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #dc2626;
+
+  mat-icon { flex-shrink: 0; }
+}
+
+.confirmacion-botones {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+
+  @media (max-width: 480px) {
+    flex-direction: column-reverse;
+    button { width: 100%; }
+  }
+}
+
+.btn-confirmar-cancelar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.confirmacion-soporte {
+  font-size: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+  margin: 0;
+
+  a {
+    color: #1C8C40;
+    text-decoration: none;
+    font-weight: 500;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+/* Chip de estatus para suscripciones */
+.estatus-chip {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px !important;
+  height: 24px !important;
+  padding: 0 10px !important;
+  border-radius: 12px !important;
+  font-weight: 500;
+
+  &.estatus-trialing {
+    background: rgba(24,95,165,0.1) !important;
+    color: #185FA5 !important;
+  }
+
+  &.estatus-active {
+    background: rgba(28,140,64,0.1) !important;
+    color: #1C8C40 !important;
+  }
+
+  &.estatus-past_due {
+    background: rgba(133,79,11,0.1) !important;
+    color: #854F0B !important;
+  }
+
+  &.estatus-canceled {
+    background: rgba(156,163,175,0.15) !important;
+    color: #6b7280 !important;
+  }
+
+  &.estatus-unpaid {
+    background: rgba(220,38,38,0.1) !important;
+    color: #dc2626 !important;
+  }
+
+  &.estatus-paused {
+    background: rgba(156,163,175,0.15) !important;
+    color: #6b7280 !important;
+  }
+}
+
+.estatus-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* Estados de carga y error para invoices */
+.invoices-loading {
+  padding: 0;
+}
+
+.invoices-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px;
+  gap: 8px;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    opacity: 0.4;
+  }
+
+  p { margin: 0; font-size: 14px; }
+}
+
+.icono-girando {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Estilos adicionales para columnas de invoices */
+.col-periodo,
+.col-fecha {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.col-concepto {
+  .concepto-text {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .plan-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(28, 140, 64, 0.1);
+    color: #1c8c40;
+  }
+}
+
+.col-total {
+  font-weight: 700;
+
+  .precio-moneda {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--mat-sys-on-surface-variant);
+    text-transform: uppercase;
+    margin-left: 2px;
+  }
+}
+
+/* Estatus específicos para facturas */
+.estatus-chip {
+  &.estatus-pagada {
+    background: rgba(28,140,64,0.1) !important;
+    color: #1C8C40 !important;
+  }
+
+  &.estatus-pendiente {
+    background: rgba(133,79,11,0.1) !important;
+    color: #854F0B !important;
+  }
+
+  &.estatus-vencida {
+    background: rgba(220,38,38,0.1) !important;
+    color: #dc2626 !important;
+  }
+
+  &.estatus-cancelada {
+    background: rgba(156,163,175,0.15) !important;
+    color: #6b7280 !important;
+  }
+}
+
+/* ============================================= */
+/* RESPONSIVE — TABLET Y MÓVIL */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .resumen-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .metric-valor {
+    font-size: 18px !important;
+  }
+
+  // Tabla de facturas: ocultar columnas secundarias
+  .mat-column-emision,
+  .mat-column-vencimiento {
+    display: none;
+  }
+
+  // Botón datos fiscales: solo ícono en móvil
+  .btn-datos-fiscales span {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .resumen-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .alerta-content {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+}

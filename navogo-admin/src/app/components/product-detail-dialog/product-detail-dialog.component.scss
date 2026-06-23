@@ -1,0 +1,746 @@
+// Dialog tipo bottom-sheet (Didi) homologado con Schedule/Location
+
+$gray-light: #e2e8f0;
+$gray: #718096;
+$gray-dark: #2d3748;
+$dark: #1a202c;
+$white: #ffffff;
+$primary: #0f4d2a;
+$secondary: #1c8f46;
+$danger: #ef4444;
+$success: #10b981;
+$border-radius: 16px;
+$spacing-xs: 8px;
+$spacing-sm: 12px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2200;
+  padding: $spacing-lg;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: $white;
+  border-radius: $spacing-lg;
+  max-width: 560px;
+  width: 100%;
+  max-height: 92vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUpModal 0.28s ease-out;
+}
+
+.modal-header {
+  padding: $spacing-lg;
+  border-bottom: 1px solid $gray-light;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: $dark;
+  }
+
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: $gray-light;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 20px;
+    color: $gray-dark;
+
+    &:hover {
+      background: $gray;
+      color: $white;
+      transform: rotate(90deg);
+    }
+
+    &:focus-visible {
+      outline: 3px solid rgba(102, 126, 234, 0.3);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.modal-body {
+  padding: $spacing-lg;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.state {
+  font-weight: 700;
+  color: $gray;
+  padding: $spacing-md 0;
+
+  &.state-error {
+    color: $danger;
+  }
+}
+
+.product-hero {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-lg;
+}
+
+.product-image {
+  position: relative;
+  border-radius: $border-radius;
+  overflow: hidden;
+  border: 1px solid $gray-light;
+  background: #f7fafc;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    .image-expand-hint {
+      opacity: 1;
+    }
+  }
+
+  img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .image-expand-hint {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.7);
+    color: $white;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.badge {
+  position: absolute;
+  top: $spacing-sm;
+  border-radius: 12px;
+  padding: 8px 10px;
+  color: $white;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+
+  .badge-main {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  .badge-sub {
+    font-size: 10px;
+    line-height: 1;
+    opacity: 0.95;
+    margin-top: 3px;
+  }
+}
+
+.badge-left {
+  left: $spacing-sm;
+}
+
+.badge-right {
+  right: $spacing-sm;
+}
+
+.badge-discount {
+  background: $danger;
+}
+
+.badge-combo {
+  background: linear-gradient(135deg, $secondary 0%, $primary 100%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  
+  .badge-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: white;
+  }
+  
+  .badge-text {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .badge-main {
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+}
+
+.badge-promo {
+  background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  animation: promoPulse 2s infinite;
+  
+  .badge-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #fbbf24;
+  }
+  
+  .badge-text {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .badge-main {
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+  }
+}
+
+@keyframes promoPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 10px 25px rgba(220, 38, 38, 0.3);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 10px 30px rgba(220, 38, 38, 0.5);
+  }
+}
+
+.product-main {
+  .product-name {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 900;
+    color: $dark;
+  }
+
+  .product-description {
+    margin: $spacing-sm 0 0;
+    color: $gray-dark;
+    line-height: 1.5;
+    font-weight: 600;
+  }
+}
+
+.promo-countdown {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border-radius: 10px;
+  margin-top: $spacing-md;
+  
+  .countdown-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #d97706;
+    flex-shrink: 0;
+  }
+}
+
+.countdown-timer {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  color: #92400e;
+  flex-wrap: wrap;
+  
+  .time-unit {
+    display: inline-block;
+    min-width: 28px;
+    text-align: center;
+  }
+}
+
+.expired-text {
+  font-size: 13px;
+  font-weight: 700;
+  color: $danger;
+}
+
+.price-block {
+  margin-top: $spacing-md;
+
+  .price-row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  .price-final {
+    font-size: 22px;
+    font-weight: 900;
+    color: $dark;
+
+    &.is-discount {
+      color: $primary;
+    }
+  }
+
+  .save-pill {
+    background: rgba(239, 68, 68, 0.14);
+    color: $danger;
+    font-weight: 900;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+  }
+
+  .price-original {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 800;
+    color: $gray;
+    text-decoration: line-through;
+  }
+
+  &.price-block--variable {
+    .price-variable-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 13px;
+      font-weight: 700;
+      color: $gray-dark;
+    }
+
+    .price-variable-input-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .price-currency {
+      font-size: 22px;
+      font-weight: 900;
+      color: $dark;
+    }
+
+    .price-variable-input {
+      width: 140px;
+      border: 2px solid $gray-light;
+      border-radius: 10px;
+      padding: 6px 10px;
+      background: $white;
+      font: inherit;
+      font-size: 22px;
+      font-weight: 900;
+      color: $dark;
+
+      &:focus {
+        outline: none;
+        border-color: $secondary;
+        box-shadow: 0 0 0 3px rgba(28, 143, 70, 0.15);
+      }
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+
+      appearance: textfield;
+      -moz-appearance: textfield;
+    }
+
+    .price-variable-hint {
+      margin: 8px 0 0;
+      font-size: 13px;
+      line-height: 1.4;
+      color: $gray;
+      font-weight: 600;
+    }
+
+    .price-variable-error {
+      margin: 6px 0 0;
+      font-size: 13px;
+      font-weight: 700;
+      color: $danger;
+    }
+
+    .price-total-line {
+      margin-top: 8px;
+      font-size: 15px;
+      font-weight: 800;
+      color: $primary;
+    }
+  }
+}
+
+.addons {
+  margin-top: $spacing-lg;
+
+  .addons-title {
+    margin: 0 0 $spacing-md;
+    font-size: 16px;
+    font-weight: 900;
+    color: $dark;
+  }
+}
+
+.addon-group {
+  padding: $spacing-md 0;
+  border-top: 1px solid $gray-light;
+
+  &.missing {
+    .group-title {
+      color: $danger;
+    }
+  }
+
+  .group-title {
+    font-size: 13px;
+    font-weight: 900;
+    color: $gray;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: $spacing-sm;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    .group-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      background: rgba(102, 126, 234, 0.1);
+      color: $primary;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 12px;
+      text-transform: none;
+      letter-spacing: 0.3px;
+    }
+  }
+
+  .group-error {
+    margin-top: -6px;
+    margin-bottom: $spacing-sm;
+    font-size: 12px;
+    font-weight: 800;
+    color: $danger;
+  }
+
+  .options {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-sm;
+  }
+
+  .option {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $border-radius;
+    border: 2px solid $gray-light;
+    background: $white;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+
+    input {
+      accent-color: $primary;
+    }
+
+    .option-text {
+      font-weight: 800;
+      color: $dark;
+    }
+
+    &.selected {
+      border-color: rgba(102, 126, 234, 0.55);
+      background: rgba(102, 126, 234, 0.08);
+    }
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+  }
+}
+
+.footer-error {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  color: $danger;
+}
+
+.footer-closed-notice {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 10px;
+  padding: 16px;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border: 2px solid #fed7aa;
+  border-radius: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+
+  .notice-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #f97316;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .notice-content {
+    flex: 1;
+
+    strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #9a3412;
+      margin-bottom: 4px;
+    }
+
+    p {
+      font-size: 13px;
+      color: #c2410c;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+}
+
+.modal-footer {
+  padding: $spacing-lg;
+  border-top: 1px solid $gray-light;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: $spacing-md;
+  align-items: center;
+}
+
+.qty {
+  display: inline-flex;
+  align-items: center;
+  border: 2px solid $gray-light;
+  border-radius: 999px;
+  overflow: hidden;
+  background: $white;
+}
+
+.qty-btn {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: $white;
+  cursor: pointer;
+  font-weight: 900;
+  color: $gray-dark;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.qty-val {
+  width: 36px;
+  text-align: center;
+  font-weight: 900;
+  color: $dark;
+}
+
+.btn-add-cart {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: $border-radius;
+  background: linear-gradient(135deg, $primary 0%, $secondary 100%);
+  color: $white;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(102, 126, 234, 0.4);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgba(102, 126, 234, 0.3);
+    outline-offset: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-content {
+    border-radius: 18px 18px 0 0;
+    max-height: 92vh;
+    animation: slideUpSheet 0.28s ease-out;
+  }
+
+  .modal-body {
+    max-height: 72vh;
+  }
+
+  .product-image img {
+    height: 200px;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpModal {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(24px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+// Overlay de imagen expandida
+.image-expanded-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.95);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg;
+  animation: fadeIn 0.3s ease;
+  cursor: zoom-out;
+
+  .image-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: $white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10001;
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: scale(1.1);
+    }
+  }
+
+  .image-expanded-container {
+    max-width: 90vw;
+    max-height: 90vh;
+    cursor: default;
+    animation: zoomIn 0.3s ease;
+
+    img {
+      max-width: 100%;
+      max-height: 90vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    }
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

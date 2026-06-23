@@ -1,0 +1,283 @@
+<div class="soporte-page">
+
+  <!-- ══ HEADER ══════════════════════════════════════════════════ -->
+  <div class="soporte-header">
+    <div class="soporte-header__info">
+      <h1>Soporte</h1>
+      <p>Reporta un problema o envía una consulta a nuestro equipo</p>
+    </div>
+
+    <div class="vista-toggle">
+      <button [class.activo]="vistaActual() === 'nuevo'"
+              (click)="vistaActual.set('nuevo')">
+        <mat-icon>add_circle_outline</mat-icon>
+        Nuevo ticket
+      </button>
+      <button [class.activo]="vistaActual() === 'historial'"
+              (click)="vistaActual.set('historial'); cargarTickets()">
+        <mat-icon>history</mat-icon>
+        Mis tickets
+        @if (tickets().length > 0) {
+          <span class="toggle-badge">{{ tickets().length }}</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ NUEVO TICKET ═════════════════════════════════════════════ -->
+  @if (vistaActual() === 'nuevo') {
+
+    <!-- Estado de éxito -->
+    @if (enviado()) {
+      <div class="ticket-enviado">
+        <div class="ticket-enviado__icono">
+          <mat-icon>check_circle</mat-icon>
+        </div>
+        <h2>¡Ticket enviado!</h2>
+        <p>
+          Nuestro equipo revisará tu solicitud y te responderá a la brevedad.
+          Puedes seguir el estado en <strong>Mis tickets</strong>.
+        </p>
+        <p class="upgrade-desc" style="font-size:13px; color:#9ca3af;">
+          Tu ticket fue enviado al equipo de soporte en
+          <strong>soporte.dawzss@dawzss.com</strong>
+        </p>
+        <button class="btn-ver-tickets" (click)="vistaActual.set('historial')">
+          <mat-icon>history</mat-icon>
+          Ver mis tickets
+        </button>
+      </div>
+    }
+
+    @if (!enviado()) {
+      <div class="ticket-layout">
+
+        <!-- ── Columna izquierda ── -->
+        <div class="ticket-info-col">
+
+          <div class="info-card">
+            <mat-icon class="info-card__icono">support_agent</mat-icon>
+            <h3>¿Cómo podemos ayudarte?</h3>
+            <p>
+              Describe tu problema o consulta con el mayor detalle posible
+              para que podamos ayudarte más rápido.
+            </p>
+          </div>
+
+          <div class="tiempos-respuesta">
+            <p class="tiempos-titulo">Tiempos de respuesta estimados</p>
+            <div class="tiempo-item">
+              <span class="tiempo-prioridad tiempo-alta">🔴 Alta</span>
+              <span>2–4 horas</span>
+            </div>
+            <div class="tiempo-item">
+              <span class="tiempo-prioridad tiempo-media">🟡 Media</span>
+              <span>24 horas</span>
+            </div>
+            <div class="tiempo-item">
+              <span class="tiempo-prioridad tiempo-baja">🟢 Baja</span>
+              <span>2–3 días hábiles</span>
+            </div>
+          </div>
+
+          <div class="contacto-directo">
+            <mat-icon>chat</mat-icon>
+            <div>
+              <p class="contacto-titulo">¿Urgente?</p>
+              <a href="https://wa.me/526721095469"
+                 target="_blank"
+                 class="btn-whatsapp">
+                <mat-icon>chat</mat-icon>
+                WhatsApp directo
+              </a>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Formulario ── -->
+        <mat-card appearance="outlined" class="ticket-form-card">
+          <mat-card-content>
+            <form [formGroup]="form" (ngSubmit)="enviar()">
+
+              <!-- Título -->
+              <mat-form-field appearance="outline"
+                              subscriptSizing="dynamic"
+                              class="campo-full">
+                <mat-label>Título del ticket *</mat-label>
+                <mat-icon matPrefix>title</mat-icon>
+                <input matInput
+                       formControlName="titulo"
+                       placeholder="Resume el problema en una frase" />
+                @if (form.get('titulo')?.hasError('required') && form.get('titulo')?.touched) {
+                  <mat-error>El título es requerido</mat-error>
+                }
+                @if (form.get('titulo')?.hasError('minlength') && form.get('titulo')?.touched) {
+                  <mat-error>Mínimo 5 caracteres</mat-error>
+                }
+              </mat-form-field>
+
+              <!-- Categoría -->
+              <div class="campo-grupo">
+                <p class="campo-label-custom">
+                  <mat-icon>category</mat-icon>
+                  Categoría *
+                </p>
+                <div class="categorias-grid">
+                  @for (cat of categorias; track cat.valor) {
+                    <button type="button"
+                            class="cat-opcion"
+                            [class.cat-opcion--activa]="form.get('categoria')?.value === cat.valor"
+                            (click)="form.patchValue({ categoria: cat.valor })">
+                      <mat-icon>{{ cat.icono }}</mat-icon>
+                      <span class="cat-label">{{ cat.label }}</span>
+                      <span class="cat-desc">{{ cat.desc }}</span>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Prioridad -->
+              <div class="campo-grupo">
+                <p class="campo-label-custom">
+                  <mat-icon>priority_high</mat-icon>
+                  Nivel de importancia *
+                </p>
+                <div class="prioridad-grid">
+                  @for (p of prioridades; track p.valor) {
+                    <button type="button"
+                            class="prio-opcion"
+                            [class.prio-opcion--activa]="form.get('prioridad')?.value === p.valor"
+                            [style.--prio-color]="p.color"
+                            (click)="form.patchValue({ prioridad: p.valor })">
+                      <mat-icon [style.color]="p.color">{{ p.icono }}</mat-icon>
+                      <div>
+                        <span class="prio-label" [style.color]="p.color">{{ p.label }}</span>
+                        <span class="prio-desc">{{ p.desc }}</span>
+                      </div>
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Descripción -->
+              <div class="campo-grupo">
+                <mat-form-field appearance="outline"
+                                subscriptSizing="dynamic"
+                                class="campo-full">
+                  <mat-label>Descripción detallada *</mat-label>
+                  <mat-icon matPrefix>description</mat-icon>
+                  <textarea matInput
+                            formControlName="descripcion"
+                            rows="5"
+                            placeholder="Describe paso a paso qué ocurre, qué esperabas que pasara y qué pasó realmente...">
+                  </textarea>
+                  @if (form.get('descripcion')?.hasError('required') && form.get('descripcion')?.touched) {
+                    <mat-error>La descripción es requerida</mat-error>
+                  }
+                  @if (form.get('descripcion')?.hasError('minlength') && form.get('descripcion')?.touched) {
+                    <mat-error>Mínimo 20 caracteres</mat-error>
+                  }
+                </mat-form-field>
+                <div class="char-count">
+                  <span [class.char-count--limite]="charCount > 2800">
+                    {{ charCount }}/3000
+                  </span>
+                </div>
+              </div>
+
+              @if (error()) {
+                <div class="form-error">
+                  <mat-icon>warning</mat-icon>
+                  {{ error() }}
+                </div>
+              }
+
+              <button type="submit"
+                      class="btn-enviar"
+                      [disabled]="form.invalid || guardando()">
+                @if (guardando()) {
+                  <span class="spinner-btn"></span>
+                  Enviando ticket...
+                } @else {
+                  <mat-icon>send</mat-icon>
+                  Enviar ticket de soporte
+                }
+              </button>
+
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+      </div>
+    }
+
+  }
+
+  <!-- ══ HISTORIAL ════════════════════════════════════════════════ -->
+  @if (vistaActual() === 'historial') {
+
+    @if (cargando()) {
+      <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    }
+
+    @if (!cargando() && tickets().length === 0) {
+      <div class="historial-vacio">
+        <mat-icon>inbox</mat-icon>
+        <p>No has enviado ningún ticket aún</p>
+        <button class="btn-nuevo-ticket" (click)="vistaActual.set('nuevo')">
+          <mat-icon>add</mat-icon>
+          Crear primer ticket
+        </button>
+      </div>
+    }
+
+    @if (!cargando() && tickets().length > 0) {
+      <div class="tickets-lista">
+        @for (ticket of tickets(); track ticket.id) {
+          <div class="ticket-item"
+               [style.border-left-color]="getColorPrioridad(ticket.prioridad)"
+               (click)="verDetalle(ticket)">
+
+            <div class="ticket-item__header">
+              <code class="ticket-num">{{ ticket.numero_ticket }}</code>
+              <span class="ticket-estatus"
+                    [style.background]="getColorEstatus(ticket.estatus) + '15'"
+                    [style.color]="getColorEstatus(ticket.estatus)">
+                <mat-icon>{{ getIconoEstatus(ticket.estatus) }}</mat-icon>
+                {{ ticket.estatus_label ?? ticket.estatus }}
+              </span>
+            </div>
+
+            <p class="ticket-titulo">{{ ticket.titulo }}</p>
+
+            <div class="ticket-meta">
+              <span class="meta-item">
+                <mat-icon>category</mat-icon>
+                {{ ticket.categoria_label ?? ticket.categoria }}
+              </span>
+              <span class="meta-item" [style.color]="getColorPrioridad(ticket.prioridad)">
+                <mat-icon>priority_high</mat-icon>
+                Prioridad {{ ticket.prioridad_label ?? ticket.prioridad }}
+              </span>
+              <span class="meta-item">
+                <mat-icon>schedule</mat-icon>
+                {{ ticket.created_at | date:'d MMM yyyy · HH:mm' }}
+              </span>
+            </div>
+
+            @if (ticket.respuesta_admin) {
+              <div class="ticket-respuesta">
+                <mat-icon>reply</mat-icon>
+                <p>{{ ticket.respuesta_admin }}</p>
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+    }
+
+  }
+
+</div>

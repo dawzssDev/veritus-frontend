@@ -1,0 +1,187 @@
+<div class="login-page">
+
+  <!-- Panel izquierdo decorativo — solo desktop -->
+  <div class="login-left">
+    <div class="login-left__inner">
+
+      <div class="login-left__logo">
+        <img src="/logo.png"
+             alt="VERITUS"
+             class="login-left__logo-img" />
+      </div>
+
+      <div class="login-left__content">
+        <h2 class="login-left__titulo">
+          El sistema que tu<br>restaurante merece.
+        </h2>
+        <p class="login-left__sub">
+          Gestión de mesas, pedidos, ventas y más,
+          todo en un solo lugar.
+        </p>
+      </div>
+
+      <div class="login-left__features">
+        @for (f of features; track f.texto) {
+          <div class="feature-item">
+            <div class="feature-item__dot"></div>
+            <span>{{ f.texto }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- Decoración de fondo -->
+      <div class="login-left__deco login-left__deco--1"></div>
+      <div class="login-left__deco login-left__deco--2"></div>
+
+    </div>
+  </div>
+
+  <!-- Panel derecho — formulario -->
+  <div class="login-right">
+    <div class="login-form-wrapper">
+
+      <!-- Logo móvil -->
+      <div class="login-logo-movil">
+        <div class="login-logo-movil__icono">
+          <img src="/logo.png" alt="VERITUS" />
+        </div>
+      </div>
+
+      <!-- Encabezado -->
+      <div class="login-form-header">
+        <h1 class="login-form-titulo">Bienvenido</h1>
+        <p class="login-form-sub">
+          Ingresa tus credenciales para continuar
+        </p>
+      </div>
+
+      <!-- Formulario existente — mantén el formGroup -->
+      <form class="login-form"
+            [formGroup]="loginForm"
+            (ngSubmit)="onSubmit()">
+
+        <!-- Email -->
+        <div class="campo-grupo">
+          <label class="campo-label">Correo electrónico</label>
+          <div class="campo-input-wrapper"
+               [class.campo-input-wrapper--focus]="emailFocused"
+               [class.campo-input-wrapper--error]="
+                 loginForm.get('email')?.invalid
+                 && loginForm.get('email')?.touched">
+            <svg class="campo-icono" viewBox="0 0 20 20"
+                 fill="none" stroke="currentColor"
+                 stroke-width="1.5">
+              <path d="M2.5 6.5l7.5 5 7.5-5"/>
+              <rect x="1" y="4" width="18" height="13"
+                    rx="2"/>
+            </svg>
+            <input class="campo-input"
+                   type="email"
+                   placeholder="tu@correo.com"
+                   formControlName="email"
+                   autocomplete="email"
+                   (focus)="emailFocused = true"
+                   (blur)="emailFocused = false" />
+          </div>
+          @if (loginForm.get('email')?.invalid
+               && loginForm.get('email')?.touched) {
+            <span class="campo-error">
+              Ingresa un correo válido
+            </span>
+          }
+        </div>
+
+        <!-- Contraseña -->
+        <div class="campo-grupo">
+          <label class="campo-label">Contraseña</label>
+          <div class="campo-input-wrapper"
+               [class.campo-input-wrapper--focus]="passFocused"
+               [class.campo-input-wrapper--error]="
+                 loginForm.get('password')?.invalid
+                 && loginForm.get('password')?.touched">
+            <svg class="campo-icono" viewBox="0 0 20 20"
+                 fill="none" stroke="currentColor"
+                 stroke-width="1.5">
+              <rect x="3" y="9" width="14" height="10"
+                    rx="2"/>
+              <path d="M7 9V6a5 5 0 0 1 10 0v3"/>
+            </svg>
+            <input class="campo-input"
+                   [type]="mostrarPass ? 'text' : 'password'"
+                   placeholder="••••••••"
+                   formControlName="password"
+                   autocomplete="current-password"
+                   (focus)="passFocused = true"
+                   (blur)="passFocused = false" />
+            <button type="button"
+                    class="campo-toggle-pass"
+                    (click)="mostrarPass = !mostrarPass">
+              @if (mostrarPass) {
+                <svg viewBox="0 0 20 20" fill="none"
+                     stroke="currentColor" stroke-width="1.5">
+                  <path d="M1 10s3.5-6 9-6 9 6 9 6
+                           -3.5 6-9 6-9-6-9-6z"/>
+                  <circle cx="10" cy="10" r="2.5"/>
+                </svg>
+              } @else {
+                <svg viewBox="0 0 20 20" fill="none"
+                     stroke="currentColor" stroke-width="1.5">
+                  <path d="M3 3l14 14M10 4c5.5 0 9 6 9 6
+                           s-1.5 2.5-4 4.5M6.5 6.5
+                           C4 8 1 10 1 10s3.5 6 9 6
+                           c1.7 0 3.3-.5 4.7-1.3"/>
+                </svg>
+              }
+            </button>
+          </div>
+          @if (loginForm.get('password')?.invalid
+               && loginForm.get('password')?.touched) {
+            <span class="campo-error">
+              La contraseña es requerida
+            </span>
+          }
+        </div>
+
+        <!-- Error general -->
+        @if (errorMessage) {
+          <div class="login-error">
+            <svg viewBox="0 0 20 20" fill="none"
+                 stroke="currentColor" stroke-width="1.5"
+                 width="16" height="16">
+              <circle cx="10" cy="10" r="9"/>
+              <line x1="10" y1="6" x2="10" y2="10"/>
+              <circle cx="10" cy="14" r="0.5"
+                      fill="currentColor"/>
+            </svg>
+            {{ errorMessage }}
+          </div>
+        }
+
+        <!-- Botón submit -->
+        <button type="submit"
+                class="btn-login"
+                [disabled]="isLoading || loginForm.invalid">
+          @if (isLoading) {
+            <span class="btn-login__spinner"></span>
+            Verificando...
+          } @else {
+            Iniciar sesión
+            <svg viewBox="0 0 20 20" fill="none"
+                 stroke="currentColor" stroke-width="2"
+                 width="16" height="16">
+              <path d="M4 10h12M10 4l6 6-6 6"/>
+            </svg>
+          }
+        </button>
+
+      </form>
+
+      <!-- Footer -->
+      <p class="login-footer">
+        © {{ anio }} Dawz Software Solutions
+      </p>
+
+    </div>
+  </div>
+
+</div>

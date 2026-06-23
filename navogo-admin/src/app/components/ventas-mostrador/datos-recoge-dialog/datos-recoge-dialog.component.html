@@ -1,0 +1,54 @@
+<div class="datos-recoge-dialog">
+  <div class="dialog-header">
+    <div class="header-icon">
+      <mat-icon>shopping_bag</mat-icon>
+    </div>
+    <h2>Datos de quien recoge</h2>
+    <button mat-icon-button class="close-button" (click)="cancel()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-body">
+    <p class="dialog-hint">
+      Ingresa el nombre y teléfono de la persona que pasará a recoger el pedido.
+    </p>
+
+    <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+      <mat-label>Nombre</mat-label>
+      <mat-icon matPrefix>person</mat-icon>
+      <input
+        matInput
+        [(ngModel)]="nombre"
+        placeholder="Nombre completo"
+        autocomplete="name"
+        autofocus>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
+      <mat-label>Teléfono</mat-label>
+      <mat-icon matPrefix>phone</mat-icon>
+      <input
+        matInput
+        type="tel"
+        [(ngModel)]="telefono"
+        placeholder="10 dígitos"
+        autocomplete="tel">
+    </mat-form-field>
+  </div>
+
+  <div class="dialog-footer">
+    <button mat-stroked-button type="button" (click)="cancel()">
+      Cancelar
+    </button>
+    <button
+      mat-raised-button
+      color="primary"
+      type="button"
+      [disabled]="!esValido"
+      (click)="confirm()">
+      <mat-icon>check</mat-icon>
+      Confirmar
+    </button>
+  </div>
+</div>

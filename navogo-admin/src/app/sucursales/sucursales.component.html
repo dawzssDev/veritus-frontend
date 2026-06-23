@@ -1,0 +1,123 @@
+<div class="sucursales-page">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="mat-headline-5">Sucursales</h1>
+      <p class="mat-body-2 text-secondary">
+        Gestiona las ubicaciones de tu negocio y asigna usuarios
+      </p>
+    </div>
+    <button mat-flat-button color="primary" (click)="abrirCrear()">
+      <mat-icon>add</mat-icon>
+      Nueva sucursal
+    </button>
+  </div>
+
+  <!-- Loading -->
+  @if (cargando()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <!-- Grid de sucursales -->
+  @if (!cargando()) {
+
+    @if (sucursales().length === 0) {
+      <div class="estado-vacio">
+        <mat-icon class="vacio-icon">store</mat-icon>
+        <p class="mat-headline-6">No tienes sucursales creadas</p>
+        <p class="mat-body-2 text-secondary">
+          Crea tu primera sucursal para organizar tu equipo por ubicación
+        </p>
+        <button mat-flat-button color="primary" (click)="abrirCrear()">
+          <mat-icon>add</mat-icon>
+          Crear primera sucursal
+        </button>
+      </div>
+    }
+
+    <div class="sucursales-grid">
+      @for (sucursal of sucursales(); track sucursal.id) {
+
+        <mat-card appearance="outlined" class="sucursal-card"
+                  [class.sucursal-card--inactiva]="!sucursal.estatus">
+          <mat-card-content>
+
+            <!-- Header de la card -->
+            <div class="sucursal-header">
+              <div class="sucursal-header__info">
+                <mat-icon class="sucursal-icono">store</mat-icon>
+                <div>
+                  <p class="sucursal-nombre">{{ sucursal.nombre }}</p>
+                  <mat-chip
+                    [class]="sucursal.estatus
+                      ? 'chip-activa' : 'chip-inactiva'"
+                    [disableRipple]="true">
+                    {{ sucursal.estatus ? 'Activa' : 'Inactiva' }}
+                  </mat-chip>
+                </div>
+              </div>
+              <div class="sucursal-acciones">
+                <button mat-icon-button
+                        matTooltip="Editar"
+                        (click)="abrirEditar(sucursal)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button
+                        color="warn"
+                        matTooltip="Eliminar"
+                        [disabled]="cargandoAccion() === sucursal.id"
+                        (click)="eliminar(sucursal)">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <!-- Detalles -->
+            <div class="sucursal-detalles">
+
+              @if (sucursal.direccion) {
+                <div class="detalle-fila">
+                  <mat-icon class="detalle-icono">location_on</mat-icon>
+                  <span>{{ sucursal.direccion }}</span>
+                </div>
+              }
+
+              @if (sucursal.telefono) {
+                <div class="detalle-fila">
+                  <mat-icon class="detalle-icono">phone</mat-icon>
+                  <span>{{ sucursal.telefono }}</span>
+                </div>
+              }
+
+              <div class="detalle-fila">
+                <mat-icon class="detalle-icono">people</mat-icon>
+                <span>
+                  {{ sucursal.usuarios_count ?? 0 }}
+                  {{ (sucursal.usuarios_count ?? 0) === 1
+                     ? 'usuario asignado' : 'usuarios asignados' }}
+                </span>
+              </div>
+
+            </div>
+
+            <!-- Botón gestionar usuarios -->
+            <button mat-stroked-button
+                    color="primary"
+                    class="btn-usuarios"
+                    (click)="abrirGestionUsuarios(sucursal)">
+              <mat-icon>manage_accounts</mat-icon>
+              Gestionar usuarios
+            </button>
+
+          </mat-card-content>
+        </mat-card>
+
+      }
+    </div>
+
+  }
+
+</div>

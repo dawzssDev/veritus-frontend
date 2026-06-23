@@ -1,0 +1,104 @@
+.dashboard-container {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #3b83bd;
+      margin: 0;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+  }
+
+  .table-container {
+    overflow-x: auto;
+    border-radius: 8px;
+  }
+
+  .custom-table {
+    width: 100%;
+    min-width: 600px;
+
+    th.mat-header-cell {
+      background-color: #e3f2fd;
+      font-weight: 600;
+      color: #1976d2;
+    }
+
+    td.mat-cell {
+      font-size: 14px;
+      color: #555;
+    }
+
+    /* Estatus creativo */
+    .estatus-activo {
+      color: #4caf50;
+      font-weight: 600;
+    }
+
+    .estatus-baja {
+      color: #f44336;
+      font-weight: 600;
+    }
+
+    /* Hover sobre filas */
+    tr.mat-row:hover {
+      background-color: rgba(63, 81, 181, 0.08);
+    }
+  }
+
+  mat-paginator {
+    margin-top: 8px;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+  }
+}
+
+/* Boton */
+.btn-container{
+    display: flex;
+    justify-content: left;
+    align-items: center;
+}
+
+.btn-container .btn{
+    padding-right: 15px;
+}
+
+.option{
+  display: flex;
+  justify-content: left;
+  align-items: center;
+}
+
+.option span{
+  padding-left: 12.5px;
+}
+
+.stock{
+  background: #a9ebab;
+  color: #123f14;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.product-image {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}

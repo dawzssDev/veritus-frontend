@@ -1,0 +1,661 @@
+<div class="pedidos-shell">
+
+  <!-- ════════════════════════════════════
+       TOP BAR
+  ════════════════════════════════════ -->
+  <header class="top-bar">
+
+    <div class="top-bar__izq">
+
+      <!-- Contadores rápidos por estatus -->
+      <div class="contadores">
+        <div class="contador contador--sin-iniciar"
+             (click)="filtroEstatus.set('1')">
+          <span class="contador__num">
+            {{ contarPorEstatus(1) }}
+          </span>
+          <span class="contador__label">Sin iniciar</span>
+        </div>
+        <div class="contador contador--en-proceso"
+             (click)="filtroEstatus.set('2')">
+          <span class="contador__num">
+            {{ contarPorEstatus(2) }}
+          </span>
+          <span class="contador__label">En proceso</span>
+        </div>
+        <div class="contador contador--listos"
+             (click)="filtroEstatus.set('3')">
+          <span class="contador__num">
+            {{ contarPorEstatus(3) }}
+          </span>
+          <span class="contador__label">Emplatado</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="top-bar__der">
+
+      <button class="btn-sonido"
+              type="button"
+              [class.btn-sonido--off]="!sonidoHabilitado()"
+              [matTooltip]="sonidoHabilitado()
+                ? 'Silenciar notificaciones'
+                : 'Activar notificaciones'"
+              (click)="toggleSonido()">
+        <mat-icon>
+          {{ sonidoHabilitado()
+             ? 'notifications_active'
+             : 'notifications_off' }}
+        </mat-icon>
+      </button>
+
+      <!-- Indicador de auto-refresh -->
+      <div class="refresh-pill"
+           [class.refresh-pill--activo]="refrescando()"
+           (click)="refrescarManual()">
+        <mat-icon [class.girar]="refrescando()">sync</mat-icon>
+        @if (!refrescando()) {
+          <span>{{ segundosProximoRefresh() }}s</span>
+        } @else {
+          <span>Actualizando...</span>
+        }
+      </div>
+
+      <!-- Última actualización -->
+      <span class="ultima-act">
+        {{ ultimaActualizacion() | date:'HH:mm:ss' }}
+      </span>
+
+    </div>
+
+  </header>
+
+  <!-- ════════════════════════════════════
+       BARRA DE FILTROS
+  ════════════════════════════════════ -->
+  <div class="filtros-bar">
+
+    <!-- FILA 1: Período + Búsqueda -->
+    <div class="filtros-fila filtros-fila--1">
+
+      <!-- Selector de período -->
+      <div class="periodo-selector">
+        <button class="periodo-btn"
+                [class.periodo-btn--activo]="periodoActivo() === 'hoy'"
+                (click)="setPeriodo('hoy')">
+          Hoy
+        </button>
+        <button class="periodo-btn"
+                [class.periodo-btn--activo]="periodoActivo() === 'semana'"
+                (click)="setPeriodo('semana')">
+          Esta semana
+        </button>
+        <button class="periodo-btn"
+                [class.periodo-btn--activo]="periodoActivo() === 'mes'"
+                (click)="setPeriodo('mes')">
+          Este mes
+        </button>
+        <button class="periodo-btn"
+                [class.periodo-btn--activo]="periodoActivo() === 'todo'"
+                (click)="setPeriodo('todo')">
+          Todo
+        </button>
+        <button class="periodo-btn periodo-btn--icono"
+                [class.periodo-btn--activo]="periodoActivo() === 'rango'"
+                (click)="setPeriodo('rango')">
+          <mat-icon>date_range</mat-icon>
+          {{ rangoLabelPersonalizado() }}
+        </button>
+      </div>
+
+      <!-- Range picker — solo visible en modo personalizado -->
+      @if (periodoActivo() === 'rango') {
+        <mat-form-field appearance="outline"
+                        subscriptSizing="dynamic"
+                        class="campo-rango">
+          <mat-label>Rango de fechas</mat-label>
+          <mat-date-range-input [rangePicker]="rangePicker">
+            <input matStartDate
+                   [(ngModel)]="rangoDesdeValue"
+                   placeholder="Inicio"
+                   (dateChange)="onRangoChange()">
+            <input matEndDate
+                   [(ngModel)]="rangoHastaValue"
+                   placeholder="Fin"
+                   (dateChange)="onRangoChange()">
+          </mat-date-range-input>
+          <mat-datepicker-toggle matIconSuffix [for]="rangePicker">
+          </mat-datepicker-toggle>
+          <mat-date-range-picker #rangePicker></mat-date-range-picker>
+        </mat-form-field>
+      }
+
+      <!-- Búsqueda -->
+      <div class="busqueda-wrapper">
+        <mat-icon class="busqueda-icono">search</mat-icon>
+        <input class="busqueda-input"
+               placeholder="Buscar folio, cliente..."
+               [(ngModel)]="busquedaValue"
+               (ngModelChange)="busqueda.set($event)" />
+        @if (busqueda()) {
+          <button class="busqueda-clear"
+                  (click)="busqueda.set(''); busquedaValue = ''">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </div>
+
+    </div>
+
+    <!-- FILA 2: Filtros de estatus + Filtros de tipo -->
+    <div class="filtros-fila filtros-fila--2">
+
+      <!-- Filtros de estatus -->
+      <div class="filtros-grupo">
+        @for (op of estatusOpciones; track op.valor) {
+          <button
+            [class]="'filtro-btn filtro-btn--' + op.clase
+              + (filtroEstatus() === op.valor ? ' filtro-btn--activo' : '')"
+            (click)="filtroEstatus.set(op.valor);
+                     filtroEstatusValue = op.valor">
+            <mat-icon class="filtro-icono">{{ op.icono }}</mat-icon>
+            <span>{{ op.label }}</span>
+            @if (op.valor !== 'activos' && op.valor !== 'todos'
+                 && contarPorEstatus(+op.valor) > 0) {
+              <span class="filtro-badge">
+                {{ contarPorEstatus(+op.valor) }}
+              </span>
+            }
+          </button>
+        }
+      </div>
+
+      <!-- Separador vertical -->
+      <div class="filtros-separador"></div>
+
+      <!-- Filtros de tipo -->
+      <div class="filtros-grupo">
+        @for (op of tipoOpciones; track op.valor) {
+          <button
+            [class]="'filtro-tipo-btn'
+              + (filtroTipo() === op.valor
+                 ? ' filtro-tipo-btn--activo' : '')"
+            (click)="filtroTipo.set(op.valor);
+                     filtroTipoValue = op.valor">
+            <mat-icon>{{ op.icono }}</mat-icon>
+            <span>{{ op.label }}</span>
+          </button>
+        }
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ════════════════════════════════════
+       CONTENIDO PRINCIPAL
+  ════════════════════════════════════ -->
+  <main class="pedidos-main">
+
+    <!-- Estado vacío -->
+    @if (!cargando() && pedidosFiltrados().length === 0) {
+      <div class="estado-vacio">
+        <div class="vacio-icono-wrapper">
+          <mat-icon>receipt_long</mat-icon>
+        </div>
+        <p class="vacio-titulo">Sin pedidos activos</p>
+        <p class="vacio-sub">
+          Los nuevos pedidos aparecerán aquí automáticamente
+        </p>
+        <button class="btn-refresh-manual" (click)="refrescarManual()">
+          <mat-icon>refresh</mat-icon>
+          Verificar ahora
+        </button>
+      </div>
+    }
+
+    <!-- Skeleton loading -->
+    @if (cargando()) {
+      <div class="pedidos-grid">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <div class="skeleton-card">
+            <div class="sk sk-titulo"></div>
+            <div class="sk sk-chips"></div>
+            <div class="sk sk-linea"></div>
+            <div class="sk sk-linea sk-linea--corta"></div>
+            <div class="sk sk-linea"></div>
+            <div class="sk sk-footer"></div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- ────── PROBLEMA 4: VISTA SEGMENTADA vs VISTA NORMAL ────── -->
+    @if (!cargando()) {
+
+      <!-- Vista segmentada por estatus (solo si filtroEstatus === 'activos') -->
+      @if (pedidosPorEstatus()) {
+        <div class="pedidos-segmentado">
+          @for (seccion of pedidosPorEstatus(); track seccion.estatus) {
+
+            <section class="seccion-estatus">
+
+              <!-- Cabecera de sección -->
+              <header class="seccion-header"
+                      [style.border-left-color]="getColorSeccion(seccion.estatus)">
+
+                <mat-icon [style.color]="getColorSeccion(seccion.estatus)">
+                  {{ getIconoEstatus(seccion.estatus) }}
+                </mat-icon>
+
+                <h3 class="seccion-titulo"
+                    [style.color]="getColorSeccion(seccion.estatus)">
+                  {{ getEtiquetaEstatus(seccion.estatus) }}
+                </h3>
+
+                <span class="seccion-count"
+                      [style.background-color]="getColorSeccion(seccion.estatus)">
+                  {{ seccion.pedidos.length }}
+                </span>
+
+                <div class="seccion-linea"
+                     [style.background-color]="getColorSeccion(seccion.estatus)">
+                </div>
+
+              </header>
+
+              <!-- Grid de pedidos de esta sección -->
+              <div class="pedidos-grid">
+                @for (pedido of seccion.pedidos; track pedido.id) {
+                  <ng-container
+                    *ngTemplateOutlet="cardTemplate; context: {pedido: pedido}">
+                  </ng-container>
+                }
+              </div>
+
+            </section>
+
+          }
+        </div>
+      }
+
+      <!-- Vista normal (grid sin segmentación) -->
+      @if (!pedidosPorEstatus() && pedidosFiltrados().length > 0) {
+        <div class="pedidos-grid">
+          @for (pedido of pedidosFiltrados(); track pedido.id) {
+            <ng-container
+              *ngTemplateOutlet="cardTemplate; context: {pedido: pedido}">
+            </ng-container>
+          }
+        </div>
+      }
+
+      <!-- Estado vacío -->
+      @if (pedidosFiltrados().length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <p>No hay pedidos que coincidan con los filtros seleccionados.</p>
+        </div>
+      }
+
+    }
+
+    <!-- ────── TEMPLATE PARA TARJETA DE PEDIDO ────── -->
+    <ng-template #cardTemplate let-pedido="pedido">
+
+      <article class="pedido-card"
+               [class]="'pedido-card pedido-card--e' + pedido.estatus"
+               [class.pedido-card--urgente]="esUrgente(pedido)"
+               [class.pedido-card--nuevo]="esNuevo(pedido)">
+
+        <!-- ── FRANJA SUPERIOR DE COLOR ── -->
+        <div class="pedido-franja"
+             [class]="'pedido-franja--e' + pedido.estatus">
+        </div>
+
+        <!-- ── CABECERA ── -->
+        <div class="pedido-cabecera">
+
+          <div class="pedido-cabecera__izq">
+            <span class="pedido-folio">
+              {{ folioPedido(pedido) }}
+            </span>
+            <!-- Timer: solo para órdenes activas -->
+            @if (pedido.estatus !== ESTATUS.FINALIZADO
+                 && pedido.estatus !== ESTATUS.CANCELADO
+                 && pedido.estatus !== ESTATUS.MERMA) {
+              <div class="pedido-timer"
+                   [class.pedido-timer--normal]="getMinutos(pedido) < 15"
+                   [class.pedido-timer--alerta]="getMinutos(pedido) >= 15
+                                                 && getMinutos(pedido) < 30"
+                   [class.pedido-timer--urgente]="getMinutos(pedido) >= 30">
+                <mat-icon>schedule</mat-icon>
+                {{ getMinutos(pedido) }}min
+              </div>
+            }
+
+            @if (pedido.tiempo_entrega_estimado
+                 && pedido.estatus !== ESTATUS.FINALIZADO
+                 && pedido.estatus !== ESTATUS.CANCELADO
+                 && pedido.estatus !== ESTATUS.MERMA) {
+              <div class="reloj-comprometido"
+                   [class]="'reloj-comprometido ' + getClaseReloj(pedido, relojTick())">
+                <mat-icon class="reloj-icono">
+                  {{ getIconoReloj(pedido, relojTick()) }}
+                </mat-icon>
+                <div class="reloj-info">
+                  <span class="reloj-tiempo">
+                    {{ getTextoReloj(pedido, relojTick()) }}
+                  </span>
+                  <span class="reloj-label">
+                    {{ getMinutosRestantes(pedido) >= 0
+                       ? 'para entregar'
+                       : 'de retraso' }}
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="pedido-cabecera__der">
+            <!-- Chip de estatus -->
+            <div class="estatus-pill"
+                 [class]="'estatus-pill--e' + pedido.estatus">
+              <mat-icon class="estatus-pill__icono">
+                {{ getIconoEstatus(pedido.estatus) }}
+              </mat-icon>
+              {{ getEtiquetaEstatusPedido(pedido.estatus) }}
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── TIPO + MESA ── -->
+        <div class="pedido-meta">
+
+          <div class="meta-tipo"
+               [class]="'meta-tipo--' + pedido.shipping_type">
+            <mat-icon>
+              {{ pedido.shipping_type === 'local'
+                 ? 'table_restaurant'
+                 : pedido.shipping_type === 'domicilio'
+                 ? 'delivery_dining' : 'shopping_bag' }}
+            </mat-icon>
+            <span>
+              {{ pedido.shipping_type === 'local'
+                 ? 'Mesa' : pedido.shipping_type === 'domicilio'
+                 ? 'Domicilio' : 'Para llevar' }}
+            </span>
+          </div>
+
+          @if (pedido.customer_name) {
+            <div class="meta-cliente">
+              <mat-icon>person</mat-icon>
+              <span>{{ pedido.customer_name }}</span>
+            </div>
+          }
+
+          @if (pedido.payment_method) {
+            <div class="meta-pago"
+                 [class.meta-pago--combinado]="
+                   pedido.payment_method === 'combinado'">
+              <mat-icon>
+                {{ getIconoPago(pedido.payment_method) }}
+              </mat-icon>
+              <span>{{ getLabelPago(pedido.payment_method) }}</span>
+            </div>
+          }
+
+          @if (pedido.payment_method === 'combinado'
+               && getDesgloseCombinado(pedido); as pagosCombinado) {
+            <div class="pago-combinado-desglose">
+              @for (p of pagosCombinado; track p.metodo) {
+                <div class="pago-combinado-fila">
+                  <mat-icon class="pago-icon-sm">
+                    {{ getIconoPago(p.metodo) }}
+                  </mat-icon>
+                  <span class="pago-metodo-sm">
+                    {{ getLabelPago(p.metodo) }}
+                  </span>
+                  <span class="pago-monto-sm">
+                    ${{ p.monto | number:'1.2-2' }}
+                  </span>
+                </div>
+              }
+            </div>
+          }
+
+          @if (esItemAdicional(pedido)) {
+            <div class="meta-adicional">
+              <mat-icon>add_circle</mat-icon>
+              <span>Adicional</span>
+            </div>
+          }
+
+        </div>
+
+        @if (pedido.shipping_type === 'domicilio' && formatDeliveryAddress(pedido.delivery_address)) {
+          <div class="meta-direccion">
+            <mat-icon>location_on</mat-icon>
+            <span>
+              {{ formatDeliveryAddress(pedido.delivery_address) }}
+              @if (getDeliveryReferencia(pedido.delivery_address)) {
+                <br><span class="meta-referencia">Ref: {{ getDeliveryReferencia(pedido.delivery_address) }}</span>
+              }
+            </span>
+          </div>
+        }
+
+        <div class="pedido-divider"></div>
+
+        <!-- ── ITEMS ── -->
+        <div class="pedido-items">
+          @if (mostrarAvisoIniciarParaChecks(pedido)) {
+            <div class="items-adicional-header">
+              <mat-icon>restaurant</mat-icon>
+              <span>Items adicionales — presiona Iniciar para marcar</span>
+            </div>
+          }
+          @if (mostrarHeaderCocinaPendiente(pedido)) {
+            <div class="items-adicional-header">
+              <mat-icon>restaurant</mat-icon>
+              <span>Items pendientes por cocinar</span>
+            </div>
+          }
+          @if (mostrarResumenEmplatado(pedido)) {
+            <div class="items-emplatado-header">
+              <mat-icon>room_service</mat-icon>
+              <span>Listo para servir — en emplatado</span>
+            </div>
+          }
+          @if (requiereEmplatadoParaAvanzar(pedido)
+               && getItemsCocina(pedido).length > 0) {
+            <div class="emplatado-progreso"
+                 [class.emplatado-progreso--completo]="
+                   todosItemsListosParaEmplatar(pedido)">
+              <div class="emplatado-progreso__barra">
+                <div class="emplatado-progreso__fill"
+                     [style.width.%]="getItemsCocina(pedido).length > 0
+                       ? (getItemsListosEmplatado(pedido)
+                          / getItemsCocina(pedido).length) * 100
+                       : 0">
+                </div>
+              </div>
+              <span class="emplatado-progreso__texto">
+                @if (todosItemsListosParaEmplatar(pedido)) {
+                  Todos listos — puedes dar Listo
+                } @else {
+                  {{ getItemsListosEmplatado(pedido) }}
+                  de {{ getItemsCocina(pedido).length }}
+                  listos para emplatar
+                }
+              </span>
+            </div>
+          }
+          @for (item of getItemsCocina(pedido);
+                track item.id ?? $index) {
+
+            <div class="item-fila"
+                 [class.item-fila--entregado]="item.entregado"
+                 [class.item-fila--listo]="
+                   item.listo_emplatado && !item.entregado">
+
+              @if (debeCheckearItem(item, pedido)) {
+                <button
+                  class="item-check"
+                  type="button"
+                  [class.item-check--listo]="item.listo_emplatado"
+                  [class.item-check--cargando]="
+                    procesandoItemId() === item.id"
+                  [disabled]="procesandoItemId() !== null"
+                  [matTooltip]="item.listo_emplatado
+                    ? 'Listo para emplatar — clic para quitar'
+                    : 'Marcar listo para emplatar'"
+                  (click)="toggleListoEmplatado(
+                    item, pedido, $event)">
+
+                  @if (procesandoItemId() === item.id) {
+                    <span class="spinner-item-check"></span>
+                  } @else if (item.listo_emplatado) {
+                    <mat-icon>check_circle_outline</mat-icon>
+                  } @else {
+                    <mat-icon>radio_button_unchecked</mat-icon>
+                  }
+
+                </button>
+              }
+
+              @if (item.entregado) {
+                <mat-icon class="item-entregado-icono">
+                  check_circle
+                </mat-icon>
+              } @else if (item.listo_emplatado && !debeCheckearItem(item, pedido)) {
+                <mat-icon class="item-listo-icono">
+                  check_circle_outline
+                </mat-icon>
+              }
+
+              <span class="item-qty"
+                    [class.item-qty--gris]="item.entregado">
+                {{ item.quantity }}×
+              </span>
+
+              <div class="item-info">
+                <span class="item-nombre">
+                  {{ item.name }}
+                </span>
+                @if (item.selections) {
+                  <span class="item-sels">
+                    {{ formatSelections(item) }}
+                  </span>
+                }
+              </div>
+
+            </div>
+          }
+        </div>
+
+        <!-- ── NOTA ── -->
+        @if (formatearNota(pedido.note)) {
+          <div class="pedido-nota">
+            <mat-icon>sticky_note_2</mat-icon>
+            <span>{{ formatearNota(pedido.note) }}</span>
+          </div>
+        }
+
+        <div class="pedido-divider"></div>
+
+        <!-- ── PIE: TOTAL + CONFIRMACIONES + BOTONES (PROBLEMA 2) ── -->
+        <div class="pedido-pie">
+
+          <div class="pedido-pie__izq">
+            <span class="total-monto">
+              ${{ pedido.total | number:'1.2-2' }}
+            </span>
+
+          </div>
+
+          <div class="pedido-pie__der">
+
+            <!-- Botón detalle SIEMPRE visible y separado -->
+            <button class="btn-detalle-fixed"
+                    matTooltip="Ver detalle completo"
+                    (click)="verDetalle(pedido); $event.stopPropagation()">
+              <mat-icon>receipt_long</mat-icon>
+            </button>
+
+            <div class="btns-acciones-grupo">
+
+              @if (pedido.estatus === ESTATUS.FINALIZADO) {
+                <button
+                  class="btn-merma"
+                  type="button"
+                  [matTooltip]="'Marcar como merma — orden no recogida'"
+                  [disabled]="procesando() === pedido.id"
+                  (click)="marcarMerma(pedido);
+                           $event.stopPropagation()">
+                  <mat-icon>delete_sweep</mat-icon>
+                  Merma
+                </button>
+              }
+
+              <!-- Domicilio en LISTO: dos controles independientes -->
+              @if (pedido.shipping_type === 'domicilio' && pedido.estatus === ESTATUS.LISTO) {
+                <button class="btn-domicilio-check"
+                        [class.btn-domicilio-check--done]="pedido.envio_confirmado"
+                        [disabled]="pedido.envio_confirmado || procesando() === pedido.id"
+                        (click)="onMarkEnvio(pedido)">
+                  <mat-icon>{{ pedido.envio_confirmado ? 'check_circle' : 'local_shipping' }}</mat-icon>
+                  <span>Entregado</span>
+                </button>
+                <span class="btn-domicilio-check btn-domicilio-check--readonly"
+                      [class.btn-domicilio-check--done]="pedido.pago_confirmado">
+                  <mat-icon>{{ pedido.pago_confirmado ? 'check_circle' : 'payments' }}</mat-icon>
+                  <span>{{ pedido.pago_confirmado ? 'Pagado' : 'Pago pendiente' }}</span>
+                </span>
+              }
+
+              <!-- Botón principal: Iniciar / Listo / Servido / Entregado -->
+              @if (puedeAvanzar(pedido) && !(pedido.shipping_type === 'domicilio' && pedido.estatus === ESTATUS.LISTO)) {
+                <button class="btn-avanzar"
+                        [class]="'btn-avanzar btn-avanzar--e'
+                                 + pedido.estatus"
+                        [class.btn-avanzar--bloqueado]="!puedeEjecutarAccion(pedido)"
+                        [disabled]="procesando() === pedido.id
+                                    || !puedeEjecutarAccion(pedido)"
+                        [matTooltip]="getTooltipAccion(pedido)"
+                        (click)="avanzarEstatus(pedido)">
+                  @if (procesando() === pedido.id) {
+                    <span class="spinner-btn"></span>
+                  } @else {
+                    <mat-icon>{{ getIconoAccion(pedido) }}</mat-icon>
+                  }
+                  <span class="btn-texto-accion">
+                    {{ getTextoAccion(pedido) }}
+                  </span>
+                </button>
+              }
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Barra de urgencia parpadeante -->
+        @if (esUrgente(pedido)) {
+          <div class="barra-urgencia"></div>
+        }
+
+        <!-- Badge "NUEVO" para pedidos recientes -->
+        @if (esNuevo(pedido)) {
+          <div class="badge-nuevo">NUEVO</div>
+        }
+
+      </article>
+
+    </ng-template>
+
+  </main>
+
+</div>

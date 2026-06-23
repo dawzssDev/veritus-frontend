@@ -1,0 +1,613 @@
+<div class="page-header">
+  <div>
+    <h1 class="mat-headline-5">Suscripciones</h1>
+    <p class="mat-body-2 text-secondary">
+      Gestiona tu suscripción, pagos y datos fiscales
+    </p>
+  </div>
+  <button mat-stroked-button color="primary" (click)="editarDatosFiscales()">
+    <mat-icon>business</mat-icon>
+    Datos fiscales
+  </button>
+</div>
+
+<!-- Metric cards con mat-card -->
+
+<!-- Skeleton mientras carga -->
+@if (cargandoResumen()) {
+  <div class="resumen-grid">
+    @for (i of [1,2,3,4]; track i) {
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          <div class="skeleton skeleton-label"></div>
+          <div class="skeleton skeleton-valor"></div>
+          <div class="skeleton skeleton-sub"></div>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+}
+
+<!-- Datos reales -->
+@if (!cargandoResumen() && resumen()) {
+
+  <div class="resumen-grid">
+
+    <!-- Plan actual -->
+    <mat-card appearance="outlined">
+      <mat-card-content>
+        <p class="metric-label">Plan actual</p>
+        <p class="metric-valor">
+          {{ resumen()!.plan_actual | titlecase }}
+        </p>
+        <p class="metric-sub mat-caption">
+          @if (resumen()!.fecha_renovacion) {
+            Renueva el {{ formatFecha(resumen()!.fecha_renovacion) }}
+          } @else if (resumen()!.estatus === 'trialing') {
+            Trial activo
+          } @else {
+            Sin suscripción activa
+          }
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Total pagado -->
+    <mat-card appearance="outlined">
+      <mat-card-content>
+        <p class="metric-label">Total pagado ({{ anioActual }})</p>
+        <p class="metric-valor">
+          ${{ resumen()!.total_pagado | number:'1.2-2' }}
+        </p>
+        <p class="metric-sub mat-caption">{{ resumen()!.moneda }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Saldo pendiente -->
+    <mat-card appearance="outlined"
+              [class.card-alerta]="resumen()!.saldo_pendiente > 0">
+      <mat-card-content>
+        <p class="metric-label">Saldo pendiente</p>
+        <p class="metric-valor"
+           [class.text-warning]="resumen()!.saldo_pendiente > 0">
+          ${{ resumen()!.saldo_pendiente | number:'1.2-2' }}
+        </p>
+        <p class="metric-sub mat-caption">
+          @if (resumen()!.saldo_pendiente > 0) {
+            Vence el
+            {{ formatFecha(resumen()!.proximo_vencimiento) }}
+          } @else {
+            Sin pagos pendientes ✓
+          }
+        </p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Próximo vencimiento / días de trial -->
+    <mat-card appearance="outlined">
+      <mat-card-content>
+        @if (resumen()!.estatus === 'trialing'
+             && resumen()!.dias_trial !== null) {
+          <p class="metric-label">Días de prueba restantes</p>
+          <p class="metric-valor"
+             [class.text-warning]="resumen()!.dias_trial! <= 3">
+            {{ resumen()!.dias_trial | number:'1.0-0' }}
+          </p>
+          <p class="metric-sub mat-caption">
+            Trial termina el
+            {{ formatFecha(resumen()!.trial_fin) }}
+          </p>
+        } @else {
+          <p class="metric-label">Próximo vencimiento</p>
+          <p class="metric-valor">
+            {{ formatFecha(resumen()!.proximo_vencimiento) }}
+          </p>
+          <p class="metric-sub mat-caption">
+            @if (resumen()!.plan_actual) {
+              Factura
+              {{ resumen()!.plan_actual | titlecase }}
+              {{ resumen()!.periodo }}
+            }
+          </p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+}
+
+<!-- Si no hay suscripción -->
+@if (!cargandoResumen() && !resumen()?.plan_actual) {
+  <mat-card appearance="outlined" class="sin-suscripcion">
+    <mat-card-content>
+      <mat-icon>info</mat-icon>
+      <p>No tienes una suscripción activa.</p>
+      <a routerLink="/" fragment="precios" mat-flat-button color="primary">
+        Ver planes
+      </a>
+    </mat-card-content>
+  </mat-card>
+}
+
+<!-- Alerta con mat-card -->
+@if (resumen()?.saldo_pendiente && resumen()!.saldo_pendiente > 0) {
+<mat-card appearance="outlined" class="alerta-card">
+  <mat-card-content>
+    <div class="alerta-content">
+      <mat-icon color="warn" class="alerta-icon">warning</mat-icon>
+      <div class="alerta-texto">
+        <p class="mat-body-1 alerta-titulo">
+          Tienes un pago pendiente de
+          ${{ resumen()!.saldo_pendiente | number:'1.2-2' }}
+          {{ resumen()!.moneda }}
+        </p>
+        <p class="mat-body-2 alerta-sub">
+          Vence el {{ formatFecha(resumen()!.proximo_vencimiento) }}.
+          Realiza tu pago para evitar interrupciones en el servicio.
+        </p>
+      </div>
+      <button mat-flat-button
+              class="btn-pagar"
+              [disabled]="pagandoAhora()"
+              (click)="pagarAhora()">
+        @if (pagandoAhora()) {
+          <span class="btn-spinner"></span>
+          Cargando...
+        } @else {
+          Pagar ahora
+        }
+      </button>
+    </div>
+  </mat-card-content>
+</mat-card>
+}
+
+<!-- Sección de suscripción activa -->
+@if (suscripcionActiva()) {
+  <mat-card appearance="outlined"
+            class="suscripcion-card"
+            [class.suscripcion-card--cancelada]="
+              suscripcionActiva()!.estatus === 'canceled'">
+
+    <mat-card-content>
+      <div class="suscripcion-layout">
+
+        <!-- Info de la suscripción -->
+        <div class="suscripcion-info">
+
+          <div class="suscripcion-info__header">
+            <mat-icon class="suscripcion-info__icono">
+              card_membership
+            </mat-icon>
+            <div>
+              <p class="suscripcion-info__titulo">Suscripción activa</p>
+              <p class="suscripcion-info__sub">
+                Plan {{ suscripcionActiva()!.plan | titlecase }} ·
+                {{ suscripcionActiva()!.periodo === 'mensual'
+                   ? 'Facturación mensual'
+                   : 'Facturación anual' }}
+              </p>
+            </div>
+          </div>
+
+          <div class="suscripcion-detalles">
+
+            <!-- Estatus -->
+            <div class="detalle-item">
+              <span class="detalle-item__label">Estatus</span>
+              <mat-chip
+                [class]="'estatus-chip estatus-'
+                  + suscripcionActiva()!.estatus"
+                [disableRipple]="true">
+                <span class="estatus-dot"></span>
+                {{ getEtiquetaEstatus(suscripcionActiva()!.estatus) }}
+              </mat-chip>
+            </div>
+
+            <!-- Precio -->
+            <div class="detalle-item">
+              <span class="detalle-item__label">Precio</span>
+              <span class="detalle-item__valor">
+                ${{ suscripcionActiva()!.precio | number:'1.2-2' }}
+                {{ suscripcionActiva()!.moneda }}/
+                {{ suscripcionActiva()!.periodo === 'mensual'
+                   ? 'mes' : 'año' }}
+              </span>
+            </div>
+
+            <!-- Trial o próximo cobro -->
+            @if (suscripcionActiva()!.estatus === 'trialing'
+                 && suscripcionActiva()!.trial_fin) {
+              <div class="detalle-item">
+                <span class="detalle-item__label">Trial termina</span>
+                <span class="detalle-item__valor detalle-item__valor--alerta">
+                  {{ formatFecha(suscripcionActiva()!.trial_fin) }}
+                  @if (suscripcionActiva()!.dias_restantes_trial) {
+                    · {{ suscripcionActiva()!.dias_restantes_trial }}
+                    días restantes
+                  }
+                </span>
+              </div>
+            } @else if (suscripcionActiva()!.proximo_cobro) {
+              <div class="detalle-item">
+                <span class="detalle-item__label">Próximo cobro</span>
+                <span class="detalle-item__valor">
+                  {{ formatFecha(suscripcionActiva()!.proximo_cobro) }}
+                </span>
+              </div>
+            }
+
+            <!-- Método de pago -->
+            @if (suscripcionActiva()!.marca_tarjeta
+                 && suscripcionActiva()!.ultimos_4_digitos) {
+              <div class="detalle-item">
+                <span class="detalle-item__label">Método de pago</span>
+                <span class="detalle-item__valor">
+                  <mat-icon style="font-size:14px;width:14px;height:14px;
+                                   vertical-align:middle">
+                    credit_card
+                  </mat-icon>
+                  {{ suscripcionActiva()!.marca_tarjeta | titlecase }}
+                  ···· {{ suscripcionActiva()!.ultimos_4_digitos }}
+                </span>
+              </div>
+            }
+
+          </div>
+        </div>
+
+        <!-- Acción de cancelar -->
+        @if (suscripcionActiva()!.estatus !== 'canceled') {
+          <div class="suscripcion-accion">
+            <button
+              mat-stroked-button
+              color="warn"
+              class="btn-cancelar"
+              [disabled]="cancelando()"
+              (click)="mostrarConfirmacion.set(true)">
+              <mat-icon>cancel</mat-icon>
+              Cancelar suscripción
+            </button>
+            <p class="suscripcion-accion__hint">
+              Seguirás teniendo acceso hasta el
+              {{ formatFecha(suscripcionActiva()!.periodo_fin) }}
+            </p>
+          </div>
+        } @else {
+          <div class="suscripcion-accion">
+            <div class="cancelada-badge">
+              <mat-icon style="font-size:16px;width:16px;height:16px">
+                info
+              </mat-icon>
+              Suscripción cancelada
+            </div>
+            <p class="suscripcion-accion__hint">
+              Acceso hasta el
+              {{ formatFecha(suscripcionActiva()!.periodo_fin) }}
+            </p>
+          </div>
+        }
+
+      </div>
+    </mat-card-content>
+
+  </mat-card>
+}
+
+<!-- Dialog de confirmación de cancelación -->
+@if (mostrarConfirmacion()) {
+  <div class="confirmacion-overlay"
+       (click)="mostrarConfirmacion.set(false)">
+    <div class="confirmacion-dialog"
+         (click)="$event.stopPropagation()">
+
+      <!-- Ícono de advertencia -->
+      <div class="confirmacion-icono">
+        <mat-icon style="font-size:32px;width:32px;height:32px;
+                         color:#854F0B">
+          warning
+        </mat-icon>
+      </div>
+
+      <h3 class="confirmacion-titulo">
+        ¿Cancelar tu suscripción?
+      </h3>
+
+      <p class="confirmacion-desc">
+        Tu suscripción al
+        <strong>
+          Plan {{ suscripcionActiva()?.plan | titlecase }}
+        </strong>
+        se cancelará al final del período actual.
+      </p>
+
+      <!-- Qué conservas -->
+      <div class="confirmacion-info">
+        <p class="confirmacion-info__titulo">
+          Lo que conservas hasta el
+          {{ formatFecha(suscripcionActiva()?.periodo_fin ?? null) }}:
+        </p>
+        <ul class="confirmacion-lista">
+          <li>
+            <mat-icon style="font-size:14px;width:14px;height:14px;
+                             color:#1C8C40">
+              check
+            </mat-icon>
+            Acceso completo a todos los módulos
+          </li>
+          <li>
+            <mat-icon style="font-size:14px;width:14px;height:14px;
+                             color:#1C8C40">
+              check
+            </mat-icon>
+            Tus datos y configuración guardados
+          </li>
+          <li>
+            <mat-icon style="font-size:14px;width:14px;height:14px;
+                             color:#1C8C40">
+              check
+            </mat-icon>
+            Soporte técnico disponible
+          </li>
+        </ul>
+      </div>
+
+      <!-- Error -->
+      @if (errorCancelacion()) {
+        <div class="confirmacion-error">
+          <mat-icon style="font-size:14px;width:14px;height:14px">
+            error
+          </mat-icon>
+          {{ errorCancelacion() }}
+        </div>
+      }
+
+      <!-- Botones -->
+      <div class="confirmacion-botones">
+        <button
+          mat-button
+          [disabled]="cancelando()"
+          (click)="mostrarConfirmacion.set(false)">
+          Mantener suscripción
+        </button>
+        <button
+          mat-flat-button
+          color="warn"
+          class="btn-confirmar-cancelar"
+          [disabled]="cancelando()"
+          (click)="cancelarSuscripcion()">
+          @if (cancelando()) {
+            <span class="btn-spinner"></span>
+            Cancelando...
+          } @else {
+            Sí, cancelar
+          }
+        </button>
+      </div>
+
+      <!-- Alternativa de soporte -->
+      <p class="confirmacion-soporte">
+        ¿Tienes algún problema?
+        <a href="https://wa.me/526721095469"
+           target="_blank">
+          Contáctanos primero
+        </a>
+      </p>
+
+    </div>
+  </div>
+}
+
+<!-- Historial con mat-card + mat-table -->
+<mat-card appearance="outlined" class="historial-card">
+  <mat-card-header>
+    <mat-card-title>Historial de facturas</mat-card-title>
+    <div class="historial-header-actions">
+      <!-- Búsqueda con mat-form-field -->
+      <mat-form-field
+        appearance="outline"
+        subscriptSizing="dynamic"
+        class="campo-busqueda"
+      >
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          placeholder="Buscar por folio o período..."
+          [(ngModel)]="busquedaValue"
+          (ngModelChange)="busqueda.set($event)"
+        />
+        @if (busqueda()) {
+        <button matSuffix mat-icon-button (click)="busqueda.set(''); busquedaValue=''">
+          <mat-icon>close</mat-icon>
+        </button>
+        }
+      </mat-form-field>
+
+      <!-- Filtros con mat-chip-listbox -->
+      <mat-chip-listbox
+        [(ngModel)]="filtroValue"
+        (ngModelChange)="filtroEstatus.set($event)"
+        hideSingleSelectionIndicator
+      >
+        @for (opcion of estatusOpciones; track opcion.valor) {
+        <mat-chip-option
+          [value]="opcion.valor"
+          [selected]="filtroEstatus() === opcion.valor"
+        >
+          {{ opcion.label }}
+        </mat-chip-option>
+        }
+      </mat-chip-listbox>
+    </div>
+  </mat-card-header>
+
+  <mat-divider></mat-divider>
+
+  <!-- mat-table -->
+  <mat-card-content class="tabla-content">
+
+    <!-- Estado de carga -->
+    @if (cargandoInvoices()) {
+      <div class="invoices-loading">
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+        <p class="mat-body-2 text-secondary" style="padding:16px">
+          Cargando facturas desde Stripe...
+        </p>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (errorInvoices() && !cargandoInvoices()) {
+      <div class="invoices-error">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ errorInvoices() }}</p>
+        <button mat-button color="primary" (click)="cargarInvoices()">
+          Reintentar
+        </button>
+      </div>
+    }
+
+    <!-- Tabla de invoices reales -->
+    @if (!cargandoInvoices() && !errorInvoices()) {
+      <table
+        mat-table
+        [dataSource]="facturasFiltradas()"
+        class="tabla-facturas mat-elevation-z0"
+      >
+        <!-- Número / Folio -->
+        <ng-container matColumnDef="folio">
+          <th mat-header-cell *matHeaderCellDef>Folio</th>
+          <td mat-cell *matCellDef="let inv">
+            <code class="folio-code">
+              {{ inv.numero ?? inv.id.slice(-8).toUpperCase() }}
+            </code>
+          </td>
+        </ng-container>
+
+        <!-- Período -->
+        <ng-container matColumnDef="periodo">
+          <th mat-header-cell *matHeaderCellDef>Período</th>
+          <td mat-cell *matCellDef="let inv" class="col-periodo">
+            {{ formatPeriodo(inv) }}
+          </td>
+        </ng-container>
+
+        <!-- Concepto -->
+        <ng-container matColumnDef="concepto">
+          <th mat-header-cell *matHeaderCellDef>Concepto</th>
+          <td mat-cell *matCellDef="let inv" class="col-concepto">
+            <span class="concepto-text">
+              {{ inv.descripcion ?? 'Suscripción DAWRZ' }}
+            </span>
+            @if (inv.plan) {
+              <span class="plan-badge">{{ inv.plan | titlecase }}</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Fecha -->
+        <ng-container matColumnDef="emision">
+          <th mat-header-cell *matHeaderCellDef>Emisión</th>
+          <td mat-cell *matCellDef="let inv" class="col-fecha">
+            {{ formatFecha(inv.fecha_creacion) }}
+          </td>
+        </ng-container>
+
+        <!-- Vencimiento -->
+        <ng-container matColumnDef="vencimiento">
+          <th mat-header-cell *matHeaderCellDef>Vencimiento</th>
+          <td mat-cell *matCellDef="let inv" class="col-fecha">
+            {{ formatFecha(inv.fecha_vencimiento) }}
+          </td>
+        </ng-container>
+
+        <!-- Total -->
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef>Total</th>
+          <td mat-cell *matCellDef="let inv" class="col-total">
+            ${{ inv.total | number:'1.2-2' }}
+            <span class="precio-moneda">{{ inv.moneda }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Estatus -->
+        <ng-container matColumnDef="estatus">
+          <th mat-header-cell *matHeaderCellDef>Estatus</th>
+          <td mat-cell *matCellDef="let inv">
+            <mat-chip
+              [class]="'estatus-chip ' + getClaseEstatusInvoice(inv)"
+              [disableRipple]="true">
+              <span class="estatus-dot"></span>
+              {{ getEstatusInvoice(inv) }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <!-- Acciones -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let inv"
+              (click)="$event.stopPropagation()">
+            <div class="acciones-cell">
+
+              <!-- Ver en Stripe -->
+              <button mat-icon-button
+                      color="primary"
+                      matTooltip="Ver factura"
+                      [disabled]="!inv.hosted_url"
+                      (click)="verInvoice(inv)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+
+              <!-- Descargar PDF -->
+              <button mat-icon-button
+                      class="btn-pdf-icon"
+                      matTooltip="Descargar PDF"
+                      [disabled]="descargandoPdf() === inv.id"
+                      (click)="descargarPDF(inv, $event)">
+                @if (descargandoPdf() === inv.id) {
+                  <mat-icon class="icono-girando">sync</mat-icon>
+                } @else {
+                  <mat-icon>picture_as_pdf</mat-icon>
+                }
+              </button>
+
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row
+            *matRowDef="let inv; columns: columnas"
+            class="fila-tabla"
+            (click)="verInvoice(inv)">
+        </tr>
+
+      </table>
+
+      <!-- Estado vacío -->
+      @if (facturasFiltradas().length === 0 && !cargandoInvoices()) {
+        <div class="tabla-vacia">
+          <mat-icon class="vacio-icon">receipt_long</mat-icon>
+
+          @if (invoices().length === 0) {
+            <p class="mat-body-1">Aún no tienes facturas generadas</p>
+            <p class="mat-body-2 text-secondary">
+              Las facturas aparecerán aquí después de tu primer cobro.
+              Durante el período de prueba gratuita no se generan facturas.
+            </p>
+          } @else {
+            <p class="mat-body-1">
+              No hay facturas con los filtros aplicados
+            </p>
+            <button mat-button color="primary"
+                    (click)="filtroEstatus.set('todas'); busqueda.set('')">
+              Ver todas las facturas
+            </button>
+          }
+
+        </div>
+      }
+    }
+  </mat-card-content>
+</mat-card>

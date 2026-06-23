@@ -1,0 +1,105 @@
+<div class="filter-bar">
+  <div class="filter-bar-main">
+    <!-- Selector de fecha -->
+    <div class="date-selector">
+      <mat-form-field appearance="outline" class="date-field">
+        <mat-label>Fecha</mat-label>
+        <input 
+          matInput 
+          [matDatepicker]="picker" 
+          [value]="selectedDate()" 
+          (dateChange)="onDateChange($event.value)"
+          readonly
+        />
+        <mat-icon matPrefix>calendar_today</mat-icon>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+      
+      @if (!isToday) {
+        <button 
+          mat-raised-button 
+          color="primary" 
+          class="today-btn"
+          (click)="goToToday()"
+        >
+          <mat-icon>today</mat-icon>
+          <span>Hoy</span>
+        </button>
+      }
+    </div>
+    
+    <!-- Botón de actualizar -->
+    <button 
+      mat-raised-button 
+      color="accent" 
+      class="refresh-btn"
+      (click)="onRefresh()"
+    >
+      <mat-icon>refresh</mat-icon>
+      <span>Actualizar</span>
+    </button>
+  </div>
+  
+  <!-- Filtros tipo chip-toggle -->
+  <div class="filter-chips">
+    <div class="filter-group">
+      <span class="filter-label">Mostrar:</span>
+      <mat-chip-set aria-label="Filtro de modo">
+        <mat-chip-option 
+          [selected]="filtroModo() === 'todos'"
+          (click)="onModoChange('todos')"
+          class="filter-chip"
+        >
+          <mat-icon>list_alt</mat-icon>
+          Todos
+        </mat-chip-option>
+        <mat-chip-option 
+          [selected]="filtroModo() === 'pendientes'"
+          (click)="onModoChange('pendientes')"
+          class="filter-chip filter-chip-pendientes"
+        >
+          <mat-icon>pending_actions</mat-icon>
+          Solo pendientes
+        </mat-chip-option>
+      </mat-chip-set>
+    </div>
+    
+    <div class="filter-group">
+      <span class="filter-label">Tipo:</span>
+      <mat-chip-set aria-label="Filtro de tipo">
+        <mat-chip-option 
+          [selected]="filtroTipo() === 'todos'"
+          (click)="onTipoChange('todos')"
+          class="filter-chip"
+        >
+          Todos
+        </mat-chip-option>
+        <mat-chip-option 
+          [selected]="filtroTipo() === 'local'"
+          (click)="onTipoChange('local')"
+          class="filter-chip filter-chip-local"
+        >
+          <span class="chip-emoji">🍽</span>
+          Comer aquí
+        </mat-chip-option>
+        <mat-chip-option 
+          [selected]="filtroTipo() === 'domicilio'"
+          (click)="onTipoChange('domicilio')"
+          class="filter-chip filter-chip-domicilio"
+        >
+          <span class="chip-emoji">🛵</span>
+          Domicilio
+        </mat-chip-option>
+        <mat-chip-option 
+          [selected]="filtroTipo() === 'recoger'"
+          (click)="onTipoChange('recoger')"
+          class="filter-chip filter-chip-recoger"
+        >
+          <span class="chip-emoji">🛍</span>
+          Para llevar
+        </mat-chip-option>
+      </mat-chip-set>
+    </div>
+  </div>
+</div>

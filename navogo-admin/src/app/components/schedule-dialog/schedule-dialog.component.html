@@ -1,0 +1,47 @@
+<div
+  class="modal-overlay"
+  [class.is-open]="open"
+  [attr.aria-hidden]="!open"
+  [style.opacity]="open ? 1 : 0"
+  [style.visibility]="open ? 'visible' : 'hidden'"
+  [style.pointer-events]="open ? 'auto' : 'none'"
+  (click)="onOverlayClick()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="horarios-title">
+  <div #dialog class="modal-content schedule-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="horarios-title">Horarios</h2>
+      <button
+        #closeButton
+        class="modal-close"
+        type="button"
+        (click)="close()"
+        aria-label="Cerrar modal de horarios">
+        <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div
+        class="horario-item"
+        *ngFor="let day of days"
+        [class.horario-today]="isToday(day)">
+        <div class="horario-day">
+          {{ formatDayName(day) }}
+          <span class="today-badge" *ngIf="isToday(day)">Hoy</span>
+        </div>
+
+        <ng-container *ngIf="horarios?.[day]?.is_open; else closed">
+          <div class="horario-time">
+            {{ formatTime(horarios?.[day]?.open) }} - {{ formatTime(horarios?.[day]?.close) }}
+          </div>
+        </ng-container>
+
+        <ng-template #closed>
+          <div class="horario-time horario-closed">Cerrado</div>
+        </ng-template>
+      </div>
+    </div>
+  </div>
+</div>

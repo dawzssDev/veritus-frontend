@@ -1,0 +1,1536 @@
+<div class="mesas-page">
+
+  <mat-tab-group class="mesas-tabs" (selectedIndexChange)="onTabChange($event)">
+
+    <!-- ── TAB 1: Gestión de Mesas ── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>table_restaurant</mat-icon>
+        <span>Mesas</span>
+      </ng-template>
+
+      <div class="gestion-mesas-container">
+
+        <!-- Loading State -->
+        @if (cargando()) {
+          <div class="loading-overlay">
+            <mat-spinner [diameter]="60"></mat-spinner>
+            <p>Cargando mesas...</p>
+          </div>
+        }
+
+        <!-- LAYOUT PRINCIPAL: mapa + panel lateral -->
+        <div class="mesas-layout" [class.mesas-layout--panel]="mesaSeleccionada() && !vistaAgregarProductos()">
+
+        <!-- VISTA MAPA -->
+        <div class="vista-mapa">
+
+            <!-- Header -->
+            <div class="mapa-header">
+              <div class="header-top">
+                <h1>
+                  <mat-icon>table_restaurant</mat-icon>
+                  Gestión de Mesas
+                </h1>
+
+                <div class="header-actions">
+                  <button
+                    mat-stroked-button
+                    [class.active]="modoEdicion()"
+                    (click)="toggleModoEdicion()">
+                    <mat-icon>{{ modoEdicion() ? 'edit_off' : 'edit' }}</mat-icon>
+                    {{ modoEdicion() ? 'Desactivar' : 'Modo' }} Edición
+                  </button>
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    (click)="abrirDialogNuevaMesa()">
+                    <mat-icon>add</mat-icon>
+                    Nueva Mesa
+                  </button>
+                </div>
+              </div>
+
+              <!-- Filtro de zonas -->
+              <div class="filtro-zonas">
+                <button
+                  class="zona-chip"
+                  [class.active]="filtroZona() === 'todas'"
+                  (click)="cambiarFiltroZona('todas')">
+                  <mat-icon>apps</mat-icon>
+                  <span>Todas las zonas</span>
+                  <span class="chip-count">{{ mesas().length }}</span>
+                </button>
+
+                @for (zona of zonasDisponibles(); track zona) {
+                  <button
+                    class="zona-chip"
+                    [class.active]="filtroZona() === zona"
+                    (click)="cambiarFiltroZona(zona)">
+                    <mat-icon>place</mat-icon>
+                    <span>{{ zona }}</span>
+                    <span class="chip-count">{{ getMesasPorZona(zona) }}</span>
+                  </button>
+                }
+              </div>
+
+              <!-- Leyenda de estados -->
+              <div class="leyenda-estados">
+                <div class="estado-badge-chip libre">
+                  <mat-icon>check_circle</mat-icon>
+                  <span>Libres</span>
+                  <span class="badge-count">{{ resumenEstados().libres }}</span>
+                </div>
+                <div class="estado-badge-chip ocupada">
+                  <mat-icon>people</mat-icon>
+                  <span>Ocupadas</span>
+                  <span class="badge-count">{{ resumenEstados().ocupadas }}</span>
+                </div>
+                <div class="estado-badge-chip reservada">
+                  <mat-icon>event</mat-icon>
+                  <span>Reservadas</span>
+                  <span class="badge-count">{{ resumenEstados().reservadas }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mapa de mesas -->
+            <div
+              #mapaContainer
+              class="mapa-mesas"
+              [class.modo-edicion-activo]="modoEdicion()"
+              (scroll)="onMapaScroll()"
+              (click)="mesaConPopoverAbierto.set(null)">
+              @if (mesasFiltradas().length === 0) {
+                <div class="empty-state">
+                  <mat-icon>table_restaurant</mat-icon>
+                  @if (filtroZona() === 'todas') {
+                    <p>No hay mesas creadas</p>
+                    <small>Crea tu primera mesa con el botón + Nueva Mesa</small>
+                    <button mat-raised-button color="primary" (click)="abrirDialogNuevaMesa()">
+                      <mat-icon>add</mat-icon>
+                      Crear Primera Mesa
+                    </button>
+                  } @else if (filtroZona() === 'libre') {
+                    <p>Todas las mesas están ocupadas</p>
+                    <small>No hay mesas disponibles en este momento</small>
+                  } @else if (filtroZona() === 'ocupada') {
+                    <p>No hay mesas ocupadas</p>
+                    <small>Todas las mesas están libres</small>
+                  } @else if (filtroZona() === 'reservada') {
+                    <p>No hay mesas reservadas</p>
+                    <small>No hay reservas activas</small>
+                  } @else {
+                    <p>No hay mesas en {{ filtroZona() }}</p>
+                    <small>Selecciona otra zona o crea mesas nuevas</small>
+                  }
+                </div>
+              } @else {
+                @for (mesa of mesasFiltradas(); track mesa.id) {
+                  <div
+                    class="mesa-card"
+                    [class.fusionada]="estaFusionada(mesa)
+                      || getMesasHermanas(mesa).length > 0"
+                    [class.libre]="mesa.estado === 'libre'"
+                    [class.ocupada]="mesa.estado === 'ocupada'"
+                    [class.pago-pendiente]="mesa.estado === 'ocupada' && !!mesa.orden && !mesa.orden.pago_confirmado"
+                    [class.cuenta-pendiente]="mesa.estado === 'cuenta_pendiente'"
+                    [class.reservada]="mesa.estado === 'reservada'"
+                    [class.draggable]="modoEdicion() && !estaRedimensionando()"
+                    [class.popover-active]="mesaConPopoverAbierto() === mesa.id"
+                    [style.position]="'absolute'"
+                    [style.left.px]="mesa.posicion_x"
+                    [style.top.px]="mesa.posicion_y"
+                    [style.width.px]="mesa.ancho"
+                    [style.height.px]="mesa.alto"
+                    cdkDrag
+                    [cdkDragBoundary]="mapaContainer"
+                    [cdkDragDisabled]="!modoEdicion() || estaRedimensionando()"
+                    (cdkDragEnded)="onDragEnded($event, mesa)"
+                    (mouseenter)="onMesaGloboEnter(mesa, $event)"
+                    (mouseleave)="onMesaGloboLeave()"
+                    (click)="!modoEdicion() ? seleccionarMesa(mesa) : null">
+
+                    <!-- ZONA SUPERIOR - Header -->
+                    <div class="mesa-card-header">
+                      <div class="mesa-titulo">
+                        <mat-icon>people</mat-icon>
+                        <span class="identificador">{{ mesa.identificador }}</span>
+                      </div>
+
+                      @if (mesa.estado === 'ocupada' && mesa.orden) {
+                        <div
+                          class="entrega-badge-header"
+                          [class.entrega-badge-header--ok]="todoEntregado(mesa)"
+                          [class.entrega-badge-header--parcial]="entregaParcial(mesa)"
+                          [class.entrega-badge-header--pendiente]="!todoEntregado(mesa) && !entregaParcial(mesa)"
+                          [matTooltip]="getTooltipEntrega(mesa)"
+                          (click)="$event.stopPropagation()"
+                          (mousedown)="$event.stopPropagation()">
+                          <mat-icon>
+                            {{ todoEntregado(mesa) ? 'check_circle' : 'room_service' }}
+                          </mat-icon>
+                          @if (todoEntregado(mesa)) {
+                            <span class="entrega-badge-header__texto">Listo</span>
+                          } @else {
+                            <span class="entrega-badge-header__texto">
+                              {{ getCantidadPorEntregar(mesa) }} por entregar
+                            </span>
+                          }
+                        </div>
+                      }
+
+                      @if (modoEdicion()) {
+                        <button
+                          mat-icon-button
+                          [matMenuTriggerFor]="menuMesa"
+                          (click)="$event.stopPropagation()"
+                          (mousedown)="$event.stopPropagation()"
+                          class="btn-menu">
+                          <mat-icon>more_vert</mat-icon>
+                        </button>
+
+                        <mat-menu #menuMesa="matMenu">
+                          <button mat-menu-item (click)="abrirDialogEditarMesa(mesa)">
+                            <mat-icon>edit</mat-icon>
+                            Editar
+                          </button>
+                          <button mat-menu-item (click)="abrirEliminarMesa(mesa, $event)">
+                            <mat-icon color="warn">delete</mat-icon>
+                            Eliminar
+                          </button>
+                        </mat-menu>
+                      }
+                    </div>
+
+                    <!-- ZONA CENTRAL - Información -->
+                    @if (mesa.ancho >= 100 && mesa.alto >= 100) {
+                      <div class="mesa-card-info">
+                        <div class="info-linea">
+                          <mat-icon>people</mat-icon>
+                          <span>{{ mesa.capacidad }} personas</span>
+                        </div>
+
+                        @if (mesa.estado === 'ocupada' && mesa.tiempo_transcurrido) {
+                          <div class="info-linea tiempo"
+                               [class.alert]="mesa.tiempo_transcurrido > 60"
+                               [class.warning]="mesa.tiempo_transcurrido > 30 && mesa.tiempo_transcurrido <= 60">
+                            <mat-icon>schedule</mat-icon>
+                            <span>{{ formatearTiempo(mesa.tiempo_transcurrido) }}</span>
+                          </div>
+                        }
+
+                        @if (mesa.zona) {
+                          <div class="info-linea">
+                            <mat-icon>location_on</mat-icon>
+                            <span>{{ mesa.zona }}</span>
+                          </div>
+                        }
+
+                        @if (mesa.orden) {
+                          <div class="info-linea productos">
+                            <mat-icon>shopping_cart</mat-icon>
+                            <span>{{ mesa.orden.items.length }} producto{{ mesa.orden.items.length !== 1 ? 's' : '' }}</span>
+                          </div>
+                          <div class="info-linea total">
+                            <mat-icon>payments</mat-icon>
+                            @if (tieneCobroExtra(mesa)) {
+                              <span class="amount">${{ getMontoExtraPorCobrar(mesa) | number:'1.2-2' }}</span>
+                            } @else {
+                              <span class="amount">${{ mesa.orden.total }}</span>
+                            }
+                          </div>
+                          @if (tieneCobroExtra(mesa)) {
+                            <div class="info-linea cobro-extra">
+                              <mat-icon>add_card</mat-icon>
+                              <span>Cobro extra</span>
+                            </div>
+                          } @else if (!mesa.orden.pago_confirmado) {
+                            <div class="info-linea cobro-pendiente">
+                              <mat-icon>receipt_long</mat-icon>
+                              <span>Cobro pendiente</span>
+                            </div>
+                          }
+                        }
+
+                      </div>
+                    }
+
+                    @if (estaFusionada(mesa)) {
+                      <div class="merge-indicador-detalle">
+                        <div class="merge-indicador-detalle__header">
+                          <mat-icon>merge_type</mat-icon>
+                          <span>Fusionada con</span>
+                        </div>
+
+                        @if (getMesaPrincipal(mesa); as principal) {
+                          <div class="merge-mesa-ref merge-mesa-ref--principal">
+                            <mat-icon>table_restaurant</mat-icon>
+                            <span>Mesa {{ principal.identificador }}</span>
+                            @if (principal.zona) {
+                              <span class="merge-zona">
+                                · {{ principal.zona }}
+                              </span>
+                            }
+                            <span class="merge-rol-badge merge-rol-badge--principal">
+                              Principal
+                            </span>
+                          </div>
+                        }
+
+                        @for (hermana of getMesasHermanas(mesa); track hermana.id) {
+                          @if (hermana.id !== getMesaPrincipal(mesa)?.id) {
+                            <div class="merge-mesa-ref">
+                              <mat-icon>table_restaurant</mat-icon>
+                              <span>Mesa {{ hermana.identificador }}</span>
+                              @if (hermana.zona) {
+                                <span class="merge-zona">
+                                  · {{ hermana.zona }}
+                                </span>
+                              }
+                            </div>
+                          }
+                        }
+                      </div>
+                    }
+
+                    @if (!estaFusionada(mesa) && getMesasHermanas(mesa).length > 0) {
+                      <div class="merge-indicador-detalle merge-indicador-detalle--principal">
+                        <div class="merge-indicador-detalle__header">
+                          <mat-icon>merge_type</mat-icon>
+                          <span>Unida con</span>
+                        </div>
+
+                        @for (sec of getMesasHermanas(mesa); track sec.id) {
+                          <div class="merge-mesa-ref">
+                            <mat-icon>table_restaurant</mat-icon>
+                            <span>Mesa {{ sec.identificador }}</span>
+                            @if (sec.zona) {
+                              <span class="merge-zona">
+                                · {{ sec.zona }}
+                              </span>
+                            }
+                            <span class="merge-rol-badge">
+                              Secundaria
+                            </span>
+                          </div>
+                        }
+                      </div>
+                    }
+
+                    @if (mesa.estado === 'ocupada') {
+                      @if (tieneSplit(mesa)) {
+                        <div class="split-indicador">
+                          <mat-icon>call_split</mat-icon>
+                          {{ mesa.ordenes_activas?.length ?? 2 }}
+                          cuentas activas
+                        </div>
+                      }
+
+                      @if (tieneSplit(mesa) && (mesa.ordenes_activas?.length ?? 0) > 1) {
+                        <div class="split-cuentas">
+                          @for (orden of mesa.ordenes_activas!; track orden.id; let i = $index) {
+                            <div class="split-cuenta-item">
+                              <span class="split-cuenta-label">
+                                Cuenta {{ i + 1 }}
+                              </span>
+                              <span class="split-cuenta-total">
+                                ${{ orden.total | number:'1.2-2' }}
+                              </span>
+                              <span class="split-cuenta-items">
+                                {{ orden.items?.length ?? 0 }} items
+                              </span>
+                            </div>
+                          }
+                        </div>
+                      }
+
+                      <div class="mesa-acciones-extra">
+                        @if (!estaFusionada(mesa)) {
+                          <button
+                            class="btn-mesa-accion btn-mesa-accion--split"
+                            type="button"
+                            [matTooltip]="'Dividir mesa en 2 cuentas'"
+                            (click)="abrirSplit(mesa); $event.stopPropagation()">
+                            <mat-icon>call_split</mat-icon>
+                            Dividir
+                          </button>
+                        }
+
+                        <button
+                          class="btn-mesa-accion btn-mesa-accion--merge"
+                          type="button"
+                          [matTooltip]="'Unir con otra mesa'"
+                          (click)="abrirMerge(mesa); $event.stopPropagation()">
+                          <mat-icon>merge_type</mat-icon>
+                          Unir
+                        </button>
+                      </div>
+                    }
+
+                    <!-- ZONA INFERIOR - Botón de estatus con popover -->
+                    <div class="mesa-card-footer" (click)="$event.stopPropagation()">
+                      <button
+                        class="btn-estado"
+                        (click)="mesaConPopoverAbierto.set(mesaConPopoverAbierto() === mesa.id ? null : mesa.id); $event.stopPropagation()"
+                        (mousedown)="$event.stopPropagation()">
+                        {{ getTextoEstado(mesa.estado) }}
+                      </button>
+
+                      <!-- POPOVER DE ACCIONES -->
+                      @if (mesaConPopoverAbierto() === mesa.id) {
+                        <div class="popover-acciones" (click)="$event.stopPropagation()" (mousedown)="$event.stopPropagation()">
+                          <div class="popover-titulo">Cambiar estatus</div>
+
+                          @if (mesa.estado === 'libre') {
+                            <button class="popover-accion" (click)="cambiarEstadoMesa(mesa, 'ocupada'); mesaConPopoverAbierto.set(null)">
+                              <mat-icon>people</mat-icon>
+                              <span>Ocupar mesa</span>
+                            </button>
+                            <!-- <button class="popover-accion" (click)="cambiarEstadoMesa(mesa, 'reservada'); mesaConPopoverAbierto.set(null)">
+                              <mat-icon>event</mat-icon>
+                              <span>Reservar</span>
+                            </button> -->
+                          }
+
+                          @if (mesa.estado === 'ocupada') {
+                            <button class="popover-accion"
+                              [disabled]="!puedeLiberar(mesa)"
+                              [matTooltip]="!puedeLiberar(mesa) ? 'Confirma el pago antes de liberar' : ''"
+                              (click)="cambiarEstadoMesa(mesa, 'libre'); mesaConPopoverAbierto.set(null)">
+                              <mat-icon>check_circle</mat-icon>
+                              <span>Liberar mesa</span>
+                            </button>
+                          }
+
+                          @if (mesa.estado === 'reservada') {
+                            <button class="popover-accion" (click)="cambiarEstadoMesa(mesa, 'ocupada'); mesaConPopoverAbierto.set(null)">
+                              <mat-icon>people</mat-icon>
+                              <span>Confirmar llegada → Ocupar</span>
+                            </button>
+                            <button class="popover-accion"
+                              [disabled]="!puedeLiberar(mesa)"
+                              [matTooltip]="!puedeLiberar(mesa) ? 'Confirma el pago antes de liberar' : ''"
+                              (click)="cambiarEstadoMesa(mesa, 'libre'); mesaConPopoverAbierto.set(null)">
+                              <mat-icon>cancel</mat-icon>
+                              <span>Cancelar reserva → Liberar</span>
+                            </button>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <!-- Handles de redimensionado -->
+                    @if (modoEdicion()) {
+                      <div class="resize-handle handle-se"
+                           (mousedown)="onResizeStart($event, mesa, 'se')">
+                      </div>
+                      <div class="resize-handle handle-sw"
+                           (mousedown)="onResizeStart($event, mesa, 'sw')">
+                      </div>
+                      <div class="resize-handle handle-ne"
+                           (mousedown)="onResizeStart($event, mesa, 'ne')">
+                      </div>
+                      <div class="resize-handle handle-nw"
+                           (mousedown)="onResizeStart($event, mesa, 'nw')">
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          </div>
+
+        <!-- PANEL LATERAL: detalle de mesa seleccionada -->
+        @if (mesaSeleccionada() && !vistaAgregarProductos()) {
+          <aside class="panel-lateral">
+            <!-- HEADER FIJO -->
+            <div class="panel-header-wrapper">
+
+              <!-- Fila 1: Identidad de la mesa -->
+              <div class="detalle-header">
+                <button mat-icon-button class="panel-close-btn" (click)="volverAlMapa()" matTooltip="Cerrar">
+                  <mat-icon>close</mat-icon>
+                </button>
+
+                <div class="header-center">
+                  <mat-icon style="width:22px;height:22px;font-size:22px">table_restaurant</mat-icon>
+                  <span class="mesa-titulo-header">Mesa {{ mesaSeleccionada()!.identificador }}</span>
+                </div>
+
+                <!-- Estado de la mesa -->
+                <div [class]="'chip-estado chip-estado-' + mesaSeleccionada()!.estado">
+                  {{ getTextoEstado(mesaSeleccionada()!.estado) }}
+                </div>
+              </div>
+
+
+
+            </div>
+
+            <!-- CONTENEDOR COLUMNA ÚNICA -->
+            <div class="detalle-contenedor">
+
+              <!-- 1. COMANDA ACTUAL (arriba) -->
+              <div class="detalle-columna-der">
+
+                <!-- Header de la comanda -->
+                <div class="comanda-header">
+                  <div class="comanda-header-left">
+                    <mat-icon class="icono-comanda" style="width:20px;height:20px;font-size:20px">shopping_cart</mat-icon>
+                    <span class="comanda-titulo">Comanda actual</span>
+                  </div>
+                  <div class="comanda-header-right">
+                    @if (totalItems() > 0) {
+                      <div class="badge-total-items">{{ totalItems() }}</div>
+                    }
+                  </div>
+                </div>
+
+                @if ((mesaSeleccionada()!.ordenes_activas?.length ?? 0) > 1) {
+                  <div class="split-cuentas-selector">
+                    <span class="split-cuentas-label">
+                      <mat-icon>call_split</mat-icon>
+                      {{ mesaSeleccionada()!.ordenes_activas!.length }} cuentas
+                    </span>
+
+                    <div class="split-tabs">
+                      @for (orden of mesaSeleccionada()!.ordenes_activas!;
+                            track orden.id; let i = $index) {
+                        <button
+                          class="split-tab"
+                          [class.split-tab--activo]="cuentaActivaId() === orden.id"
+                          type="button"
+                          (click)="cuentaActivaId.set(orden.id)">
+                          Cuenta {{ i + 1 }}
+                          <span class="split-tab-monto">
+                            ${{ orden.total | number:'1.2-2' }}
+                          </span>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Lista de items de la comanda -->
+                <div class="comanda-lista">
+                  <ng-template #comandaItemTpl let-item="item" let-mesa="mesa">
+                    <div class="comanda-item"
+                         [class.comanda-item--entregado]="item.entregado">
+                      <button
+                        class="item-check-btn"
+                        [class.item-check-btn--ok]="item.entregado"
+                        [class.item-check-btn--loading]="procesandoItemId() === item.id"
+                        type="button"
+                        [matTooltip]="item.entregado
+                          ? 'Marcar como pendiente'
+                          : 'Marcar como entregado'"
+                        [disabled]="procesandoItemId() !== null"
+                        (click)="toggleEntregado(item, mesa); $event.stopPropagation()">
+                        @if (procesandoItemId() === item.id) {
+                          <span class="spinner-check"></span>
+                        } @else if (item.entregado) {
+                          <mat-icon>check_circle</mat-icon>
+                        } @else {
+                          <mat-icon>radio_button_unchecked</mat-icon>
+                        }
+                      </button>
+
+                      <div class="comanda-item__info">
+                        <span class="comanda-item__nombre">
+                          {{ item.quantity }}× {{ item.name }}
+                        </span>
+                        @if (formatSelections(item)) {
+                          <span class="comanda-item__sels">
+                            {{ formatSelections(item) }}
+                          </span>
+                        }
+                      </div>
+
+                      <span class="comanda-item__precio"
+                            [class.tachado]="item.entregado">
+                        ${{ (+item.unit_price * item.quantity) | number:'1.2-2' }}
+                      </span>
+                    </div>
+                  </ng-template>
+
+                  @if (ordenActiva()?.items?.length) {
+                    @let mesaComanda = mesaSeleccionada()!;
+
+                    @if (itemsComandaAgrupados().pagados.length > 0) {
+
+                      <!-- ── SECCIÓN: YA COBRADO ── -->
+                      <div class="comanda-seccion-header comanda-seccion-header--pagado">
+                        <mat-icon style="font-size:14px;width:14px;height:14px">check_circle</mat-icon>
+                        <span>YA COBRADO</span>
+                        <span class="seccion-monto">${{ montoCobradoAnterior() | number:'1.2-2' }}</span>
+                      </div>
+                      @for (item of itemsComandaAgrupados().pagados; track item.id) {
+                        <ng-container
+                          *ngTemplateOutlet="comandaItemTpl; context: { item: item, mesa: mesaComanda }" />
+                      }
+
+                      <!-- ── SECCIÓN: POR COBRAR ── -->
+                      <div class="comanda-seccion-header comanda-seccion-header--pendiente">
+                        <mat-icon style="font-size:14px;width:14px;height:14px">restaurant</mat-icon>
+                        <span>POR COBRAR</span>
+                        <span class="seccion-monto">${{ montoPendienteComanda() | number:'1.2-2' }}</span>
+                      </div>
+                      @for (item of itemsComandaAgrupados().pendientes; track item.id) {
+                        <ng-container
+                          *ngTemplateOutlet="comandaItemTpl; context: { item: item, mesa: mesaComanda }" />
+                      }
+
+                    } @else {
+
+                      <!-- ── LISTA SIMPLE (sin split de cobro) ── -->
+                      @for (item of itemsComandaOrdenados(); track item.id) {
+                        <ng-container
+                          *ngTemplateOutlet="comandaItemTpl; context: { item: item, mesa: mesaComanda }" />
+                      }
+
+                    }
+
+                    @if ((ordenActiva()?.items?.length ?? 0) > 0) {
+                      <div class="comanda-entrega-resumen">
+                        <div class="entrega-progreso">
+                          <div class="entrega-progreso__barra">
+                            <div class="entrega-progreso__fill"
+                                 [style.width.%]="totalItemsOrdenActiva() > 0
+                                   ? (itemsOrdenActivaEntregados() / totalItemsOrdenActiva()) * 100
+                                   : 0">
+                            </div>
+                          </div>
+                          <span class="entrega-progreso__texto">
+                            {{ itemsOrdenActivaEntregados() }}
+                            de {{ totalItemsOrdenActiva() }} entregados
+                          </span>
+                        </div>
+                      </div>
+                    }
+
+                  } @else {
+                    <div class="comanda-vacia">
+                      <mat-icon class="icono-vacio">receipt_long</mat-icon>
+                      <div class="texto-vacio">No hay productos en la comanda</div>
+                      <div class="subtexto-vacio">Usa el botón Agregar Productos para comenzar</div>
+                      @if (ordenActiva()) {
+                        <button mat-stroked-button class="btn-agregar-vacio" (click)="abrirAgregarProductos()">
+                          <mat-icon>add</mat-icon>
+                          Agregar Productos
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- Footer sticky de la comanda -->
+                @if (hayItems()) {
+                  <div class="comanda-footer">
+                    @if (montoCobradoAnterior() > 0) {
+                      <div class="footer-ya-cobrado-row">
+                        <span>Ya cobrado</span>
+                        <span class="footer-ya-cobrado-monto">
+                          ${{ montoCobradoAnterior() | number:'1.2-2' }}
+                          <button class="btn-deshacer-cobro" (click)="resetearCobradoAnterior()" title="Deshacer cobro anterior">
+                            <mat-icon style="font-size:14px;width:14px;height:14px;line-height:14px">undo</mat-icon>
+                            Deshacer
+                          </button>
+                        </span>
+                      </div>
+                      <div class="footer-total-row footer-total-row--pendiente">
+                        <span class="footer-total-label">Por cobrar</span>
+                        <span class="footer-total-monto">${{ montoPendienteComanda() | number:'1.2-2' }}</span>
+                      </div>
+                    } @else {
+                      <div class="footer-total-row">
+                        <span class="footer-total-label">Total</span>
+                        <span class="footer-total-monto">${{ ordenActiva()!.total }}</span>
+                      </div>
+                    }
+                    <!-- ACCIONES BAR: todos los botones en una línea -->
+                    <div class="footer-acciones-bar">
+                      <button class="btn-footer-agregar" (click)="abrirAgregarProductos()">
+                        <mat-icon style="width:18px;height:18px;font-size:18px">add_shopping_cart</mat-icon>
+                        Agregar
+                      </button>
+                      <button class="btn-footer-imprimir" (click)="imprimirTicket()">
+                        <mat-icon style="width:18px;height:18px;font-size:18px">receipt_long</mat-icon>
+                        Imprimir
+                      </button>
+                      @if (pagoConfirmado() && montoPendienteComanda() > 0) {
+                        <button mat-flat-button class="btn-cobrar-extra" (click)="abrirDialogPago()">
+                          <mat-icon style="width:18px;height:18px;font-size:18px">payments</mat-icon>
+                          Cobrar ${{ montoPendienteComanda() | number:'1.2-2' }}
+                        </button>
+                      } @else if (!pagoConfirmado()) {
+                        <button mat-flat-button class="btn-pedir-cuenta" (click)="abrirDialogPago()">
+                          Procesar Pago
+                          <mat-icon>arrow_forward</mat-icon>
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+
+              </div>
+
+              <!-- 2. RESUMEN (abajo) -->
+              @if (ordenActiva()) {
+                <div class="detalle-columna-izq" style="width: 100%; flex: 0 0 auto; min-width: unset;">
+                  <div class="seccion-card">
+                    <div class="seccion-titulo">RESUMEN</div>
+                    <div class="resumen-filas">
+                      <div class="resumen-fila">
+                        <span class="resumen-label">Subtotal</span>
+                        <span class="resumen-valor">${{ ordenActiva()!.subtotal }}</span>
+                      </div>
+                      <div class="resumen-fila">
+                        <span class="resumen-label">Propina</span>
+                        <span class="resumen-valor">${{ ordenActiva()!.tip }}</span>
+                      </div>
+                      <div class="resumen-fila">
+                        <span class="resumen-label">Envío</span>
+                        <span class="resumen-valor">${{ ordenActiva()!.shipping_cost }}</span>
+                      </div>
+                      @if (montoCobradoAnterior() > 0) {
+                        <div class="resumen-fila">
+                          <span class="resumen-label">Ya cobrado</span>
+                          <span class="resumen-valor" style="color:#9e9e9e;text-decoration:line-through">${{ montoCobradoAnterior() | number:'1.2-2' }}</span>
+                        </div>
+                      }
+                      <div class="resumen-fila resumen-total">
+                        <span class="resumen-label">Total</span>
+                        @if (montoCobradoAnterior() > 0) {
+                          <span class="resumen-valor">${{ montoPendienteComanda() | number:'1.2-2' }}</span>
+                        } @else {
+                          <span class="resumen-valor">${{ ordenActiva()!.total }}</span>
+                        }
+                      </div>
+                      <!-- Fila de estado de pago -->
+                      <div class="pago-estado-row">
+                        <div class="pago-metodo-chip">
+                          <div class="pago-metodo-chip__icono">
+                            <mat-icon>{{ getIconoPago(ordenActiva()!.payment_method) }}</mat-icon>
+                          </div>
+                          <span class="pago-metodo-chip__label">{{ getPaymentMethodLabel(ordenActiva()!.payment_method) }}</span>
+                        </div>
+                        <div class="pago-badge"
+                             [class.pago-badge--ok]="ordenActiva()!.pago_confirmado"
+                             [class.pago-badge--pendiente]="!ordenActiva()!.pago_confirmado">
+                          <mat-icon>{{ ordenActiva()!.pago_confirmado ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                          <span>{{ ordenActiva()!.pago_confirmado ? 'Pagado' : 'Pendiente' }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- 3. Ocupar Mesa (solo para mesa libre) -->
+              @if (mesaSeleccionada()!.estado === 'libre') {
+                <div style="padding: 12px 16px; background: #f5f7fa; border-top: 0.5px solid #e0e0e0;">
+                  <button mat-flat-button class="btn-accion btn-accion-ocupar" style="width: 100%; height: 48px;" (click)="cambiarEstadoMesa(mesaSeleccionada()!, 'ocupada')">
+                    <mat-icon style="width:20px;height:20px;font-size:20px">people</mat-icon>
+                    Ocupar Mesa
+                  </button>
+                </div>
+              }
+
+            </div>
+          </aside>
+        }
+
+        </div><!-- end .mesas-layout -->
+
+        <!-- ============================================= -->
+        <!-- VISTA AGREGAR PRODUCTOS -->
+        <!-- ============================================= -->
+        @if (vistaAgregarProductos()) {
+          <div class="vista-agregar-productos">
+            <div class="agregar-header">
+              <button class="btn-volver-agregar" (click)="cancelarAgregarProductos()">
+                <mat-icon>arrow_back</mat-icon>
+                <span>Cancelar</span>
+              </button>
+
+              <h2 class="agregar-titulo">
+                Agregar productos · {{ mesaSeleccionada()!.identificador }}
+
+                @if (tieneSplit(mesaSeleccionada()!)) {
+                  <span class="agregar-cuenta-badge">
+                    Cuenta {{ getNumeroCuentaActiva(mesaSeleccionada()!) }}
+                  </span>
+                }
+              </h2>
+
+              <div class="agregar-header-right">
+                @if (productosNuevos().length > 0) {
+                  <div class="badge-productos-nuevos">
+                    {{ productosNuevos().length }}
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="main-content-agregar" [class.vista-productos]="vistaMovilAgregar() === 'productos'" [class.vista-orden]="vistaMovilAgregar() === 'orden'">
+
+              <!-- PANEL IZQUIERDO - Catálogo de Productos -->
+              <div class="panel-productos" [class.oculto-movil]="vistaMovilAgregar() === 'orden'">
+
+                @if (!mesaSeleccionada()?.id_orden) {
+                  <div class="alerta-sin-orden">
+                    <mat-icon style="font-size:20px;width:20px;height:20px;color:#854F0B">
+                      warning
+                    </mat-icon>
+                    <div>
+                      <p class="alerta-sin-orden__titulo">
+                        Esta mesa no tiene una orden activa
+                      </p>
+                      <p class="alerta-sin-orden__desc">
+                        Para agregar productos primero debes crear una orden
+                        desde "Levantar Orden" o desde "Punto de Venta".
+                      </p>
+                    </div>
+                  </div>
+                }
+
+                <div class="search-bar">
+                  <mat-form-field appearance="outline" class="search-field">
+                    <mat-icon matPrefix>search</mat-icon>
+                    <input matInput
+                           placeholder="Buscar producto..."
+                           [value]="busquedaMenu()"
+                           (input)="onBusquedaMenuChange($any($event.target).value)">
+                    @if (busquedaMenu()) {
+                      <button mat-icon-button matSuffix (click)="limpiarBusquedaMenu()">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    }
+                  </mat-form-field>
+                </div>
+
+                <div class="categorias-tabs">
+                  <mat-chip-listbox [value]="categoriaActivaMenu()" (change)="seleccionarCategoriaMenu($event.value)" class="chips-container">
+                    <mat-chip-option value="todos" [selected]="categoriaActivaMenu() === 'todos'">
+                      <mat-icon>restaurant</mat-icon>
+                      Todos
+                    </mat-chip-option>
+                    @for (cat of obtenerCategoriasUnicasMenu(); track cat) {
+                      <mat-chip-option [value]="cat" [selected]="categoriaActivaMenu() === cat">
+                        {{ cat }}
+                      </mat-chip-option>
+                    }
+                  </mat-chip-listbox>
+                </div>
+
+                <div class="productos-grid">
+                  @if (cargandoMenu()) {
+                    <div class="empty-state">
+                      <mat-spinner [diameter]="40"></mat-spinner>
+                      <p>Cargando productos...</p>
+                    </div>
+                  } @else {
+                    @for (producto of productosFiltradosMenu(); track producto.id) {
+                      <div class="producto-card" (click)="agregarProductoNuevo(producto)">
+                        <div class="producto-imagen">
+                          @if (producto.imagen_url || producto.imagen) {
+                            <img [src]="producto.imagen_url || producto.imagen" [alt]="producto.nombre">
+                          } @else {
+                            <div class="imagen-placeholder">
+                              <mat-icon>restaurant</mat-icon>
+                            </div>
+                          }
+
+                          @if (getCantidadProductoNuevo(producto.id) > 0) {
+                            <span class="cantidad-badge">
+                              {{ getCantidadProductoNuevo(producto.id) }}
+                            </span>
+                          }
+
+                          @if (producto.descuento && producto.descuento > 0 && producto.descuento < producto.precio) {
+                            <span class="descuento-badge">
+                              -{{ (((producto.precio - producto.descuento) / producto.precio) * 100).toFixed(0) }}%
+                            </span>
+                          }
+                        </div>
+
+                        <div class="producto-info">
+                          <h3 class="producto-nombre">{{ producto.nombre }}</h3>
+                          <div class="producto-precio">
+                            @if (producto.descuento && producto.descuento > 0 && producto.descuento < producto.precio) {
+                              <span class="precio-original">${{ producto.precio | number:'1.2-2' }}</span>
+                              <span class="precio-con-descuento">${{ producto.descuento | number:'1.2-2' }}</span>
+                            } @else {
+                              <span class="precio-actual">${{ producto.precio | number:'1.2-2' }}</span>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    } @empty {
+                      <div class="empty-state">
+                        <mat-icon>search_off</mat-icon>
+                        <p>No se encontraron productos</p>
+                      </div>
+                    }
+                  }
+                </div>
+
+              </div>
+
+              <!-- PANEL DERECHO - Detalles de la Orden -->
+              <div class="panel-orden" [class.oculto-movil]="vistaMovilAgregar() === 'productos'">
+
+                <div class="orden-header">
+                  <button mat-icon-button class="btn-volver-movil" (click)="vistaMovilAgregar.set('productos')">
+                    <mat-icon>arrow_back</mat-icon>
+                  </button>
+                  <h2>
+                    <mat-icon>shopping_cart</mat-icon>
+                    Productos a agregar
+                  </h2>
+                </div>
+
+                <div class="orden-productos">
+                  @if (productosNuevos().length === 0) {
+                    <div class="orden-vacia">
+                      <mat-icon>add_shopping_cart</mat-icon>
+                      <p>No hay productos seleccionados</p>
+                      <small>Selecciona productos del menú</small>
+                    </div>
+                  } @else {
+                    <div class="productos-lista">
+                      @for (item of productosNuevos(); track item.id; let idx = $index) {
+                        <div class="orden-item">
+                          <div class="item-principal">
+                            <div class="item-info">
+                              <h4 class="item-nombre">{{ item.name }}</h4>
+                              <div class="item-precio-unitario">
+                                ${{ $any(item.unit_price) | number:'1.2-2' }} c/u
+                              </div>
+
+                              @if (isSelectionsArray(item.selections) && $any(item.selections).length > 0) {
+                                <div class="item-selections">
+                                  @for (sel of $any(item.selections); track $index) {
+                                    <div class="selection-item">
+                                      <span class="selection-value">{{ sel.extra || sel.nombre }}</span>
+                                    </div>
+                                  }
+                                </div>
+                              }
+
+                              <div class="item-nota-container">
+                                @if (item.note && item.note.trim()) {
+                                  <p class="nota-texto">
+                                    <mat-icon inline>note</mat-icon>
+                                    {{ item.note }}
+                                  </p>
+                                  <a class="link-editar-nota" (click)="abrirDialogNotaProductoNuevo(idx)">
+                                    Editar nota
+                                  </a>
+                                } @else {
+                                  <a class="link-agregar-nota" (click)="abrirDialogNotaProductoNuevo(idx)">
+                                    <mat-icon inline>add</mat-icon>
+                                    Agregar nota
+                                  </a>
+                                }
+                              </div>
+                            </div>
+
+                            <div class="item-controles">
+                              <div class="cantidad-controls">
+                                <button
+                                  mat-icon-button
+                                  (click)="disminuirCantidadProductoNuevo(item)"
+                                  [disabled]="item.quantity <= 1">
+                                  <mat-icon>remove</mat-icon>
+                                </button>
+                                <span class="cantidad">{{ item.quantity }}</span>
+                                <button mat-icon-button (click)="aumentarCantidadProductoNuevo(item)">
+                                  <mat-icon>add</mat-icon>
+                                </button>
+                              </div>
+                              <div class="item-subtotal">
+                                ${{ ($any(item.unit_price) * item.quantity) | number:'1.2-2' }}
+                              </div>
+                              <button
+                                mat-icon-button
+                                color="warn"
+                                (click)="eliminarProductoNuevo(idx)"
+                                class="btn-eliminar">
+                                <mat-icon>delete</mat-icon>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div class="orden-footer">
+                  <div class="resumen">
+                    <div class="resumen-item total">
+                      <span class="label">Total a agregar:</span>
+                      <span class="valor">${{ subtotalProductosNuevos() | number:'1.2-2' }}</span>
+                    </div>
+                  </div>
+
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    class="btn-confirmar-orden"
+                    [disabled]="productosNuevos().length === 0 || guardandoItems() || !mesaSeleccionada()?.id_orden"
+                    (click)="confirmarAgregarProductos()">
+                    @if (guardandoItems()) {
+                      <mat-spinner [diameter]="20" style="display: inline-block; margin-right: 8px;"></mat-spinner>
+                      Guardando...
+                    } @else {
+                      <ng-container>
+                        <mat-icon>check_circle</mat-icon>
+                        Confirmar ({{ productosNuevos().length }})
+                      </ng-container>
+                    }
+                  </button>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- Botón flotante móvil -->
+            <button
+              mat-fab
+              color="primary"
+              class="btn-ver-orden-movil"
+              [class.oculto]="vistaMovilAgregar() === 'orden'"
+              (click)="vistaMovilAgregar.set('orden')"
+              [matBadge]="productosNuevos().length"
+              [matBadgeHidden]="productosNuevos().length === 0"
+              matBadgeColor="warn">
+              <mat-icon>shopping_cart</mat-icon>
+            </button>
+          </div>
+        }
+
+        <!-- Viñeta de comanda flotante (fixed, no se recorta por overflow del mapa) -->
+        @if (mesaGloboHover(); as mesaGlobo) {
+          <div
+            class="mesa-globo-floating"
+            [style.left.px]="globoPos().left"
+            [style.top.px]="globoPos().top"
+            role="tooltip">
+            <div class="globo-titulo">
+              <mat-icon>receipt</mat-icon>
+              <span>Comanda &mdash; {{ getCantidadTotalProductos(mesaGlobo) }} productos</span>
+            </div>
+
+            <div class="globo-items">
+              @for (item of getItemsResumen(mesaGlobo); track item.id) {
+                <div class="globo-item">
+                  <span class="item-cantidad">{{ item.quantity }}x</span>
+                  <span class="item-nombre">{{ item.name }}</span>
+                </div>
+              }
+
+              @if (getItemsRestantes(mesaGlobo) > 0) {
+                <div class="globo-item-mas">
+                  <span>+ {{ getItemsRestantes(mesaGlobo) }} más...</span>
+                </div>
+              }
+            </div>
+
+            <div class="globo-total">
+              <span>Total:</span>
+              <span class="total-precio">${{ getTotalComanda(mesaGlobo).toFixed(2) }}</span>
+            </div>
+          </div>
+        }
+
+      </div>
+    </mat-tab>
+
+    <!-- ── TAB 2: Reservas ── -->
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>event_available</mat-icon>
+        <span>Reservas</span>
+        @if (reservas().length > 0) {
+          <span class="tab-badge">{{ reservas().length }}</span>
+        }
+      </ng-template>
+
+      <div class="reservas-panel">
+
+        <!-- ── Header del calendario ── -->
+        <div class="cal-header">
+
+          <!-- Navegación de fecha -->
+          <div class="cal-nav">
+            <button class="cal-nav-btn" (click)="irDiaAnterior()">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+
+            <div class="cal-fecha-info">
+              @if (vistaCalendario() === 'dia') {
+                <p class="cal-fecha-titulo">
+                  {{ fechaCalendario() | date:'EEEE d MMMM yyyy':'':'es' }}
+                </p>
+              } @else {
+                <p class="cal-fecha-titulo">
+                  Semana del
+                  {{ diasSemana()[0] | date:'d MMM':'':'es' }}
+                  al
+                  {{ diasSemana()[6] | date:'d MMM yyyy':'':'es' }}
+                </p>
+              }
+            </div>
+
+            <button class="cal-nav-btn" (click)="irDiaSiguiente()">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+
+            @if (!esHoy(fechaCalendario())) {
+              <button class="btn-hoy" (click)="irAHoy()">Hoy</button>
+            }
+          </div>
+
+          <!-- Selector de vista -->
+          <div class="cal-vista-toggle">
+            <button
+              [class.activo]="vistaCalendario() === 'dia'"
+              (click)="vistaCalendario.set('dia'); cargarReservas()">
+              <mat-icon>view_day</mat-icon>
+              Día
+            </button>
+            <button
+              [class.activo]="vistaCalendario() === 'semana'"
+              (click)="vistaCalendario.set('semana'); cargarReservas()">
+              <mat-icon>view_week</mat-icon>
+              Semana
+            </button>
+          </div>
+
+          <!-- Botón nueva reserva -->
+          <button class="btn-nueva-reserva" (click)="abrirFormReserva()">
+            <mat-icon>add</mat-icon>
+            Nueva reserva
+          </button>
+
+        </div>
+
+        <!-- ── CALENDARIO DIARIO ── -->
+        @if (vistaCalendario() === 'dia') {
+          <div class="cal-diario">
+            <div class="cal-diario__grid">
+
+              <!-- Columna de horas -->
+              <div class="cal-horas">
+                @for (hora of HORAS; track hora) {
+                  <div class="cal-hora-label">{{ hora }}:00</div>
+                }
+              </div>
+
+              <!-- Área de eventos -->
+              <div class="cal-eventos-area">
+
+                <!-- Líneas de hora -->
+                @for (hora of HORAS; track hora) {
+                  <div class="cal-hora-linea"></div>
+                }
+
+                <!-- Línea de hora actual -->
+                @if (esHoy(fechaCalendario())) {
+                  <div class="cal-hora-actual" [style.top]="getTopHoraActual()">
+                    <div class="cal-hora-actual__punto"></div>
+                    <div class="cal-hora-actual__linea"></div>
+                  </div>
+                }
+
+                <!-- Reservas del día -->
+                @for (reserva of reservas(); track reserva.id) {
+                  <div class="cal-reserva"
+                       [style.top]="getEstiloReserva(reserva)['top']"
+                       [style.height]="getEstiloReserva(reserva)['height']"
+                       [style.border-left-color]="getColorEstatus(reserva.estatus)"
+                       [style.background]="getColorEstatus(reserva.estatus) + '15'"
+                       (click)="abrirFormReserva(reserva)">
+
+                    <div class="cal-reserva__header">
+                      <mat-icon>person</mat-icon>
+                      <span class="cal-reserva__cliente">{{ reserva.nombre_cliente }}</span>
+                      <span class="cal-reserva__personas">{{ reserva.num_personas }}p</span>
+                    </div>
+
+                    <div class="cal-reserva__meta">
+                      <span>Mesa {{ reserva.mesa?.identificador }}</span>
+                      <span>{{ reserva.hora_inicio }}–{{ reserva.hora_fin }}</span>
+                    </div>
+
+                    <div class="cal-reserva__estatus"
+                         [style.background]="getColorEstatus(reserva.estatus)">
+                      {{ getLabelEstatus(reserva.estatus) }}
+                    </div>
+
+                  </div>
+                }
+
+              </div>
+
+            </div>
+          </div>
+        }
+
+        <!-- ── CALENDARIO SEMANAL ── -->
+        @if (vistaCalendario() === 'semana') {
+          <div class="cal-semanal">
+
+            <!-- Headers de días -->
+            <div class="cal-sem-headers">
+              <div class="cal-sem-hora-col"></div>
+              @for (dia of diasSemana(); track dia.toISOString()) {
+                <div class="cal-sem-dia-header"
+                     [class.cal-sem-dia-header--hoy]="esHoy(dia)">
+                  <span class="dia-nombre">{{ dia | date:'EEE':'':'es' }}</span>
+                  <span class="dia-num" [class.dia-num--hoy]="esHoy(dia)">
+                    {{ dia | date:'d' }}
+                  </span>
+                  <button class="btn-add-dia" (click)="abrirFormReserva(undefined, dia)">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+
+            <!-- Grid horario -->
+            <div class="cal-sem-grid">
+
+              <!-- Horas -->
+              <div class="cal-sem-horas">
+                @for (hora of HORAS; track hora) {
+                  <div class="cal-sem-hora-label">{{ hora }}:00</div>
+                }
+              </div>
+
+              <!-- Columnas de días -->
+              @for (dia of diasSemana(); track dia.toISOString()) {
+                <div class="cal-sem-dia-col"
+                     [class.cal-sem-dia-col--hoy]="esHoy(dia)">
+
+                  <!-- Líneas de hora -->
+                  @for (hora of HORAS; track hora) {
+                    <div class="cal-sem-hora-linea"
+                         (click)="abrirFormReserva(undefined, dia)">
+                    </div>
+                  }
+
+                  <!-- Reservas del día -->
+                  @for (r of getReservasDia(dia); track r.id) {
+                    <div class="cal-sem-reserva"
+                         [style.top]="getEstiloReserva(r)['top']"
+                         [style.height]="getEstiloReserva(r)['height']"
+                         [style.border-left-color]="getColorEstatus(r.estatus)"
+                         [style.background]="getColorEstatus(r.estatus) + '18'"
+                         (click)="abrirFormReserva(r); $event.stopPropagation()">
+                      <p class="sem-reserva-nombre">{{ r.nombre_cliente }}</p>
+                      <p class="sem-reserva-mesa">
+                        Mesa {{ r.mesa?.identificador }} · {{ r.hora_inicio }}
+                      </p>
+                    </div>
+                  }
+
+                </div>
+              }
+
+            </div>
+
+          </div>
+        }
+
+        <!-- Lista de reservas bajo el calendario -->
+        @if (reservas().length > 0) {
+          <div class="reservas-lista">
+            <h3 class="lista-titulo">
+              <mat-icon>list</mat-icon>
+              Reservas ({{ reservas().length }})
+            </h3>
+
+            @for (reserva of reservas(); track reserva.id) {
+              <div class="reserva-item"
+                   [style.border-left-color]="getColorEstatus(reserva.estatus)">
+
+                <div class="reserva-item__hora">
+                  <span>{{ reserva.hora_inicio }}</span>
+                  <span class="hora-fin">{{ reserva.hora_fin }}</span>
+                </div>
+
+                <div class="reserva-item__info">
+                  <p class="ri-cliente">{{ reserva.nombre_cliente }}</p>
+                  <div class="ri-meta">
+                    <span>
+                      <mat-icon>table_restaurant</mat-icon>
+                      Mesa {{ reserva.mesa?.identificador }}
+                    </span>
+                    <span>
+                      <mat-icon>people</mat-icon>
+                      {{ reserva.num_personas }} personas
+                    </span>
+                    @if (reserva.telefono_cliente) {
+                      <span>
+                        <mat-icon>phone</mat-icon>
+                        {{ reserva.telefono_cliente }}
+                      </span>
+                    }
+                  </div>
+                  @if (reserva.notas) {
+                    <p class="ri-nota">{{ reserva.notas }}</p>
+                  }
+                </div>
+
+                <div class="reserva-item__acciones">
+                  <span class="estatus-pill"
+                        [style.background]="getColorEstatus(reserva.estatus) + '15'"
+                        [style.color]="getColorEstatus(reserva.estatus)">
+                    {{ getLabelEstatus(reserva.estatus) }}
+                  </span>
+
+                  <div class="acciones-btns">
+                    <button mat-icon-button
+                            matTooltip="Confirmar"
+                            [disabled]="reserva.estatus === 'confirmada'"
+                            (click)="cambiarEstatusReserva(reserva.id, 'confirmada')">
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                            matTooltip="En curso"
+                            (click)="cambiarEstatusReserva(reserva.id, 'en_curso')">
+                      <mat-icon>play_circle</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                            matTooltip="Editar"
+                            (click)="abrirFormReserva(reserva)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button
+                            color="warn"
+                            matTooltip="Cancelar"
+                            (click)="cambiarEstatusReserva(reserva.id, 'cancelada')">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+            }
+
+          </div>
+        }
+
+        <!-- Estado vacío -->
+        @if (!cargandoReservas() && reservas().length === 0) {
+          <div class="reservas-vacio">
+            <mat-icon>event_available</mat-icon>
+            <p>Sin reservas para este período</p>
+            <button class="btn-nueva-reserva" (click)="abrirFormReserva()">
+              <mat-icon>add</mat-icon>
+              Crear primera reserva
+            </button>
+          </div>
+        }
+
+      </div>
+
+    </mat-tab>
+
+  </mat-tab-group>
+
+  <!-- MODAL DE COMPLEMENTOS (ProductDetailDialog) -->
+  <!-- Fuera del mat-tab-group para evitar que position:fixed quede relativo al tab-body transform -->
+  <app-product-detail-dialog
+    [open]="showProductModal()"
+    [productId]="selectedProductId()"
+    (openChange)="showProductModal.set($event)"
+    (closed)="showProductModal.set(false); selectedProductId.set(null)"
+    (addToCart)="onAddFromDetail($event)">
+  </app-product-detail-dialog>
+
+  <!-- ═══ MODAL SPLIT ═══ -->
+  @if (mostrarSplitModal() && mesaSplitActiva()) {
+    <div class="modal-overlay"
+         (click)="mostrarSplitModal.set(false)">
+    </div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div class="modal-titulo">
+          <mat-icon>call_split</mat-icon>
+          Dividir Mesa {{ mesaSplitActiva()!.identificador }}
+        </div>
+        <button class="modal-cerrar"
+                (click)="mostrarSplitModal.set(false)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint">
+          Se creará una segunda cuenta independiente
+          en esta mesa. Cada cuenta tendrá su propio
+          ticket y cobro.
+        </p>
+        <div class="modal-info-mesa">
+          <mat-icon>table_restaurant</mat-icon>
+          <span>
+            Mesa {{ mesaSplitActiva()!.identificador }}
+            — {{ mesaSplitActiva()!.zona }}
+          </span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn-cancel"
+                (click)="mostrarSplitModal.set(false)">
+          Cancelar
+        </button>
+        <button class="modal-btn-confirm"
+                (click)="confirmarSplit(mesaSplitActiva()!)">
+          <mat-icon>add</mat-icon>
+          Crear segunda cuenta
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ═══ MODAL SPLIT DESTINO ═══ -->
+  @if (mostrarSplitDestinoModal() && mesaSplitActiva()) {
+    <div class="modal-overlay"
+         (click)="mostrarSplitDestinoModal.set(false)">
+    </div>
+
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div class="modal-titulo">
+          <mat-icon>call_split</mat-icon>
+          ¿Dónde levantas la cuenta?
+        </div>
+        <button class="modal-cerrar"
+                (click)="mostrarSplitDestinoModal.set(false)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <p class="modal-hint">
+          Mesa {{ mesaSplitActiva()!.identificador }}
+          — elige desde dónde tomarás
+          la nueva cuenta.
+        </p>
+
+        <div class="destino-opciones">
+          <button
+            class="destino-card"
+            type="button"
+            (click)="navegarSplit('pos')">
+            <div class="destino-card__icono destino-card__icono--pos">
+              <mat-icon>point_of_sale</mat-icon>
+            </div>
+            <div class="destino-card__info">
+              <span class="destino-card__titulo">
+                Punto de Venta
+              </span>
+              <span class="destino-card__hint">
+                Mostrador con catálogo visual
+                y métodos de pago
+              </span>
+            </div>
+            <mat-icon class="destino-card__flecha">
+              chevron_right
+            </mat-icon>
+          </button>
+
+          <button
+            class="destino-card"
+            type="button"
+            (click)="navegarSplit('levantar')">
+            <div class="destino-card__icono destino-card__icono--levantar">
+              <mat-icon>edit_note</mat-icon>
+            </div>
+            <div class="destino-card__info">
+              <span class="destino-card__titulo">
+                Levantar Orden
+              </span>
+              <span class="destino-card__hint">
+                Tomar pedido rápido desde
+                la mesa con el mesero
+              </span>
+            </div>
+            <mat-icon class="destino-card__flecha">
+              chevron_right
+            </mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ═══ MODAL MERGE ═══ -->
+  @if (mostrarMergeModal() && mesaMergeActiva()) {
+    <div class="modal-overlay"
+         (click)="mostrarMergeModal.set(false)">
+    </div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div class="modal-titulo">
+          <mat-icon>merge_type</mat-icon>
+          Unir Mesa {{ mesaMergeActiva()!.identificador }}
+        </div>
+        <button class="modal-cerrar"
+                (click)="mostrarMergeModal.set(false)">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-hint">
+          Selecciona las mesas que se unirán.
+          Todas compartirán la misma orden.
+        </p>
+
+        <div class="merge-mesas-grid">
+          @for (mesa of mesasDisponiblesMerge(); track mesa.id) {
+            <div class="merge-mesa-item"
+                 [class.merge-mesa-item--sel]="mesasParaMerge().includes(mesa.id)"
+                 (click)="toggleMesaMerge(mesa.id)">
+              <mat-icon>
+                {{ mesasParaMerge().includes(mesa.id)
+                   ? 'check_circle'
+                   : 'table_restaurant' }}
+              </mat-icon>
+              <span>Mesa {{ mesa.identificador }}</span>
+              <span class="merge-mesa-zona">
+                {{ mesa.zona }}
+              </span>
+            </div>
+          }
+        </div>
+
+        @if (mesasDisponiblesMerge().length === 0) {
+          <div class="merge-vacio">
+            No hay mesas libres disponibles
+            para fusionar
+          </div>
+        }
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn-cancel"
+                (click)="mostrarMergeModal.set(false)">
+          Cancelar
+        </button>
+        <button class="modal-btn-confirm"
+                [disabled]="mesasParaMerge().length === 0"
+                (click)="confirmarMerge()">
+          <mat-icon>merge_type</mat-icon>
+          Unir {{ mesasParaMerge().length + 1 }}
+          mesas
+        </button>
+      </div>
+    </div>
+  }
+
+</div>

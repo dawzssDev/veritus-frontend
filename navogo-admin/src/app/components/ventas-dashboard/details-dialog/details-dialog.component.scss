@@ -1,0 +1,350 @@
+// Estilos globales para ocultar scrollbars en el diálogo
+:host ::ng-deep {
+  .mat-mdc-dialog-container .mdc-dialog__surface {
+    overflow: hidden !important;
+  }
+  
+  .mat-mdc-dialog-content {
+    scrollbar-width: none !important; /* Firefox */
+    -ms-overflow-style: none !important; /* IE y Edge */
+    
+    &::-webkit-scrollbar {
+      display: none !important; /* Chrome, Safari y Opera */
+    }
+  }
+}
+
+.details-dialog {
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  width: 920px;
+  max-width: 95vw;
+
+  .dialog-header {
+    background: linear-gradient(135deg, var(--brand-green-dark, #0f4d2a) 0%, var(--brand-green, #1c8f46) 100%);
+    color: white;
+    padding: 24px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: -24px -24px 0 -24px;
+    border-radius: 4px 4px 0 0;
+    flex-shrink: 0;
+
+    .dialog-header-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .dialog-icon {
+        font-size: 40px;
+        width: 40px;
+        height: 40px;
+        opacity: 0.95;
+      }
+
+      .dialog-title {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1.3;
+      }
+
+      .dialog-subtitle {
+        margin: 6px 0 0 0;
+        opacity: 0.92;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+    }
+
+    .close-btn {
+      color: white;
+      margin: -8px -8px 0 0;
+      opacity: 0.9;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .dialog-summary {
+    display: flex;
+    gap: 48px;
+    padding: 20px 32px;
+    background: rgba(28, 143, 70, 0.06);
+    border-bottom: 1px solid rgba(28, 143, 70, 0.12);
+    flex-shrink: 0;
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+
+      .summary-label {
+        font-size: 13px;
+        color: #666;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+
+      .summary-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--brand-green, #1c8f46);
+        line-height: 1.2;
+      }
+    }
+  }
+
+  .dialog-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 24px 32px !important;
+    min-height: 0;
+    
+    // Ocultar scrollbars
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE y Edge */
+    
+    &::-webkit-scrollbar {
+      display: none; /* Chrome, Safari y Opera */
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      color: #999;
+
+      mat-icon {
+        font-size: 72px;
+        width: 72px;
+        height: 72px;
+        margin-bottom: 20px;
+        opacity: 0.25;
+      }
+
+      p {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+      }
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      
+      // Ocultar scrollbars
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE y Edge */
+      
+      &::-webkit-scrollbar {
+        display: none; /* Chrome, Safari y Opera */
+      }
+
+      .details-table {
+        width: 100%;
+        background: white;
+
+        th {
+          background: #f8f9fa;
+          font-weight: 600;
+          color: #1f2937;
+          padding: 14px 16px;
+          border-bottom: 2px solid var(--brand-green, #1c8f46);
+          font-size: 13px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        td {
+          padding: 16px;
+          border-bottom: 1px solid #f0f0f0;
+          font-size: 14px;
+          vertical-align: middle;
+        }
+
+        .table-row {
+          transition: background-color 0.15s ease;
+
+          &:hover {
+            background-color: rgba(28, 143, 70, 0.03);
+          }
+
+          &:last-child td {
+            border-bottom: none;
+          }
+        }
+
+        .order-id {
+          font-weight: 700;
+          color: var(--brand-green-dark, #0f4d2a);
+          font-size: 14px;
+        }
+
+        .total-amount {
+          font-weight: 700;
+          color: var(--brand-green, #1c8f46);
+          font-size: 15px;
+        }
+
+        mat-chip {
+          font-size: 12px;
+          height: 30px;
+          min-height: 30px;
+          font-weight: 500;
+        }
+
+        // Estilos personalizados para chips de métodos de pago
+        .payment-chip {
+          border: none !important;
+          
+          &.payment-efectivo {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+          }
+          
+          &.payment-transferencia {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+          }
+          
+          &.payment-tarjeta {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%) !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.25);
+          }
+        }
+
+        .shipping-type {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 14px;
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+            color: #6b7280;
+          }
+        }
+
+        .items-count {
+          color: #6b7280;
+          font-size: 14px;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .dialog-actions {
+    padding: 20px 32px !important;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 -24px -24px -24px;
+    flex-shrink: 0;
+    background: #fafafa;
+
+    button {
+      min-width: 120px;
+      font-weight: 500;
+
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .details-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    max-height: 100vh;
+
+    .dialog-header {
+      padding: 16px 20px;
+
+      .dialog-header-content {
+        gap: 12px;
+
+        .dialog-icon {
+          font-size: 32px;
+          width: 32px;
+          height: 32px;
+        }
+
+        .dialog-title {
+          font-size: 18px;
+        }
+
+        .dialog-subtitle {
+          font-size: 13px;
+        }
+      }
+    }
+
+    .dialog-summary {
+      flex-direction: column;
+      gap: 16px;
+      padding: 16px 20px;
+
+      .summary-item {
+        .summary-value {
+          font-size: 20px;
+        }
+      }
+    }
+
+    .dialog-content {
+      padding: 16px 20px !important;
+
+      .table-container {
+        border-radius: 8px;
+
+        .details-table {
+          font-size: 13px;
+
+          th {
+            padding: 12px 10px;
+            font-size: 12px;
+          }
+
+          td {
+            padding: 12px 10px;
+          }
+        }
+      }
+    }
+
+    .dialog-actions {
+      flex-direction: column-reverse;
+      gap: 12px;
+      padding: 16px 20px !important;
+
+      button {
+        width: 100%;
+        min-width: unset;
+      }
+    }
+  }
+}

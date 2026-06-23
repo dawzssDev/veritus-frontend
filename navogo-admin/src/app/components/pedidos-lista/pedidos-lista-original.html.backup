@@ -1,0 +1,248 @@
+<div class="pedidos-dashboard">
+  <!-- HEADER FIJO -->
+  <div class="pedidos-header">
+    <div class="header-left">
+      <h1 class="header-title">Pedidos</h1>
+      @if (ordersList.length > 0) {
+        <div class="header-badge">{{ ordersList.length }}</div>
+      }
+    </div>
+
+    <div class="header-right">
+      <mat-form-field appearance="outline" class="header-control">
+        <input matInput [matDatepicker]="picker" [value]="selectedDay" (dateChange)="onDayChange($event.value)" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="header-control">
+        <mat-select
+          multiple
+          [value]="selectedHours"
+          (selectionChange)="onHoursChange($event.value)"
+          placeholder="Horas">
+          @for (h of hours; track h) {
+            <mat-option [value]="h">{{ formatHourRange(h) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <button class="header-btn" (click)="goToToday()">
+        Hoy
+      </button>
+
+      <button class="header-btn" (click)="toggleOrderMode()">
+        {{ orderMode === 'newest' ? 'Más nuevos' : 'Más antiguos' }}
+      </button>
+
+      <button class="header-btn" [class.header-btn--active]="showOnlyPending" (click)="togglePendingFilter()">
+        {{ showOnlyPending ? 'Solo pendientes' : 'Ver todo' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- BARRA DE FILTROS -->
+  <div class="pedidos-filters">
+    <!-- Filtros por estatus no implementados en este diseño, se usan los botones del header -->
+  </div>
+
+  <!-- LOADING Y ESTADOS VACÍOS -->
+  @if (isLoading) {
+    <div class="pedidos-loading">
+      <mat-progress-spinner mode="indeterminate" diameter="40"></mat-progress-spinner>
+    </div>
+  } @else if (ordersList.length === 0) {
+    <div class="pedidos-empty">
+      <mat-icon class="empty-icon">receipt_long</mat-icon>
+      @if (showOnlyPending) {
+        <h3 class="empty-title">No hay pedidos pendientes</h3>
+        <p class="empty-subtitle">Todos los pedidos están al día</p>
+      } @else {
+        <h3 class="empty-title">No hay pedidos</h3>
+        <p class="empty-subtitle">Los pedidos aparecerán aquí cuando lleguen</p>
+      }
+    </div>
+  } @else {
+    <!-- GRID DE PEDIDOS -->
+    <div class="pedidos-grid">
+      @for (row of ordersList; track trackByOrderId($index, row)) {
+        <div
+          class="pedido-card"
+          [class.pedido-card--local]="row.shipping_type === 'local'"
+          [class.pedido-card--llevar]="row.shipping_type === 'recoger'"
+          [class.pedido-card--domicilio]="row.shipping_type === 'domicilio'"
+          [class.pedido-card--finalizado]="row.estatus === 2"
+          [class.pedido-card--cancelado]="row.estatus === 3">
+          <!-- ZONA SUPERIOR: Header -->
+          <div class="card-header">
+            <div class="header-info">
+              <div class="folio">{{ dailyFolio(row) ?? '-' }}</div>
+              <div class="hora">{{ formatTime(row.created_at) }}</div>
+              
+              @if (row.sucursal) {
+                <div class="sucursal-badge">
+                  <mat-icon class="sucursal-badge__icono">store</mat-icon>
+                  <span class="sucursal-badge__nombre">
+                    {{ row.sucursal.nombre }}
+                  </span>
+                </div>
+              }
+              
+              @if (row.estatus !== 2 && row.estatus !== 3) {
+                @if (getWaitingTimeClass(row.created_at) === 'time-critical') {
+                  <div class="urgencia urgente">
+                    🔴 {{ getWaitingTime(row.created_at) }}
+                  </div>
+                } @else if (getWaitingTimeClass(row.created_at) === 'time-warning') {
+                  <div class="urgencia advertencia">
+                    ⚠ {{ getWaitingTime(row.created_at) }}
+                  </div>
+                } @else {
+                  <div class="tiempo-ok">Hace {{ getWaitingTime(row.created_at) }}</div>
+                }
+              }
+            </div>
+
+            <div class="header-chips">
+              <!-- Chip Finalizado -->
+              <div class="status-chip" [class.status-chip--activo]="row.estatus === 2">
+                <mat-icon>{{ row.estatus === 2 ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                <span>Finalizado</span>
+              </div>
+              
+              <!-- Chip Pagado -->
+              <div class="status-chip status-chip--pago" [class.status-chip--activo]="row.pago_confirmado">
+                <mat-icon>payments</mat-icon>
+                <span>Pagado</span>
+              </div>
+              
+              <!-- Chip Servido (solo si no es para recoger) -->
+              @if (row.shipping_type !== 'recoger') {
+                <div class="status-chip status-chip--servido" [class.status-chip--activo]="row.envio_confirmado">
+                  <mat-icon>{{ row.shipping_type === 'local' ? 'room_service' : 'local_shipping' }}</mat-icon>
+                  <span>{{ row.shipping_type === 'local' ? 'Servido' : 'Enviado' }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- ZONA MEDIA: Info cliente y total -->
+          <div class="card-info">
+            <div class="cliente-info">
+              <!-- Badge tipo de orden -->
+              <div class="tipo-badge" [class.tipo-badge--local]="row.shipping_type === 'local'" [class.tipo-badge--llevar]="row.shipping_type === 'recoger'" [class.tipo-badge--domicilio]="row.shipping_type === 'domicilio'">
+                <mat-icon>{{ shippingTypeIcon(row.shipping_type) }}</mat-icon>
+                <span>{{ shippingTypeLabel(row.shipping_type) }}</span>
+              </div>
+              
+              <div class="nombre-cliente">{{ row.customer_name }}</div>
+              
+              <div class="metodo-pago">
+                <mat-icon>{{ paymentIcon(row.payment_method) }}</mat-icon>
+                <span>{{ row.payment_method }}</span>
+              </div>
+            </div>
+
+            <div class="total-info">
+              <div class="total-label">TOTAL</div>
+              <div class="total-monto">{{ formatMoney(row.total) }}</div>
+            </div>
+          </div>
+
+          <!-- ZONA ITEMS: Comanda -->
+          @if (row.items && row.items.length > 0) {
+            <div class="card-comanda">
+              <div class="comanda-header">
+                <span>COMANDA</span>
+                <div class="badge-cantidad">{{ getTotalItems(row) }}</div>
+              </div>
+              
+              <div class="comanda-items">
+                @for (item of row.items.slice(0, 3); track $index) {
+                  <div class="comanda-item">
+                    <div class="item-left">
+                      <div class="item-cantidad">{{ item.quantity }}</div>
+                      <div class="item-detalles">
+                        <div class="item-nombre">{{ item.name }}</div>
+                        @if (item.selections && item.selections.length > 0) {
+                          <div class="item-extras">
+                            @for (sel of item.selections; track $index) {
+                              <span class="extra-chip">{{ sel.extra || sel.groupTitle }}</span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                    <div class="item-precio">{{ formatMoney(item.unit_price) }}</div>
+                  </div>
+                }
+                
+                @if (row.items.length > 3) {
+                  <button class="ver-mas" type="button" (click)="$event.stopPropagation()">
+                    Ver {{ row.items.length - 3 }} más
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- ZONA NOTAS -->
+          @if (row.note && row.note.trim()) {
+            <div class="card-nota">
+              <mat-icon>sticky_note_2</mat-icon>
+              <span class="nota-texto">{{ row.note }}</span>
+            </div>
+          }
+
+          <!-- ZONA INFERIOR: Acciones -->
+          <div class="card-acciones">
+            <button class="btn-detalle" type="button" (click)="$event.stopPropagation(); goToDetail(row)">
+              <mat-icon>open_in_new</mat-icon>
+              <span>Ver detalle</span>
+            </button>
+
+            <div class="acciones-btns">
+              @if (row.estatus !== 3 && row.estatus !== 2) {
+                <!-- Botón Pago -->
+                <button
+                  class="btn-accion"
+                  [class.btn-accion--pago]="!row.pago_confirmado"
+                  [class.btn-accion--pago-activo]="row.pago_confirmado"
+                  [matTooltip]="row.pago_confirmado ? 'Pago confirmado' : 'Confirmar pago'"
+                  type="button"
+                  (click)="$event.stopPropagation(); onMarkPago(row)"
+                  [disabled]="!canTogglePago(row) || isSaving(row.id)">
+                  <mat-icon>payments</mat-icon>
+                </button>
+
+                <!-- Botón Servido/Envío -->
+                @if (row.shipping_type !== 'recoger') {
+                  <button
+                    class="btn-accion"
+                    [class.btn-accion--servido]="!row.envio_confirmado"
+                    [class.btn-accion--servido-activo]="row.envio_confirmado"
+                    [matTooltip]="row.envio_confirmado ? (row.shipping_type === 'local' ? 'Servido' : 'Enviado') : (row.shipping_type === 'local' ? 'Marcar como servido' : 'Confirmar envío')"
+                    type="button"
+                    (click)="$event.stopPropagation(); onMarkEnvio(row)"
+                    [disabled]="row.envio_confirmado || isSaving(row.id)">
+                    <mat-icon>{{ row.shipping_type === 'local' ? 'room_service' : 'local_shipping' }}</mat-icon>
+                  </button>
+                }
+
+                <!-- Botón Cancelar -->
+                <button
+                  class="btn-accion btn-accion--cancelar"
+                  matTooltip="Cancelar pedido"
+                  type="button"
+                  (click)="$event.stopPropagation(); onCancelOrder(row)"
+                  [disabled]="!canCancelOrder(row)">
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

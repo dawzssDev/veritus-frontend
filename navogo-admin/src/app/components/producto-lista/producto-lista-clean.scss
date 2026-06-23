@@ -1,0 +1,217 @@
+@import '../../../styles/shared-listing.scss';
+
+// ============================================================
+// LOADING OVERLAY - DISEÑO MODERNO
+// ============================================================
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease;
+}
+
+.loading-content {
+  text-align: center;
+  background: var(--mat-sys-surface);
+  padding: 48px 64px;
+  border-radius: 24px;
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  min-width: 320px;
+  border: 1px solid color-mix(in srgb, var(--brand-green-lime) 20%, transparent);
+}
+
+.spinner-container {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 24px;
+
+  .spinner-logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+      color: var(--brand-green);
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+  }
+}
+
+.loading-title {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--mat-sys-on-surface);
+  letter-spacing: -0.3px;
+}
+
+.loading-subtitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--mat-sys-on-surface) 65%, transparent);
+}
+
+// Animaciones
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}
+
+// ============================================================
+// ESTILOS ESPECÍFICOS PARA PRODUCTOS
+// ============================================================
+
+// Estilos para filtros
+.filters-container {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  align-items: center;
+
+  .filter-field {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+// Icono de promoción en el nombre del producto
+.product-name-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .promo-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #dc3545;
+  }
+}
+
+// Badge de precio
+.price-text {
+  font-weight: 600;
+  color: #28a745;
+  font-size: 14px;
+}
+
+// Badge de descuento
+.discount-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: #e9ecef;
+  color: #6c757d;
+
+  &.has-discount {
+    background-color: #fff3cd;
+    color: #856404;
+  }
+}
+
+// Badge de combo
+.combo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background-color: #e9ecef;
+  color: #6c757d;
+
+  &.is-combo {
+    background-color: #d1ecf1;
+    color: #0c5460;
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .filters-container {
+    flex-direction: column;
+    
+    .filter-field {
+      width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .loading-content {
+    padding: 36px 48px;
+    min-width: 280px;
+    border-radius: 20px;
+  }
+
+  .loading-title {
+    font-size: 20px;
+  }
+
+  .loading-subtitle {
+    font-size: 14px;
+  }
+
+  .spinner-container {
+    mat-spinner {
+      width: 50px !important;
+      height: 50px !important;
+    }
+
+    .spinner-logo mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+}

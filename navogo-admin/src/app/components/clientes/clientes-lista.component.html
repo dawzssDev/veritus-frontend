@@ -1,0 +1,195 @@
+<div class="dashboard-container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="title">
+          <mat-icon>people</mat-icon>
+          Clientes
+        </h1>
+        <p>Gestiona el directorio de clientes y sus direcciones</p>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button (click)="nuevoCliente()">
+          <mat-icon>person_add</mat-icon>
+          Nuevo cliente
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-card">
+
+    <!-- Barra de búsqueda -->
+    <div class="filtros-bar">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar cliente</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          [value]="busquedaTexto"
+          (input)="onBusqueda($any($event.target).value)"
+          placeholder="Nombre o teléfono...">
+        @if (busquedaTexto) {
+          <button mat-icon-button matSuffix (click)="onBusqueda(''); busquedaTexto = ''">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+    </div>
+
+    <!-- Estado de carga -->
+    @if (isLoading()) {
+      <div class="state-card">
+        <div class="state-card__icon-wrap state-card__icon-wrap--spin">
+          <mat-icon>sync</mat-icon>
+        </div>
+        <div>
+          <p class="state-card__title">Cargando clientes...</p>
+          <p class="state-card__sub">Un momento por favor</p>
+        </div>
+      </div>
+    }
+
+    <!-- Error -->
+    @if (!isLoading() && errorMsg()) {
+      <div class="state-card state-card--error">
+        <div class="state-card__icon-wrap">
+          <mat-icon>error_outline</mat-icon>
+        </div>
+        <div>
+          <p class="state-card__title">Error al cargar</p>
+          <p class="state-card__sub">{{ errorMsg() }}</p>
+        </div>
+      </div>
+    }
+
+    <!-- Tabla -->
+    @if (!isLoading() && !errorMsg()) {
+      <div class="table-container">
+        <table mat-table [dataSource]="clientes()" class="custom-table" [trackBy]="trackById">
+
+          <!-- Nombre -->
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Cliente</th>
+            <td mat-cell *matCellDef="let c">
+              <div class="cell-with-image">
+                <div class="avatar-circle">
+                  <mat-icon>person</mat-icon>
+                </div>
+                <div class="product-info">
+                  <span class="product-name">{{ c.nombre }}</span>
+                  @if (c.email) {
+                    <span class="product-category">{{ c.email }}</span>
+                  }
+                </div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Teléfono -->
+          <ng-container matColumnDef="telefono">
+            <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+            <td mat-cell *matCellDef="let c">
+              <span class="telefono-cell">
+                <mat-icon>phone</mat-icon>
+                {{ c.telefono }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Total pedidos 
+          <ng-container matColumnDef="total_pedidos">
+            <th mat-header-cell *matHeaderCellDef>Pedidos</th>
+            <td mat-cell *matCellDef="let c">
+              <span class="badge-pedidos" [class.cero]="c.total_pedidos === 0">
+                {{ c.total_pedidos }}
+              </span>
+            </td>
+          </ng-container>-->
+
+          <!-- Último pedido
+          <ng-container matColumnDef="ultimo_pedido">
+            <th mat-header-cell *matHeaderCellDef>Último pedido</th>
+            <td mat-cell *matCellDef="let c">
+              @if (c.ultimo_pedido) {
+                <span class="fecha-cell">{{ c.ultimo_pedido | date:'dd/MM/yy HH:mm' }}</span>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+          </ng-container> -->
+
+          <!-- Direcciones -->
+          <ng-container matColumnDef="direcciones">
+            <th mat-header-cell *matHeaderCellDef>Direcciones</th>
+            <td mat-cell *matCellDef="let c">
+              <span class="badge-dir" [class.cero]="(c.direcciones?.length ?? 0) === 0">
+                <mat-icon>location_on</mat-icon>
+                {{ c.direcciones?.length ?? 0 }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Acciones -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let c">
+              <div class="actions-cell">
+                <button mat-icon-button 
+                        matTooltip="Editar"
+                        (click)="editarCliente(c, $event)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button 
+                        matTooltip="Eliminar"
+                        (click)="eliminar(c, $event)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnas;"
+              class="clickable-row"
+              (click)="abrirDetalle(row)">
+          </tr>
+
+          <!-- Sin datos -->
+          <tr class="mat-mdc-row no-data" *matNoDataRow>
+            <td [attr.colspan]="columnas.length">
+              <div class="empty-state">
+                <mat-icon>people_outline</mat-icon>
+                <h3>Sin clientes</h3>
+                <p>
+                  @if (busquedaTexto) {
+                    No se encontraron clientes para "{{ busquedaTexto }}"
+                  } @else {
+                    Aún no hay clientes registrados
+                  }
+                </p>
+                @if (!busquedaTexto) {
+                  <button mat-raised-button class="btn-nuevo" (click)="nuevoCliente()">
+                    <mat-icon>person_add</mat-icon>
+                    Registrar primer cliente
+                  </button>
+                }
+              </div>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Paginador -->
+      <mat-paginator
+        [length]="total()"
+        [pageSize]="perPage()"
+        [pageSizeOptions]="[10, 15, 25, 50]"
+        (page)="onPage($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    }
+  </div>
+</div>

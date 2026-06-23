@@ -1,0 +1,112 @@
+@use '../../../styles/shared-listing' as *;
+
+// Variables de marca
+$green: #1C8C40;
+$green-dark: #1A1A11;
+
+// ── Barra de filtros ──────────────────────────────────
+.filtros-bar {
+  padding: 16px 16px 0;
+
+  .search-field {
+    width: 100%;
+    max-width: 400px;
+  }
+}
+
+// ── Avatar circular ───────────────────────────────────
+.avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba($green, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon {
+    color: $green;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// ── Celdas especiales ─────────────────────────────────
+.telefono-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: #555;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: #999;
+  }
+}
+
+.badge-pedidos {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  background: rgba($green, 0.1);
+  color: $green;
+
+  &.cero {
+    background: #f0f0f0;
+    color: #aaa;
+  }
+}
+
+.badge-dir {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: $green;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &.cero {
+    color: #bbb;
+    mat-icon { color: #ccc; }
+  }
+}
+
+.fecha-cell {
+  font-size: 13px;
+  color: #555;
+}
+
+// ── Fila clickeable ───────────────────────────────────
+.clickable-row {
+  cursor: pointer;
+}
+
+// ── Botón nuevo en empty state ────────────────────────
+.btn-nuevo {
+  background: $green !important;
+  color: white !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+// ── Tabla min-width ───────────────────────────────────
+.custom-table {
+  min-width: 650px;
+}

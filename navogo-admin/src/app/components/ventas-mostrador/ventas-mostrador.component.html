@@ -1,0 +1,635 @@
+<div class="ventas-mostrador-container">
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-overlay">
+      <mat-spinner [diameter]="60"></mat-spinner>
+      <p>Cargando menú...</p>
+    </div>
+  }
+
+  <!-- Main Content -->
+  @if (!isLoading()) {
+    <div class="main-content" [class.vista-productos]="vistaMovil() === 'productos'" [class.vista-orden]="vistaMovil() === 'orden'">
+
+      <!-- PANEL IZQUIERDO - Catálogo de Productos -->
+      <div class="panel-productos" [class.oculto-movil]="vistaMovil() === 'orden'">
+        
+        <!-- Barra de búsqueda -->
+        <div class="search-bar">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-icon matPrefix>search</mat-icon>
+            <input 
+              matInput 
+              placeholder="Buscar producto..."
+              [value]="busqueda()"
+              (input)="onBusquedaChange($any($event.target).value)">
+            @if (busqueda()) {
+              <button mat-icon-button matSuffix (click)="limpiarBusqueda()">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- Tabs de categorías -->
+        <div class="categorias-tabs">
+          <mat-chip-listbox 
+            [value]="categoriaActiva()"
+            (change)="seleccionarCategoria($event.value)"
+            class="chips-container">
+            <mat-chip-option value="todos" [selected]="categoriaActiva() === 'todos'">
+              <mat-icon>restaurant</mat-icon>
+              Todos
+            </mat-chip-option>
+            @for (categoria of obtenerCategoriasUnicas(); track categoria) {
+              <mat-chip-option 
+                [value]="categoria"
+                [selected]="categoriaActiva() === categoria">
+                {{ categoria }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        </div>
+
+        <!-- Grilla de productos -->
+        <div class="productos-grid">
+          @for (producto of productosFiltrados(); track trackByProductId($index, producto)) {
+            <div class="producto-card" (click)="viewProduct(producto)">
+              <!-- Imagen del producto -->
+              <div class="producto-imagen">
+                @if (producto.imagen_url) {
+                  <img [src]="producto.imagen_url" [alt]="producto.nombre">
+                } @else {
+                  <div class="imagen-placeholder">
+                    <mat-icon>restaurant</mat-icon>
+                  </div>
+                }
+                
+                <!-- Badge de cantidad en carrito -->
+                @if (obtenerCantidadEnCarrito(producto.id) > 0) {
+                  <span class="cantidad-badge">
+                    {{ obtenerCantidadEnCarrito(producto.id) }}
+                  </span>
+                }
+
+                <!-- Badge de descuento (solo si hay descuento real) -->
+                @if (tieneDescuentoActivo(producto) && producto.descuento! < producto.precio) {
+                  <span class="descuento-badge">
+                    -{{ calcularPorcentajeDescuento(producto) }}%
+                  </span>
+                }
+              </div>
+
+              <!-- Info del producto -->
+              <div class="producto-info">
+                <h3 class="producto-nombre">{{ producto.nombre }}</h3>
+                <div class="producto-precio">
+                  @if (tieneDescuentoActivo(producto)) {
+                    <span class="precio-original">${{ producto.precio | number:'1.2-2' }}</span>
+                    <span class="precio-con-descuento">
+                      ${{ obtenerPrecioConDescuento(producto) | number:'1.2-2' }}
+                    </span>
+                  } @else {
+                    <span class="precio-actual">${{ producto.precio | number:'1.2-2' }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="empty-state">
+              <mat-icon>search_off</mat-icon>
+              <p>No se encontraron productos</p>
+            </div>
+          }
+        </div>
+
+      </div>
+
+      <!-- PANEL DERECHO - Orden Actual -->
+      <div class="panel-orden" [class.oculto-movil]="vistaMovil() === 'productos'">
+        
+        <!-- Header del panel -->
+        <div class="orden-header">
+          <button mat-icon-button class="btn-volver-movil" (click)="irAProductos()">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <h2>
+            <mat-icon>shopping_cart</mat-icon>
+            Orden Actual
+          </h2>
+        </div>
+
+        <!-- Selector de tipo de servicio -->
+        <div class="tipo-servicio-selector">
+          <button 
+            mat-stroked-button 
+            [class.active]="tipoServicio() === 'mesa'"
+            (click)="seleccionarTipoServicio('mesa')">
+            <mat-icon>table_restaurant</mat-icon>
+            En mesa
+          </button>
+           <button 
+            mat-stroked-button 
+            [class.active]="tipoServicio() === 'llevar'"
+            (click)="seleccionarTipoServicio('llevar')">
+            <mat-icon>shopping_bag</mat-icon>
+            Para llevar
+          </button>
+          <button 
+            mat-stroked-button 
+            [class.active]="tipoServicio() === 'domicilio'"
+            (click)="seleccionarTipoServicio('domicilio')">
+            <mat-icon>delivery_dining</mat-icon>
+            Domicilio
+          </button> 
+        </div>
+
+        <!-- Campos adicionales según tipo de servicio -->
+        <div class="servicio-detalles">
+          @switch (tipoServicio()) {
+            @case ('mesa') {
+              <div class="seleccion-mesa">
+                @if (!mesaSeleccionada()) {
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    class="btn-seleccionar-mesa"
+                    (click)="abrirSeleccionMesa()">
+                    <mat-icon>table_restaurant</mat-icon>
+                    Seleccionar Mesa
+                  </button>
+                } @else {
+                  <div class="mesa-seleccionada-card">
+                    <div class="mesa-info-header">
+                      <div class="mesa-identificador">
+                        <mat-icon>table_restaurant</mat-icon>
+                        <span class="identificador">{{ mesaSeleccionada()!.identificador }}</span>
+                      </div>
+                      <button
+                        mat-icon-button
+                        (click)="abrirSeleccionMesa()"
+                        matTooltip="Cambiar mesa">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    </div>
+                    <div class="mesa-detalles">
+                      <span class="detalle">
+                        <mat-icon>person</mat-icon>
+                        {{ mesaSeleccionada()!.capacidad }} personas
+                      </span>
+                      @if (mesaSeleccionada()!.zona) {
+                        <span class="detalle">
+                          <mat-icon>place</mat-icon>
+                          {{ mesaSeleccionada()!.zona }}
+                        </span>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+            @case ('domicilio') {
+              <div class="buscador-cliente-wrap">
+                <div class="seccion-header-row">
+                  <span class="seccion-titulo">Buscar cliente</span>
+                  @if (tipoEnvio() === 'domicilio') {
+                    <button
+                      type="button"
+                      class="btn-tiempo-estimado"
+                      [class.btn-tiempo-estimado--activo]="tiempoEstimado()"
+                      (click)="abrirTiempoEstimado()">
+                      <mat-icon>schedule</mat-icon>
+                      @if (tiempoEstimado()) {
+                        {{ getTiempoBotonLabel() }}
+                      } @else {
+                        Tiempo est.
+                      }
+                    </button>
+                  }
+                </div>
+                <app-cliente-buscador
+                  tipoVisible="domicilio"
+                  (clienteSeleccionado)="onClienteSeleccionado($event)"
+                  (solicitaCrearCliente)="onSolicitaCrearCliente()"
+                  (solicitaCapturarDireccion)="onCapturarDireccionCliente()">
+                </app-cliente-buscador>
+              </div>
+            }
+            @case ('llevar') {
+              <div class="seleccion-recoge">
+                <div class="seccion-header-row">
+                  <span class="seccion-titulo">Datos de quien recoge</span>
+                  @if (tipoEnvio() === 'recoger') {
+                    <button
+                      type="button"
+                      class="btn-tiempo-estimado"
+                      [class.btn-tiempo-estimado--activo]="tiempoEstimado()"
+                      (click)="abrirTiempoEstimado()">
+                      <mat-icon>schedule</mat-icon>
+                      @if (tiempoEstimado()) {
+                        {{ getTiempoBotonLabel() }}
+                      } @else {
+                        Tiempo est.
+                      }
+                    </button>
+                  }
+                </div>
+                @if (!nombreRecoge().trim() || !telefonoRecoge().trim()) {
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    class="btn-datos-recoge"
+                    (click)="abrirDatosRecoge()">
+                    <mat-icon>person</mat-icon>
+                    Datos de quien recoge
+                  </button>
+                } @else {
+                  <div class="recoge-seleccionado-card">
+                    <div class="recoge-info-header">
+                      <div class="recoge-identificador">
+                        <mat-icon>person</mat-icon>
+                        <span class="identificador">{{ nombreRecoge() }}</span>
+                      </div>
+                      <button
+                        mat-icon-button
+                        (click)="abrirDatosRecoge()"
+                        matTooltip="Editar datos">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    </div>
+                    <div class="recoge-detalles">
+                      <span class="detalle">
+                        <mat-icon>phone</mat-icon>
+                        {{ telefonoRecoge() }}
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          }
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Lista de productos en la orden -->
+        <div class="orden-productos">
+          @if (carrito().length === 0) {
+            <div class="carrito-vacio">
+              <mat-icon>add_shopping_cart</mat-icon>
+              <p>No hay productos en la orden</p>
+              <small>Selecciona productos del menú</small>
+            </div>
+          } @else {
+            <div class="productos-lista">
+              @for (item of carrito(); track trackByProductoId($index, item); let idx = $index) {
+                <div class="orden-item">
+                  <div class="item-principal">
+                    <!-- Imagen del producto -->
+                    <div class="item-imagen">
+                      @if (item.producto.imagen_url) {
+                        <img [src]="item.producto.imagen_url" [alt]="item.producto.nombre">
+                      } @else {
+                        <div class="imagen-placeholder">
+                          <mat-icon>restaurant</mat-icon>
+                        </div>
+                      }
+                    </div>
+
+                    <div class="item-info">
+                      <h4>{{ item.producto.nombre }}</h4>
+                      
+                      <!-- Link para agregar nota o mostrar nota existente -->
+                      <div class="item-nota-container">
+                        @if (item.nota && item.nota.trim()) {
+                          <p class="nota-texto">
+                            <mat-icon inline>note</mat-icon>
+                            {{ item.nota }}
+                          </p>
+                          <a class="link-editar-nota" (click)="abrirDialogNota(idx)">
+                            Editar nota
+                          </a>
+                        } @else {
+                          <a class="link-agregar-nota" (click)="abrirDialogNota(idx)">
+                            <mat-icon inline>add</mat-icon>
+                            Agregar nota
+                          </a>
+                        }
+                      </div>
+
+                      <div class="item-controles">
+                        <button 
+                          mat-icon-button 
+                          (click)="disminuirCantidad(idx)"
+                          [disabled]="item.cantidad <= 1">
+                          <mat-icon>remove</mat-icon>
+                        </button>
+                        <span class="cantidad">{{ item.cantidad }}</span>
+                        <button 
+                          mat-icon-button 
+                          (click)="aumentarCantidad(idx)">
+                          <mat-icon>add</mat-icon>
+                        </button>
+                      </div>
+                    </div>
+                    <div class="item-precios">
+                      <span class="precio-unitario">
+                        ${{ obtenerPrecioConDescuento(item.producto) | number:'1.2-2' }}
+                      </span>
+                      <span class="subtotal">
+                        ${{ calcularSubtotalItem(item) | number:'1.2-2' }}
+                      </span>
+                    </div>
+                    <button 
+                      mat-icon-button 
+                      color="warn"
+                      (click)="eliminarDelCarrito(idx)"
+                      class="btn-eliminar">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Resumen de totales -->
+        @if (carrito().length > 0) {
+          <div class="resumen-totales">
+            <mat-divider></mat-divider>
+            <div class="total-linea">
+              <span>Subtotal:</span>
+              <span>${{ subtotal() | number:'1.2-2' }}</span>
+            </div>
+
+            @if (tipoServicio() === 'domicilio') {
+              <div class="resumen-fila resumen-fila--envio">
+                <div class="envio-label-wrap">
+                  <mat-icon>delivery_dining</mat-icon>
+                  <span>Costo de envío</span>
+                </div>
+
+                <div class="envio-control">
+                  <button
+                    type="button"
+                    class="envio-toggle"
+                    [class.envio-toggle--activo]="costoEnvio() > 0"
+                    (click)="costoEnvio.set(
+                      costoEnvio() > 0 ? 0 : COSTO_ENVIO_DEFAULT)"
+                    [matTooltip]="costoEnvio() > 0
+                      ? 'Quitar costo de envío'
+                      : 'Agregar costo de envío'">
+                    <mat-icon>
+                      {{ costoEnvio() > 0
+                         ? 'check_circle'
+                         : 'radio_button_unchecked' }}
+                    </mat-icon>
+                  </button>
+
+                  <div class="envio-monto-wrap"
+                       [class.envio-monto-wrap--inactivo]="costoEnvio() === 0">
+                    <span class="envio-signo">$</span>
+                    <input
+                      type="number"
+                      min="0"
+                      inputmode="numeric"
+                      class="envio-input"
+                      [value]="costoEnvio()"
+                      [disabled]="costoEnvio() === 0"
+                      (change)="costoEnvio.set(
+                        Math.max(0, +$any($event.target).value))"
+                      placeholder="0" />
+                  </div>
+                </div>
+              </div>
+            }
+
+            <div class="resumen-fila resumen-fila--total total-linea total-final">
+              <span>TOTAL:</span>
+              <span>${{ calcularTotal() | number:'1.2-2' }}</span>
+            </div>
+          </div>
+
+          <!-- Sección de pago -->
+          <div class="seccion-pago">
+            <h3>Método de pago</h3>
+            <div class="metodos-pago">
+              <button 
+                mat-stroked-button 
+                [class.active]="metodoPago() === 'efectivo'"
+                (click)="seleccionarMetodoPago('efectivo')">
+                <mat-icon>payments</mat-icon>
+                Efectivo
+              </button>
+              <button 
+                mat-stroked-button 
+                [class.active]="metodoPago() === 'tarjeta'"
+                (click)="seleccionarMetodoPago('tarjeta')">
+                <mat-icon>credit_card</mat-icon>
+                Tarjeta
+              </button>
+              <button 
+                mat-stroked-button 
+                [class.active]="metodoPago() === 'transferencia'"
+                (click)="seleccionarMetodoPago('transferencia')">
+                <mat-icon>account_balance</mat-icon>
+                Transferencia
+              </button>
+              <button 
+                mat-stroked-button 
+                [class.active]="metodoPago() === 'combinado'"
+                (click)="seleccionarMetodoPago('combinado')">
+                <mat-icon>splitscreen</mat-icon>
+                Combinado
+              </button>
+            </div>
+
+            <!-- Campos de pago según método -->
+            <div class="detalles-pago">
+              @switch (metodoPago()) {
+                @case ('efectivo') {
+                  @if (!(tipoEnvio() === 'recoger' && !yaPago())
+                       && tipoEnvio() !== 'domicilio') {
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>Monto recibido</mat-label>
+                      <input 
+                        matInput 
+                        type="number" 
+                        [ngModel]="montoRecibido()"
+                        (ngModelChange)="montoRecibido.set(+$event || 0)"
+                        [min]="totalOrden()"
+                        step="0.01"
+                        placeholder="0.00">
+                      <span matPrefix>$&nbsp;</span>
+                    </mat-form-field>
+                    @if (montoRecibido() >= totalOrden()) {
+                      <div class="cambio-display">
+                        <span>Cambio:</span>
+                        <span class="cambio-monto">${{ cambio() | number:'1.2-2' }}</span>
+                      </div>
+                    }
+                  }
+                }
+                @case ('combinado') {
+                  <div class="pago-combinado-fields">
+                    <mat-form-field appearance="outline">
+                      <mat-label>Efectivo</mat-label>
+                      <input 
+                        matInput 
+                        type="number" 
+                        [ngModel]="pagoCombinado().efectivo"
+                        (ngModelChange)="actualizarPagoCombinado('efectivo', $event)"
+                        min="0"
+                        step="0.01">
+                      <span matPrefix>$&nbsp;</span>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Tarjeta</mat-label>
+                      <input 
+                        matInput 
+                        type="number" 
+                        [ngModel]="pagoCombinado().tarjeta"
+                        (ngModelChange)="actualizarPagoCombinado('tarjeta', $event)"
+                        min="0"
+                        step="0.01">
+                      <span matPrefix>$&nbsp;</span>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline">
+                      <mat-label>Transferencia</mat-label>
+                      <input 
+                        matInput 
+                        type="number" 
+                        [ngModel]="pagoCombinado().transferencia"
+                        (ngModelChange)="actualizarPagoCombinado('transferencia', $event)"
+                        min="0"
+                        step="0.01">
+                      <span matPrefix>$&nbsp;</span>
+                    </mat-form-field>
+                    @if (totalPagadoCombinado() >= totalOrden()) {
+                      <div class="cambio-display">
+                        <span>Cambio:</span>
+                        <span class="cambio-monto">${{ cambio() | number:'1.2-2' }}</span>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+            </div>
+          </div>
+
+          <!-- Advertencia si es tipo mesa y no hay mesa seleccionada -->
+          @if (tipoServicio() === 'mesa' && !mesaSeleccionada()) {
+            <p class="advertencia-mesa">
+              <mat-icon style="font-size:16px;width:16px;height:16px;color:#854F0B">
+                warning
+              </mat-icon>
+              Selecciona una mesa para continuar
+            </p>
+          }
+
+          @if (tipoServicio() === 'llevar' && (!nombreRecoge().trim() || !telefonoRecoge().trim())) {
+            <p class="advertencia-mesa">
+              <mat-icon style="font-size:16px;width:16px;height:16px;color:#854F0B">
+                warning
+              </mat-icon>
+              Ingresa el nombre y teléfono de quien recogerá el pedido
+            </p>
+          }
+
+          @if (tipoEnvio() === 'recoger'
+               || tipoEnvio() === 'domicilio') {
+
+            <div class="pago-inmediato-wrap"
+                 [class.pago-inmediato-wrap--ok]="yaPago()">
+
+              <div class="pago-inmediato-info">
+                <mat-icon>
+                  {{ yaPago() ? 'check_circle' : 'payments' }}
+                </mat-icon>
+                <div>
+                  <span class="pago-inmediato-label">
+                    {{ yaPago()
+                       ? 'Pedido pagado'
+                       : '¿Ya pagó el cliente?' }}
+                  </span>
+                  <span class="pago-inmediato-hint">
+                    {{ yaPago()
+                       ? 'Se registrará como pagado'
+                       : 'Marca si el cliente ya pagó' }}
+                  </span>
+                </div>
+              </div>
+
+              <mat-slide-toggle
+                [checked]="yaPago()"
+                (change)="yaPago.set($event.checked)"
+                color="primary">
+              </mat-slide-toggle>
+
+            </div>
+
+          }
+
+          <!-- Botón principal -->
+          <button 
+            mat-raised-button 
+            color="primary"
+            class="btn-registrar-venta"
+            [disabled]="!ordenValida()"
+            (click)="registrarVenta()">
+            <mat-icon>check_circle</mat-icon>
+            Registrar Venta
+          </button>
+
+          <!-- Botón ver detalle -->
+          <button 
+            mat-stroked-button
+            class="btn-ver-detalle"
+            (click)="verDetalleOrden()">
+            <mat-icon>receipt_long</mat-icon>
+            Ver Detalle Completo
+          </button>
+
+          <!-- Botón limpiar -->
+          <button 
+            mat-button 
+            color="warn"
+            class="btn-limpiar"
+            (click)="limpiarOrden()">
+            <mat-icon>clear_all</mat-icon>
+            Limpiar Orden
+          </button>
+        }
+
+      </div>
+
+      <!-- Botón flotante para ir a orden (solo móvil) -->
+      @if (carrito().length > 0 && vistaMovil() === 'productos') {
+        <button 
+          mat-fab 
+          extended
+          color="primary"
+          class="btn-flotante-orden"
+          (click)="irAOrden()">
+          <mat-icon>shopping_cart</mat-icon>
+          Ver Orden ({{ carrito().length }})
+          <span class="precio-flotante">${{ totalOrden() | number:'1.2-2' }}</span>
+        </button>
+      }
+
+    </div>
+  }
+
+</div>
+
+<!-- ============================================================ -->
+<!-- PRODUCT DETAIL DIALOG (BOTTOM SHEET) -->
+<!-- ============================================================ -->
+<app-product-detail-dialog
+  [(open)]="showProductModal"
+  [productId]="selectedProductId()"
+  [canAdd]="true"
+  (addToCart)="onAddFromDetail($event)">
+</app-product-detail-dialog>

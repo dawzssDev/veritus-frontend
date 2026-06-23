@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(ts|html|scss\\)$\")",
+      "Bash(awk 'NR<=80')",
+      "Bash(awk 'NR<=60')"
+    ]
+  }
+}

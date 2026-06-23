@@ -1,0 +1,134 @@
+/* ============================================================
+   LAYOUT PRINCIPAL - SIDEBAR + HEADER + CONTENT
+   ============================================================ */
+
+/* Reset global */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Contenedor principal */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #fafaf8;
+  overflow-x: hidden;
+}
+
+/* Área principal (contiene header + content) */
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 220px;
+  min-height: 100vh;
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 0; /* ← evita overflow en flex */
+}
+
+/* Contenido principal */
+.main-content {
+  flex: 1;
+  /* Header (64px) + banner (aprox 32px) = 96px, pero reducimos a 72px para menos espacio 
+  padding: 72px 24px 24px 24px;*/
+  background-color: #fafaf8;
+  min-height: calc(100vh - 64px);
+  overflow-y: auto;
+}
+
+/* ============================================================
+   AJUSTES CUANDO EL SIDEBAR SE COLAPSA
+   ============================================================ */
+
+/* Cuando el sidebar tiene clase collapsed */
+.app-container:has(.sidebar.collapsed) .main-wrapper {
+  margin-left: 64px;
+}
+
+/* Fallback: si :has() no funciona, usar clase en body */
+body.sidebar-collapsed .main-wrapper {
+  margin-left: 64px !important;
+}
+
+/* ── TABLET (768px - 1024px) ── */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .main-wrapper {
+    margin-left: 64px; /* sidebar colapsado en tablet */
+  }
+}
+
+/* ── MÓVIL (≤ 768px) ── */
+@media (max-width: 768px) {
+  .app-container {
+    flex-direction: row; /* mantener row para que sidebar
+                           esté fuera del flujo del contenido */
+    position: relative;
+  }
+
+  .main-wrapper {
+    margin-left: 0 !important;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .main-content {
+    padding: 0;
+  }
+
+  /* El overlay cubre TODO incluyendo el header */
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 150; /* debajo del sidebar (1100) pero sobre el header (1000) */
+  }
+}
+
+/* ============================================================
+   SCROLL PERSONALIZADO
+   ============================================================ */
+
+.main-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.main-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.main-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Overlay oscuro detrás del sidebar en móvil */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 199;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (min-width: 769px) {
+  .sidebar-overlay {
+    display: none;
+  }
+}

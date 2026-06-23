@@ -1,0 +1,49 @@
+<div
+  class="modal-overlay"
+  *ngIf="open"
+  (click)="onOverlayClick()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="location-picker-title">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <button
+        #closeButton
+        class="btn-close"
+        type="button"
+        (click)="close()"
+        aria-label="Cerrar">
+        ←
+      </button>
+
+      <div class="header-text">
+        <h2 id="location-picker-title">Ubicación</h2>
+        <p>Arrastra el mapa para seleccionar el punto de entrega</p>
+      </div>
+
+      <div class="spacer"></div>
+    </div>
+
+    <div class="modal-body">
+      <div class="map-shell">
+        <div #map class="map"></div>
+
+        <div class="pin" aria-hidden="true">
+          <div class="pin-dot"></div>
+        </div>
+
+        <button class="btn-locate" type="button" (click)="locate()">
+          Llevar a ubicación actual
+        </button>
+      </div>
+
+      <div class="hint" *ngIf="status === 'locating'">Obteniendo ubicación…</div>
+      <div class="hint warn" *ngIf="status === 'denied'">No se pudo acceder a tu ubicación.</div>
+      <div class="hint warn" *ngIf="status === 'unavailable'">Tu navegador no soporta ubicación.</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-save" type="button" (click)="save()">Guardar</button>
+    </div>
+  </div>
+</div>

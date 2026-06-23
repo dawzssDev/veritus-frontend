@@ -1,0 +1,200 @@
+<div class="tv-screen">
+
+  <!-- LOADING -->
+  @if (cargando()) {
+    <div class="tv-loading">
+      <div class="tv-loading__logo">{{ nombreEmpresa() }}</div>
+      <div class="tv-loading__spinner"></div>
+    </div>
+  }
+
+  @if (!cargando()) {
+
+    <!-- ══════ IZQUIERDA: MENÚ ══════ -->
+    <div class="tv-left">
+
+      <!-- Header -->
+      <div class="tv-header">
+        <div class="tv-header__izq">
+
+          <!-- Logo si existe, nombre si no -->
+          @if (logoEmpresa()) {
+            <img [src]="logoEmpresa()!"
+                 alt="Logo"
+                 class="tv-empresa-logo" />
+          } @else {
+            <span class="tv-logo">{{ nombreEmpresa() }}</span>
+          }
+
+          <div class="tv-sep"></div>
+          <span class="tv-label">Nuestro Menú</span>
+        </div>
+        <div class="tv-reloj">
+          <span class="tv-reloj__hora">
+            {{ horaActual() | date:'HH:mm' }}
+          </span>
+          <span class="tv-reloj__fecha">
+            {{ horaActual() | date:'EEEE d MMM':'':'es' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Scroll vertical de categorías -->
+      <div class="tv-vertical-wrapper">
+        <div class="tv-vertical-track" #ticker>
+
+          <!-- Contenido original -->
+          @for (cat of categorias(); track cat.id) {
+            <div class="tv-fila-cat">
+
+              <div class="tv-fila-cat__titulo">
+                <div class="tv-fila-cat__barra"></div>
+                {{ cat.nombre }}
+              </div>
+
+              <div class="tv-fila-productos">
+                @for (p of cat.productos.slice(0,4); track p.id) {
+                  <div class="tv-pcard">
+                    @if (p.imagen) {
+                      <img [src]="p.imagen" [alt]="p.nombre"
+                           class="tv-pcard__img" />
+                    } @else {
+                      <div class="tv-pcard__ph">🍽️</div>
+                    }
+                    <div class="tv-pcard__body">
+                      <p class="tv-pcard__nombre">{{ p.nombre }}</p>
+                      @if (p.descripcion) {
+                        <p class="tv-pcard__desc">{{ p.descripcion }}</p>
+                      }
+                      <p class="tv-pcard__precio">
+                        ${{ p.precio | number:'1.2-2' }}
+                      </p>
+                    </div>
+                  </div>
+                }
+              </div>
+
+            </div>
+          }
+
+          <!-- Copia duplicada para loop infinito sin salto -->
+          @for (cat of categorias(); track 'b' + cat.id) {
+            <div class="tv-fila-cat">
+
+              <div class="tv-fila-cat__titulo">
+                <div class="tv-fila-cat__barra"></div>
+                {{ cat.nombre }}
+              </div>
+
+              <div class="tv-fila-productos">
+                @for (p of cat.productos.slice(0,4); track p.id) {
+                  <div class="tv-pcard">
+                    @if (p.imagen) {
+                      <img [src]="p.imagen" [alt]="p.nombre"
+                           class="tv-pcard__img" />
+                    } @else {
+                      <div class="tv-pcard__ph">🍽️</div>
+                    }
+                    <div class="tv-pcard__body">
+                      <p class="tv-pcard__nombre">{{ p.nombre }}</p>
+                      @if (p.descripcion) {
+                        <p class="tv-pcard__desc">{{ p.descripcion }}</p>
+                      }
+                      <p class="tv-pcard__precio">
+                        ${{ p.precio | number:'1.2-2' }}
+                      </p>
+                    </div>
+                  </div>
+                }
+              </div>
+
+            </div>
+          }
+
+        </div>
+      </div>
+
+      <!-- Frase -->
+      <div class="tv-frase">
+        <span class="tv-frase__q">"</span>
+        <span class="tv-frase__txt">{{ frase() }}</span>
+        <span class="tv-frase__q">"</span>
+      </div>
+
+    </div>
+
+    <!-- ══════ DERECHA: DESTACADOS ══════ -->
+    <div class="tv-right">
+
+      <div class="tv-right__header">
+        <span class="tv-right__dot"></span>
+        Destacados del día
+      </div>
+
+      <!-- Imagen principal grande -->
+      @if (promoActual()) {
+        <div class="tv-promo">
+          @if (promoActual()!.imagen) {
+            <img [src]="promoActual()!.imagen"
+                 [alt]="promoActual()!.nombre"
+                 class="tv-promo__img" />
+          } @else {
+            <div class="tv-promo__img-ph">🍽️</div>
+          }
+          <div class="tv-promo__overlay"></div>
+          <div class="tv-promo__info">
+            <p class="tv-promo__cat">{{ promoActual()!.categoria }}</p>
+            <p class="tv-promo__nombre">{{ promoActual()!.nombre }}</p>
+            @if (promoActual()!.descripcion) {
+              <p class="tv-promo__desc">
+                {{ promoActual()!.descripcion }}
+              </p>
+            }
+            <p class="tv-promo__precio">
+              ${{ promoActual()!.precio | number:'1.2-2' }}
+              <span>MXN</span>
+            </p>
+          </div>
+        </div>
+      }
+
+      <!-- Dots promos -->
+      <div class="tv-dots tv-dots--sm">
+        @for (d of dotsLen(destacados().length); track d) {
+          <div class="tv-dot" [class.tv-dot--on]="d === promoIdx()">
+          </div>
+        }
+      </div>
+
+      <!-- Mini grid otros destacados -->
+      <div class="tv-mini-grid">
+        @for (p of destacados().slice(0,3); track p.id; let i = $index) {
+          <div class="tv-mini" [class.tv-mini--on]="i === promoIdx()">
+            @if (p.imagen) {
+              <img [src]="p.imagen" [alt]="p.nombre"
+                   class="tv-mini__img" />
+            } @else {
+              <div class="tv-mini__ph">🍽️</div>
+            }
+            <div class="tv-mini__body">
+              <p class="tv-mini__nombre">{{ p.nombre }}</p>
+              <p class="tv-mini__precio">
+                ${{ p.precio | number:'1.2-2' }}
+              </p>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Footer -->
+      <div class="tv-right__footer">
+        <div class="tv-right__footer-dot"></div>
+        <span>Servicio disponible ahora</span>
+        <span class="tv-right__footer-sep">·</span>
+        <span>Pide con tu mesero</span>
+      </div>
+
+    </div>
+
+  }
+</div>

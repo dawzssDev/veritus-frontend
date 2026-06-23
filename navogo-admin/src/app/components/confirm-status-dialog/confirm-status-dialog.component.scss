@@ -1,0 +1,181 @@
+.confirmDialog {
+  display: grid;
+  gap: 0;
+  width: min(440px, calc(100vw - 32px));
+  background: var(--mat-sys-surface-container, var(--mat-sys-surface));
+  color: var(--mat-sys-on-surface);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.confirmDialog__header {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 18px 14px;
+  background: var(--mat-sys-surface-container-high, var(--mat-sys-surface));
+  color: var(--mat-sys-on-surface);
+  border-bottom: 1px solid var(--mat-sys-outline-variant, transparent);
+}
+
+.confirmDialog__header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 4px;
+  background: var(--mat-sys-primary);
+}
+
+.confirmDialog__badge {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+  outline: 1px solid var(--mat-sys-outline-variant, transparent);
+}
+
+.confirmDialog__badge mat-icon {
+  width: 22px;
+  height: 22px;
+  font-size: 22px;
+}
+
+.confirmDialog__titles {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.confirmDialog__title {
+  font: var(--mat-sys-title-medium);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.confirmDialog__meta {
+  font: var(--mat-sys-body-small);
+  opacity: 0.9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.confirmDialog__close {
+  color: inherit;
+}
+
+.confirmDialog__body {
+  padding: 16px 20px 8px;
+}
+
+.confirmDialog__message {
+  font: var(--mat-sys-body-large);
+  letter-spacing: 0.15px;
+  line-height: 1.55;
+  color: var(--mat-sys-on-surface-variant, var(--mat-sys-on-surface));
+}
+
+.confirmDialog__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--mat-sys-surface-container-high, var(--mat-sys-surface));
+  outline: 1px solid var(--mat-sys-outline-variant, transparent);
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant, var(--mat-sys-on-surface));
+}
+
+.confirmDialog__hint-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  opacity: 0.7;
+}
+
+.confirmDialog__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 14px 20px 20px;
+}
+
+.confirmDialog.kind-pago .confirmDialog__header {
+  background: var(--mat-sys-surface-container-high, var(--mat-sys-surface));
+}
+
+.confirmDialog.kind-envio .confirmDialog__header {
+  background: var(--mat-sys-surface-container-high, var(--mat-sys-surface));
+}
+
+.confirmDialog.kind-pago .confirmDialog__header::before {
+  background: var(--mat-sys-tertiary);
+}
+
+.confirmDialog.kind-envio .confirmDialog__header::before {
+  background: var(--mat-sys-secondary);
+}
+
+.confirmDialog.kind-pago .confirmDialog__badge {
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+}
+
+.confirmDialog.kind-envio .confirmDialog__badge {
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+}
+
+// Kind: cancelar → rojo destructivo
+.confirmDialog.kind-cancelar .confirmDialog__header::before {
+  background: #dc2626;
+}
+
+.confirmDialog.kind-cancelar .confirmDialog__badge {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+// Botón confirmar — variantes por kind
+.btn-confirmar--cancelar {
+  background: #dc2626 !important;
+  color: white !important;
+  box-shadow: 0 2px 12px rgba(220, 38, 38, 0.3) !important;
+
+  &:hover { background: #b91c1c !important; }
+}
+
+.btn-confirmar--pago {
+  background: #1C8C40 !important;
+  color: white !important;
+  box-shadow: 0 2px 12px rgba(28, 140, 64, 0.3) !important;
+}
+
+.btn-confirmar--envio {
+  background: #2563eb !important;
+  color: white !important;
+  box-shadow: 0 2px 12px rgba(37, 99, 235, 0.3) !important;
+}
+
+@media (max-width: 520px) {
+  .confirmDialog__footer {
+    flex-direction: column;
+  }
+
+  .confirmDialog__footer button {
+    width: 100%;
+  }
+}

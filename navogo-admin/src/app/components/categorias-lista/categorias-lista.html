@@ -1,0 +1,181 @@
+<div class="categorias-page">
+
+  <!-- Header Compacto -->
+  <header class="page-header">
+    <div class="header-title">
+      <mat-icon class="header-icon">category</mat-icon>
+      <h1>Categorías</h1>
+    </div>
+    <div class="header-actions">
+      <button mat-icon-button [matMenuTriggerFor]="exportMenu" class="action-icon">
+        <mat-icon>download</mat-icon>
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportExcel()">
+          <mat-icon>table_view</mat-icon>
+          Excel
+        </button>
+        <button mat-menu-item (click)="exportPDF()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          PDF
+        </button>
+      </mat-menu>
+      <button mat-fab extended color="primary" (click)="open()" class="add-button">
+        <mat-icon>add</mat-icon>
+        <span class="btn-text-full">Nueva Categoría</span>
+        <span class="btn-text-short">Nueva</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Overlay de carga -->
+  <div class="loading-overlay" [class.active]="isLoading">
+    <div class="loading-content">
+      <mat-spinner [diameter]="50"></mat-spinner>
+      <p>Cargando categorías...</p>
+    </div>
+  </div>
+
+  <!-- Filtros Compactos -->
+  <section class="filters-section">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Buscar</mat-label>
+      <input matInput [(ngModel)]="filterNombre" (ngModelChange)="applyFilters()" placeholder="Nombre de categoría">
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Estado</mat-label>
+      <mat-select [(ngModel)]="filterEstado" (ngModelChange)="applyFilters()">
+        <mat-option value="todos">Todos</mat-option>
+        <mat-option value="activo">Activo</mat-option>
+        <mat-option value="inactivo">Inactivo</mat-option>
+      </mat-select>
+      <mat-icon matPrefix>tune</mat-icon>
+    </mat-form-field>
+  </section>
+
+  <!-- Vista de Cards (Mobile) -->
+  <div class="cards-view">
+    <div class="product-card" *ngFor="let categoria of dataSource.data">
+      <div class="card-header">
+        <div class="card-image">
+          <img [src]="categoria.imagen_url" [alt]="categoria.nombre" *ngIf="categoria.imagen">
+          <div class="card-image-placeholder" *ngIf="!categoria.imagen">
+            <mat-icon>category</mat-icon>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-content">
+        <h3 class="card-title">{{ categoria.nombre }}</h3>
+        <p class="card-description">{{ categoria.descripcion || 'Sin descripción' }}</p>
+        
+        <div class="card-footer">
+          <span class="card-status" [class.active]="categoria.estatus === 'activo' || categoria.estatus === 1">
+            <mat-icon>{{ (categoria.estatus === 'activo' || categoria.estatus === 1) ? 'check_circle' : 'cancel' }}</mat-icon>
+            {{ (categoria.estatus === 'activo' || categoria.estatus === 1) ? 'Activo' : 'Inactivo' }}
+          </span>
+          
+          <div class="card-actions">
+            <button mat-icon-button color="primary" (click)="openById(categoria.id)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="delete(categoria.id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state para cards -->
+    <div class="empty-cards" *ngIf="dataSource.data.length === 0">
+      <mat-icon>category</mat-icon>
+      <h3>No hay categorías</h3>
+      <p>Agrega tu primera categoría</p>
+      <button mat-raised-button color="primary" (click)="open()">
+        <mat-icon>add</mat-icon>
+        Crear Categoría
+      </button>
+    </div>
+  </div>
+
+  <!-- Vista de Tabla (Desktop) -->
+  <div class="table-view">
+    <table mat-table [dataSource]="dataSource" matSort class="productos-table">
+
+      <ng-container matColumnDef="imagen">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Categoría </th>
+        <td mat-cell *matCellDef="let row">
+          <div class="table-product">
+            <img [src]="row.imagen_url" [alt]="row.nombre" class="table-img" *ngIf="row.imagen">
+            <div class="table-img-placeholder" *ngIf="!row.imagen">
+              <mat-icon>category</mat-icon>
+            </div>
+            <div class="table-product-info">
+              <span class="table-name">{{ row.nombre }}</span>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="descripcion">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Descripción </th>
+        <td mat-cell *matCellDef="let row">
+          <span class="table-category">{{ row.descripcion || 'Sin descripción' }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="estatus">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+        <td mat-cell *matCellDef="let row">
+          <span class="table-status" [class.active]="row.estatus === 'activo' || row.estatus === 1">
+            <mat-icon>{{ (row.estatus === 'activo' || row.estatus === 1) ? 'check_circle' : 'cancel' }}</mat-icon>
+            {{ (row.estatus === 'activo' || row.estatus === 1) ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let row">
+          <div class="table-actions">
+            <button mat-icon-button color="primary" (click)="openById(row.id)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="delete(row.id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          <div class="empty-table">
+            <mat-icon>category</mat-icon>
+            <h3>No hay categorías registradas</h3>
+            <p>Comienza agregando tu primera categoría</p>
+            <button mat-raised-button color="primary" (click)="open()">
+              <mat-icon>add</mat-icon>
+              Crear Categoría
+            </button>
+          </div>
+        </td>
+      </tr>
+
+    </table>
+  </div>
+
+  <!-- Paginador -->
+  <mat-paginator 
+    [pageSizeOptions]="[5, 10, 25, 50]" 
+    [pageSize]="10"
+    showFirstLastButtons>
+  </mat-paginator>
+
+</div>

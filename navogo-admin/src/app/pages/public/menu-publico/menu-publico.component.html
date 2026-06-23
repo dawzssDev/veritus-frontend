@@ -1,0 +1,311 @@
+<div class="menu-publico-container">
+  <!-- ============================================= -->
+  <!-- PASO 1: BIENVENIDA -->
+  <!-- ============================================= -->
+  @if (pasoActual() === 'bienvenida') {
+    <div class="paso-bienvenida">
+      <div class="bienvenida-content">
+        <div class="logo-section">
+          <mat-icon>restaurant_menu</mat-icon>
+          <h1>¡Bienvenido!</h1>
+        </div>
+
+        @if (cargandoBienvenida() && !datosMesa()) {
+          <div class="loading-section">
+            <mat-spinner diameter="40"></mat-spinner>
+            <p>Cargando información...</p>
+          </div>
+        }
+
+        @if (errorBienvenida()) {
+          <div class="error-section">
+            <mat-icon>error_outline</mat-icon>
+            <p>{{ errorBienvenida() }}</p>
+            <button mat-raised-button color="primary" (click)="cargarDatosMesa()">
+              <mat-icon>refresh</mat-icon>
+              Reintentar
+            </button>
+          </div>
+        }
+
+        @if (datosMesa() && !errorBienvenida()) {
+          <div class="mesa-info-section">
+            <mat-icon class="mesa-icon">table_restaurant</mat-icon>
+            <h2>{{ datosMesa()!.identificador }}</h2>
+            @if (datosMesa()!.zona) {
+              <p class="zona">{{ datosMesa()!.zona }}</p>
+            }
+          </div>
+
+          <div class="nombre-form">
+            <p class="instruccion">Para continuar, por favor ingresa tu nombre:</p>
+            
+            <mat-form-field appearance="outline" class="nombre-field">
+              <mat-label>Tu nombre</mat-label>
+              <input 
+                matInput 
+                [(ngModel)]="nombreCliente"
+                placeholder="Ej: Juan Pérez"
+                [disabled]="cargandoBienvenida()"
+                (keyup.enter)="continuarDesdeBienvenida()">
+              <mat-icon matPrefix>person</mat-icon>
+            </mat-form-field>
+
+            <button 
+              mat-raised-button 
+              color="primary" 
+              class="btn-continuar"
+              (click)="continuarDesdeBienvenida()"
+              [disabled]="cargandoBienvenida() || nombreCliente().trim().length < 2">
+              @if (cargandoBienvenida()) {
+                <mat-spinner diameter="24"></mat-spinner>
+              } @else {
+                <ng-container>
+                  <span>Continuar</span>
+                  <mat-icon>arrow_forward</mat-icon>
+                </ng-container>
+              }
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ============================================= -->
+  <!-- PASO 2: MENÚ -->
+  <!-- ============================================= -->
+  @if (pasoActual() === 'menu') {
+    <div class="paso-menu">
+      <!-- Header fijo -->
+      <div class="menu-header">
+        <div class="header-content">
+          <h1>{{ nombreRestaurante }}</h1>
+          <p class="saludo">
+            <mat-icon>person</mat-icon>
+            Hola {{ nombreCliente() }} - {{ datosMesa()?.identificador }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Barra de búsqueda -->
+      <div class="search-bar">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Buscar productos</mat-label>
+          <input 
+            matInput 
+            #searchInput
+            (input)="onBusquedaChange(searchInput.value)"
+            placeholder="Buscar...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <!-- Tabs de categorías -->
+      <div class="categorias-tabs">
+        <div class="tabs-scroll">
+          <button 
+            class="categoria-tab"
+            [class.active]="categoriaActiva() === 0"
+            (click)="seleccionarCategoria(0)">
+            Todos
+          </button>
+          @for (categoria of categorias(); track categoria.id; let i = $index) {
+            <button 
+              class="categoria-tab"
+              [class.active]="categoriaActiva() === i + 1"
+              (click)="seleccionarCategoria(i + 1)">
+              {{ categoria.nombre }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Loading del menú -->
+      @if (cargandoMenu()) {
+        <div class="loading-menu">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Cargando menú...</p>
+        </div>
+      }
+
+      <!-- Error del menú -->
+      @if (errorMenu() && !cargandoMenu()) {
+        <div class="error-menu">
+          <mat-icon>error_outline</mat-icon>
+          <p>{{ errorMenu() }}</p>
+          <button mat-raised-button color="primary" (click)="cargarMenu()">
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
+        </div>
+      }
+
+      <!-- Grid de productos -->
+      @if (!cargandoMenu() && !errorMenu()) {
+        <div class="productos-grid">
+          @for (producto of productosFiltrados(); track producto.id) {
+            <div class="producto-card">
+              <div class="producto-imagen">
+                @if (producto.imagen_url) {
+                  <img [src]="producto.imagen_url" [alt]="producto.nombre" loading="lazy">
+                } @else {
+                  <div class="imagen-placeholder">
+                    <mat-icon>restaurant</mat-icon>
+                  </div>
+                }
+              </div>
+              
+              <div class="producto-info">
+                <h3>{{ producto.nombre }}</h3>
+                @if (producto.descripcion) {
+                  <p class="descripcion">{{ producto.descripcion }}</p>
+                }
+                <div class="producto-footer">
+                  <span class="precio">${{ producto.precio.toFixed(2) }}</span>
+                  <button 
+                    mat-mini-fab 
+                    color="primary"
+                    (click)="agregarAlCarrito(producto)">
+                    <mat-icon>add</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="no-productos">
+              <mat-icon>search_off</mat-icon>
+              <p>No se encontraron productos</p>
+            </div>
+          }
+        </div>
+
+        <!-- Espaciado para el carrito flotante -->
+        @if (carritoVisible()) {
+          <div class="carrito-spacer"></div>
+        }
+      }
+
+      <!-- Carrito flotante -->
+      @if (carritoVisible()) {
+        <div class="carrito-flotante">
+          <div class="carrito-content" (click)="verResumen()">
+            <div class="carrito-info">
+              <mat-icon [matBadge]="totalItems()" matBadgeColor="warn">shopping_cart</mat-icon>
+              <span class="items-count">{{ totalItems() }} producto{{ totalItems() > 1 ? 's' : '' }}</span>
+            </div>
+            <div class="carrito-total">
+              <span class="total-label">Total:</span>
+              <span class="total-amount">${{ totalCarrito().toFixed(2) }}</span>
+              <mat-icon>arrow_forward</mat-icon>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ============================================= -->
+  <!-- PASO 3: CONFIRMACIÓN -->
+  <!-- ============================================= -->
+  @if (pasoActual() === 'confirmacion') {
+    <div class="paso-confirmacion">
+      <!-- Header -->
+      <div class="confirmacion-header">
+        <button mat-icon-button (click)="volverAlMenu()">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <h2>Resumen del Pedido</h2>
+      </div>
+
+      <!-- Lista de items -->
+      <div class="confirmacion-content">
+        <div class="items-lista">
+          @for (item of carrito(); track item.producto.id) {
+            <div class="item-resumen">
+              <div class="item-imagen">
+                @if (item.producto.imagen_url) {
+                  <img [src]="item.producto.imagen_url" [alt]="item.producto.nombre">
+                } @else {
+                  <div class="imagen-placeholder-small">
+                    <mat-icon>restaurant</mat-icon>
+                  </div>
+                }
+              </div>
+              
+              <div class="item-info">
+                <h4>{{ item.producto.nombre }}</h4>
+                <p class="item-precio">${{ item.producto.precio.toFixed(2) }} c/u</p>
+              </div>
+
+              <div class="item-cantidad">
+                <button mat-icon-button (click)="decrementarCantidad(item)">
+                  <mat-icon>remove</mat-icon>
+                </button>
+                <span>{{ item.cantidad }}</span>
+                <button mat-icon-button (click)="incrementarCantidad(item)">
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
+
+              <div class="item-subtotal">
+                <p>${{ item.subtotal.toFixed(2) }}</p>
+                <button mat-icon-button color="warn" (click)="eliminarDelCarrito(item)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Nota opcional -->
+        <div class="nota-section">
+          <mat-form-field appearance="outline" class="nota-field">
+            <mat-label>Nota o instrucciones especiales (opcional)</mat-label>
+            <textarea 
+              matInput 
+              [(ngModel)]="notaPedido"
+              rows="3"
+              placeholder="Ej: Sin cebolla, extra picante, etc."></textarea>
+            <mat-icon matPrefix>note</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Total -->
+        <div class="total-section">
+          <div class="total-row">
+            <span class="total-label">Total del pedido:</span>
+            <span class="total-cantidad">${{ totalCarrito().toFixed(2) }}</span>
+          </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="acciones-section">
+          <button 
+            mat-stroked-button 
+            class="btn-volver"
+            (click)="volverAlMenu()">
+            <mat-icon>arrow_back</mat-icon>
+            Seguir agregando
+          </button>
+          
+          <button 
+            mat-raised-button 
+            color="primary"
+            class="btn-enviar"
+            (click)="enviarPedido()"
+            [disabled]="enviandoPedido()">
+            @if (enviandoPedido()) {
+              <mat-spinner diameter="24"></mat-spinner>
+            } @else {
+              <ng-container>
+                <mat-icon>send</mat-icon>
+                <span>Enviar pedido</span>
+              </ng-container>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

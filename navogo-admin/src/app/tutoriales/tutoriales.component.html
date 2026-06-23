@@ -1,0 +1,58 @@
+<div class="coming-page">
+
+  <div class="coming-card">
+
+    <!-- Ícono animado -->
+    <div class="coming-icono-wrapper">
+      <div class="coming-icono-ring"></div>
+      <mat-icon class="coming-icono">construction</mat-icon>
+    </div>
+
+    <!-- Texto -->
+    <h1 class="coming-titulo">
+      Estamos trabajando en esto
+    </h1>
+
+    <p class="coming-sub">
+      Nos encontramos construyendo los tutoriales en video
+      para que tú y tu equipo puedan sacar el máximo
+      provecho de <strong>VERITUS</strong>.
+    </p>
+
+    <p class="coming-sub coming-sub--sm">
+      Muy pronto tendrás acceso a guías paso a paso
+      de cada módulo del sistema.
+    </p>
+
+    <!-- Badge -->
+    <div class="coming-badge">
+      <mat-icon>hourglass_top</mat-icon>
+      Próximamente disponible
+    </div>
+
+    <!-- Módulos que tendrán tutorial -->
+    <div class="coming-modulos">
+      <p class="coming-modulos__titulo">
+        ¿Qué aprenderás?
+      </p>
+      <div class="coming-modulos__grid">
+        @for (m of modulos; track m.label) {
+          <div class="modulo-chip">
+            <mat-icon>{{ m.icon }}</mat-icon>
+            <span>{{ m.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Botón volver -->
+    <button mat-flat-button
+            class="coming-btn"
+            routerLink="/ventas-mostrador">
+      <mat-icon>arrow_back</mat-icon>
+      Volver al inicio
+    </button>
+
+  </div>
+
+</div>

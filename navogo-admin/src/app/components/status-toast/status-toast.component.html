@@ -1,0 +1,12 @@
+<div class="toast" [class.toast--success]="data.kind === 'success'">
+  <div class="toast__icon" aria-hidden="true">
+    <mat-icon>{{ data.icon }}</mat-icon>
+  </div>
+
+  <div class="toast__content">
+    <div class="toast__title">{{ data.title }}</div>
+    @if (data.detail) {
+      <div class="toast__detail">{{ data.detail }}</div>
+    }
+  </div>
+</div>

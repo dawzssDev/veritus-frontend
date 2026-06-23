@@ -1,0 +1,237 @@
+<div class="pickup-page">
+  @if (submitStatus() === 'success') {
+    <div class="shell">
+      <header class="pickup-header">
+        <button class="btn-back" type="button" aria-label="Volver" (click)="goBack()">
+          <mat-icon aria-hidden="true">arrow_back</mat-icon>
+        </button>
+        <div class="title">
+          <h1>Pedido enviado</h1>
+          <p>Se registró tu pedido correctamente.</p>
+        </div>
+      </header>
+
+      <main class="success">
+        <div class="success-card">
+          <div class="success-icon" aria-hidden="true">✓</div>
+          <div class="success-title">Pedido enviado con éxito</div>
+          <div class="success-text">
+            Si no se abrió WhatsApp o necesitas reenviar el mensaje, puedes hacerlo aquí.
+          </div>
+
+          @if (submitError()) {
+            <div class="inline-error">{{ submitError() }}</div>
+          }
+
+          <button class="btn-whatsapp" type="button" (click)="resendWhatsApp()">
+            Reenviar mensaje por WhatsApp
+          </button>
+        </div>
+      </main>
+    </div>
+  } @else {
+  <div class="shell">
+    <header class="pickup-header">
+      <button class="btn-back" type="button" (click)="goBack()" aria-label="Regresar al carrito">
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      </button>
+
+      <div class="title">
+        <h1>Datos de tu pedido</h1>
+        <p>Confirma para recoger en tienda</p>
+      </div>
+
+      <div class="mode-toggle" role="group" aria-label="Seleccionar tipo de entrega">
+        <button type="button" class="mode" (click)="switchToDomicilio()">A domicilio</button>
+        <button type="button" class="mode active" (click)="switchToRecoger()">Para recoger</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="card">
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" placeholder="Tu nombre" [formControl]="form.controls.contact.controls.name" />
+          @if (form.controls.contact.controls.name.touched && form.controls.contact.controls.name.invalid) {
+            <div class="error">Escribe tu nombre.</div>
+          }
+        </div>
+
+        <div class="field">
+          <label>Número telefónico</label>
+          <div class="phone-row">
+            <input class="phone-country" type="text" placeholder="+52" [formControl]="form.controls.contact.controls.phoneCountry" />
+            <input class="phone-number" type="tel" inputmode="numeric" placeholder="9991234567" [formControl]="form.controls.contact.controls.phone" />
+          </div>
+          @if (form.controls.contact.controls.phone.touched && form.controls.contact.controls.phone.invalid) {
+            <div class="error">Ingresa un teléfono válido.</div>
+          }
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title center">Propina</div>
+
+        <div class="tip-row" role="group" aria-label="Seleccionar propina">
+          <button type="button" class="chip" [class.active]="form.controls.tipPreset.value === '0'" (click)="selectTipPreset('0')">$0</button>
+          <button type="button" class="chip" [class.active]="form.controls.tipPreset.value === '15'" (click)="selectTipPreset('15')">$15</button>
+          <button type="button" class="chip" [class.active]="form.controls.tipPreset.value === '30'" (click)="selectTipPreset('30')">$30</button>
+          <button type="button" class="chip" [class.active]="form.controls.tipPreset.value === 'other'" (click)="selectTipPreset('other')">Otro</button>
+        </div>
+
+        @if (form.controls.tipPreset.value === 'other') {
+          <div class="field">
+            <label>Propina</label>
+            <input type="number" min="0" inputmode="numeric" placeholder="0" [formControl]="form.controls.tipOther" />
+          </div>
+        }
+      </section>
+
+      <section class="card">
+        <div class="card-title center">Método de pago</div>
+        <div class="muted center">Escoge con cuál te gustaría pagar</div>
+
+        @if (paymentAvailability().efectivo) {
+          <label class="pay-row" [class.selected]="form.controls.paymentMethod.value === 'efectivo'">
+            <div class="pay-left">
+              <mat-icon aria-hidden="true">payments</mat-icon>
+              <span>Efectivo</span>
+            </div>
+            <input type="radio" value="efectivo" [formControl]="form.controls.paymentMethod" aria-label="Seleccionar efectivo" />
+          </label>
+        }
+
+        @if (paymentAvailability().transferencia) {
+          <label class="pay-row" [class.selected]="form.controls.paymentMethod.value === 'transferencia'">
+            <div class="pay-left">
+              <mat-icon aria-hidden="true">account_balance</mat-icon>
+              <span>Transferencia bancaria</span>
+            </div>
+            <input type="radio" value="transferencia" [formControl]="form.controls.paymentMethod" aria-label="Seleccionar transferencia" />
+          </label>
+        }
+
+        @if (paymentAvailability().tarjeta) {
+          <label class="pay-row" [class.selected]="form.controls.paymentMethod.value === 'tarjeta'">
+            <div class="pay-left">
+              <mat-icon aria-hidden="true">credit_card</mat-icon>
+              <span>Tarjeta</span>
+            </div>
+            <input type="radio" value="tarjeta" [formControl]="form.controls.paymentMethod" aria-label="Seleccionar tarjeta" />
+          </label>
+        }
+
+        @if (form.controls.paymentMethod.value === 'efectivo'
+             && cart.shippingType() !== 'recoger') {
+          <div class="payment-card">
+            <div class="field">
+              <label>Cantidad con la que pagarás</label>
+              <input type="number" min="0" inputmode="numeric" placeholder="0" [formControl]="form.controls.cashAmount" />
+              @if (form.controls.cashAmount.touched && form.controls.cashAmount.invalid) {
+                <div class="error">Ingresa una cantidad válida (≥ total).</div>
+              }
+            </div>
+          </div>
+        }
+
+        @if (form.controls.paymentMethod.value === 'transferencia' && paymentAvailability().transferencia) {
+          <div class="transfer-card">
+            <div class="transfer-title">
+              <mat-icon aria-hidden="true">info</mat-icon>
+              <span>Datos para transferencia</span>
+            </div>
+
+            <div class="transfer-row">
+              <div class="transfer-k">Titular</div>
+              <div class="transfer-v">{{ transferAccount.titular }}</div>
+              <button
+                class="icon-btn"
+                type="button"
+                aria-label="Copiar titular"
+                [disabled]="transferAccount.titular === '—'"
+                (click)="copyTransferField('titular')">
+                <mat-icon aria-hidden="true">content_copy</mat-icon>
+                <span class="sr">Copiar</span>
+              </button>
+              @if (copyStatus() === 'titular') {
+                <span class="copy-pill">Copiado</span>
+              }
+            </div>
+
+            <div class="transfer-row">
+              <div class="transfer-k">Banco</div>
+              <div class="transfer-v">{{ transferAccount.banco }}</div>
+              <button
+                class="icon-btn"
+                type="button"
+                aria-label="Copiar banco"
+                [disabled]="transferAccount.banco === '—'"
+                (click)="copyTransferField('banco')">
+                <mat-icon aria-hidden="true">content_copy</mat-icon>
+                <span class="sr">Copiar</span>
+              </button>
+              @if (copyStatus() === 'banco') {
+                <span class="copy-pill">Copiado</span>
+              }
+            </div>
+
+            <div class="transfer-row">
+              <div class="transfer-k">CLABE</div>
+              <div class="transfer-v mono">{{ transferAccount.clabe }}</div>
+              <button
+                class="icon-btn"
+                type="button"
+                aria-label="Copiar CLABE"
+                [disabled]="transferAccount.clabe === '—'"
+                (click)="copyTransferField('clabe')">
+                <mat-icon aria-hidden="true">content_copy</mat-icon>
+                <span class="sr">Copiar</span>
+              </button>
+              @if (copyStatus() === 'clabe') {
+                <span class="copy-pill">Copiado</span>
+              }
+            </div>
+          </div>
+        }
+
+        @if (form.controls.paymentMethod.touched && form.controls.paymentMethod.invalid) {
+          <div class="error">Selecciona un método de pago.</div>
+        }
+      </section>
+
+      <section class="card summary">
+        <div class="card-title">Resumen</div>
+
+        <div class="row">
+          <span>Subtotal productos</span>
+          <span>{{ formatPrice(subtotal()) }}</span>
+        </div>
+
+        <div class="row">
+          <span>Propina</span>
+          <span>{{ formatPrice(tipAmount()) }}</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="row total">
+          <span>Total</span>
+          <span>{{ formatPrice(total()) }}</span>
+        </div>
+      </section>
+
+      @if (submitError()) {
+        <div class="inline-error">{{ submitError() }}</div>
+      }
+    </main>
+  </div>
+
+  <footer class="cta">
+    <div class="cta-inner">
+      <button class="btn-whatsapp" type="button" (click)="sendWhatsApp()" [disabled]="submitStatus() === 'submitting'">
+        Enviar pedido por WhatsApp
+      </button>
+    </div>
+  </footer>
+  }
+</div>

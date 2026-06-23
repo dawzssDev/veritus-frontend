@@ -1,0 +1,37 @@
+<div class="dialog-container">
+
+  <div class="dialog-header">
+    <div class="icon-wrap">
+      <mat-icon>lock_open</mat-icon>
+    </div>
+    <div class="header-texto">
+      <h2 mat-dialog-title>Liberar mesa</h2>
+      <p class="header-sub">{{ data.identificador }}</p>
+    </div>
+  </div>
+
+  <mat-dialog-content>
+    <p class="mensaje-principal">
+      La mesa quedará <strong>libre</strong> y podrá ser asignada a nuevos clientes.
+    </p>
+
+    @if (data.pagado) {
+      <div class="info-banner info-banner--verde">
+        <mat-icon>check_circle</mat-icon>
+        <span>El pago ya fue confirmado. Puedes liberar la mesa sin problema.</span>
+      </div>
+    }
+
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button (click)="cancelar()">
+      Cancelar
+    </button>
+    <button mat-flat-button class="btn-confirmar" (click)="confirmar()">
+      <mat-icon>lock_open</mat-icon>
+      Liberar mesa
+    </button>
+  </mat-dialog-actions>
+
+</div>

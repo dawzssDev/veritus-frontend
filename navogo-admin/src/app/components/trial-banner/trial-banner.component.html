@@ -1,0 +1,51 @@
+@if (trialService.enTrial() && trialService.cargado()) {
+  <div class="trial-banner"
+       [class.trial-banner--advertencia]="
+         trialService.advertencia()"
+       [class.trial-banner--urgente]="
+         trialService.urgente()">
+
+    <div class="trial-banner__contenido">
+
+      <!-- Ícono -->
+      <div class="trial-icono">
+        <mat-icon>
+          {{ trialService.urgente() ? 'warning' : 'hourglass_top' }}
+        </mat-icon>
+      </div>
+
+      <!-- Texto -->
+      <div class="trial-texto">
+        <span class="trial-mensaje">{{ mensaje() }}</span>
+        <span class="trial-fecha">
+          @if (trialService.estado()?.trial_fin) {
+            Vence el
+            {{ trialService.estado()!.trial_fin!
+               | date:'d MMM yyyy' }}
+          }
+        </span>
+      </div>
+
+      <!-- Barra de progreso -->
+      <div class="trial-progreso">
+        <div class="trial-progreso__barra">
+          <div class="trial-progreso__fill"
+               [style.width.%]="porcentaje()">
+          </div>
+        </div>
+        <span class="trial-progreso__label">
+          {{ trialService.diasRestantes() }}
+          {{ trialService.diasRestantes() === 1 ? 'día' : 'días' }}
+        </span>
+      </div>
+
+      <!-- CTA -->
+      <a class="trial-cta" routerLink="/suscripcion">
+        <mat-icon>upgrade</mat-icon>
+        Activar plan
+      </a>
+
+    </div>
+
+  </div>
+}

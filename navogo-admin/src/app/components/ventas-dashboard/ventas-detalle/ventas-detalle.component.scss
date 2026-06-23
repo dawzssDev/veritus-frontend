@@ -1,0 +1,271 @@
+@import '../../../../styles/shared-listing.scss';
+
+// Header personalizado para ventas detalle
+.ventas-header {
+  position: relative;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  color: #1a1a1a;
+  overflow: hidden;
+  min-height: 180px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.ventas-header-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(28, 143, 70, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(28, 143, 70, 0.02) 0%, transparent 50%);
+  opacity: 0.6;
+}
+
+.ventas-header-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 32px 40px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.back-btn {
+  color: #1a1a1a;
+  background: rgba(0, 0, 0, 0.05);
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.ventas-header-info {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.ventas-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  background: rgba(28, 143, 70, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.ventas-icon {
+  font-size: 40px;
+  width: 40px;
+  height: 40px;
+  color: var(--mat-sys-primary);
+}
+
+.ventas-title-group {
+  flex: 1;
+}
+
+.ventas-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 800;
+  color: #1a1a1a;
+  letter-spacing: -0.5px;
+}
+
+.ventas-subtitle {
+  margin: 8px 0 0;
+  font-size: 16px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.ventas-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.export-btn {
+  height: 48px;
+  padding: 0 24px;
+  font-weight: 600;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  
+  mat-icon {
+    margin-right: 8px;
+  }
+  
+  &--excel {
+    background: var(--mat-sys-primary);
+    color: white;
+    
+    &:hover {
+      background: #1a7040;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(28, 143, 70, 0.25);
+    }
+  }
+  
+  &--pdf {
+    background: #f8f9fa;
+    color: #1a1a1a;
+    border: 1px solid #dee2e6;
+    
+    &:hover {
+      background: #e9ecef;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+.summary {
+  padding: 20px;
+  display: flex;
+  gap: 40px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summary-label {
+  font-size: 13px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.summary-value {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--mat-sys-primary);
+}
+
+.content {
+  padding: 20px;
+}
+
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  color: #6c757d;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+
+  p {
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.details-table {
+  width: 100%;
+  background: white;
+
+  th {
+    background: #f8f9fa;
+    font-weight: 700;
+    color: #495057;
+    padding: 16px 12px;
+  }
+
+  td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f1f3f5;
+  }
+
+  .mat-mdc-row:hover {
+    background-color: #f8f9fa;
+  }
+}
+
+.order-id {
+  font-weight: 700;
+  color: var(--mat-sys-primary);
+  font-size: 15px;
+}
+
+.total-amount {
+  font-weight: 700;
+  font-size: 16px;
+  color: #212529;
+}
+
+.payment-chip {
+  font-size: 12px;
+  
+  &.payment-efectivo {
+    background-color: rgba(40, 167, 69, 0.12);
+    color: #28a745;
+  }
+
+  &.payment-transferencia {
+    background-color: rgba(0, 123, 255, 0.12);
+    color: #007bff;
+  }
+
+  &.payment-tarjeta {
+    background-color: rgba(220, 53, 69, 0.12);
+    color: #dc3545;
+  }
+}
+
+.shipping-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #495057;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.items-count {
+  color: #6c757d;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .summary {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+
+    button {
+      width: 100%;
+    }
+  }
+}

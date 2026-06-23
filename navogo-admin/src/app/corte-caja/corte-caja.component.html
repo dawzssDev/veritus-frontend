@@ -1,0 +1,442 @@
+<div class="corte-page">
+
+  <!-- ══════════════════════
+       HEADER
+  ══════════════════════ -->
+  <div class="corte-header">
+    <div class="corte-header__info">
+      <h1 class="corte-header__titulo">Corte de Caja</h1>
+      <p class="corte-header__sub">
+        Control de ingresos por turno · Solo órdenes finalizadas
+      </p>
+    </div>
+
+    <!-- Selector de fecha -->
+    <div class="fecha-nav">
+      <button class="fecha-nav-btn"
+              (click)="irDiaAnterior()">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <mat-form-field appearance="outline"
+                      subscriptSizing="dynamic"
+                      class="campo-fecha">
+        <mat-icon matPrefix>calendar_today</mat-icon>
+        <input matInput
+               [matDatepicker]="picker"
+               [value]="fechaValue"
+               [max]="fechaValue"
+               (dateChange)="onFechaCambio($event.value)"
+               readonly />
+        <mat-datepicker-toggle matIconSuffix [for]="picker">
+        </mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <button class="fecha-nav-btn"
+              [disabled]="esHoy()"
+              (click)="irDiaSiguiente()">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+
+      @if (!esHoy()) {
+        <button class="btn-hoy" (click)="irAHoy()">
+          <mat-icon>today</mat-icon>
+          Hoy
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Label de fecha actual -->
+  <div class="fecha-label-wrapper">
+    <div class="fecha-label"
+         [class.fecha-label--hoy]="esHoy()">
+      <mat-icon>{{ esHoy() ? 'wb_sunny' : 'event' }}</mat-icon>
+      <span>{{ labelFecha() | titlecase }}</span>
+      @if (esHoy()) {
+        <span class="fecha-label__badge">En curso</span>
+      }
+    </div>
+  </div>
+
+  <!-- ══════════════════════
+       LOADING
+  ══════════════════════ -->
+  @if (cargando()) {
+    <div class="cortes-grid">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-corte">
+          <div class="sk sk-header"></div>
+          <div class="sk sk-monto"></div>
+          <div class="sk-grid-2">
+            <div class="sk sk-item"></div>
+            <div class="sk sk-item"></div>
+            <div class="sk sk-item"></div>
+            <div class="sk sk-item"></div>
+          </div>
+          <div class="sk sk-btn"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ══════════════════════
+       CARDS DE LOS 3 CORTES
+  ══════════════════════ -->
+  @if (!cargando() && resumen()) {
+    <div class="cortes-grid">
+
+      @for (item of TIPOS; track item.tipo) {
+        @let corte   = resumen()!.cortes[item.tipo];
+        @let preview = resumen()!.previews[item.tipo];
+        @let datos   = corte ?? preview;
+        @let cerrado = !!corte;
+
+        <div class="corte-card"
+             [class.corte-card--cerrado]="cerrado"
+             [class.corte-card--vacio]="!datos?.total_ordenes">
+
+          <!-- Acento de color lateral -->
+          <div class="corte-acento"
+               [class.corte-acento--manana]="item.tipo==='manana'"
+               [class.corte-acento--tarde]="item.tipo==='tarde'"
+               [class.corte-acento--diario]="item.tipo==='diario'">
+          </div>
+
+          <div class="corte-card-inner">
+
+            <!-- ── Cabecera ── -->
+            <div class="corte-cab">
+              <div class="corte-cab__izq">
+                <div class="corte-icono-wrapper"
+                     [class.ci--manana]="item.tipo==='manana'"
+                     [class.ci--tarde]="item.tipo==='tarde'"
+                     [class.ci--diario]="item.tipo==='diario'">
+                  <mat-icon>{{ item.icono }}</mat-icon>
+                </div>
+                <div>
+                  <p class="corte-nombre">{{ item.label }}</p>
+                  <p class="corte-rango">{{ item.rango }}</p>
+                </div>
+              </div>
+              <div class="corte-estado"
+                   [class.ce--cerrado]="cerrado"
+                   [class.ce--pendiente]="!cerrado">
+                <mat-icon>
+                  {{ cerrado ? 'lock' : 'lock_open' }}
+                </mat-icon>
+                {{ cerrado ? 'Cerrado' : 'Pendiente' }}
+              </div>
+            </div>
+
+            <!-- ── Total principal ── -->
+            <div class="corte-total-wrapper">
+              <p class="corte-total-label">TOTAL VENTAS</p>
+              <p class="corte-total-monto"
+                 [class.corte-total-monto--cero]="!datos?.total_ventas">
+                ${{ (datos?.total_ventas ?? 0) | number:'1.2-2' }}
+              </p>
+              <p class="corte-total-ordenes">
+                @if (datos?.total_ordenes) {
+                  {{ datos!.total_ordenes }}
+                  {{ datos!.total_ordenes === 1
+                     ? 'orden finalizada' : 'órdenes finalizadas' }}
+                } @else {
+                  Sin órdenes finalizadas
+                }
+              </p>
+            </div>
+
+            <!-- ── Desglose por método de pago ── -->
+            <div class="corte-desglose">
+
+              <div class="desglose-item">
+                <div class="desglose-item__icono desglose-item__icono--efectivo">
+                  <mat-icon>payments</mat-icon>
+                </div>
+                <div>
+                  <p class="desglose-label">Efectivo</p>
+                  <p class="desglose-monto">
+                    ${{ (datos?.total_efectivo ?? 0) | number:'1.2-2' }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="desglose-item">
+                <div class="desglose-item__icono desglose-item__icono--tarjeta">
+                  <mat-icon>credit_card</mat-icon>
+                </div>
+                <div>
+                  <p class="desglose-label">Tarjeta</p>
+                  <p class="desglose-monto">
+                    ${{ (datos?.total_tarjeta ?? 0) | number:'1.2-2' }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="desglose-item">
+                <div class="desglose-item__icono desglose-item__icono--transferencia">
+                  <mat-icon>account_balance</mat-icon>
+                </div>
+                <div>
+                  <p class="desglose-label">Transferencia</p>
+                  <p class="desglose-monto">
+                    ${{ (datos?.total_transferencia ?? 0) | number:'1.2-2' }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="desglose-item">
+                <div class="desglose-item__icono desglose-item__icono--propina">
+                  <mat-icon>volunteer_activism</mat-icon>
+                </div>
+                <div>
+                  <p class="desglose-label">Propinas</p>
+                  <p class="desglose-monto">
+                    ${{ (datos?.total_propinas ?? 0) | number:'1.2-2' }}
+                  </p>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- ── Resultado del arqueo (si está cerrado) ── -->
+            @if (cerrado && corte!.diferencia !== null) {
+              <div class="arqueo-resultado"
+                   [class.ar--sobrante]="+corte!.diferencia! > 0"
+                   [class.ar--faltante]="+corte!.diferencia! < 0"
+                   [class.ar--cuadrado]="+corte!.diferencia! === 0">
+                <mat-icon>
+                  {{ +corte!.diferencia! > 0 ? 'trending_up'
+                     : +corte!.diferencia! < 0 ? 'trending_down'
+                     : 'check_circle' }}
+                </mat-icon>
+                <div>
+                  <p class="ar-label">
+                    {{ +corte!.diferencia! > 0 ? 'Sobrante'
+                       : +corte!.diferencia! < 0 ? 'Faltante'
+                       : 'Caja cuadrada' }}
+                  </p>
+                  <p class="ar-monto">
+                    {{ +corte!.diferencia! > 0 ? '+' : '' }}
+                    ${{ corte!.diferencia! | number:'1.2-2' }}
+                  </p>
+                </div>
+                @if (cerrado) {
+                  <div class="ar-cajero">
+                    <mat-icon>person</mat-icon>
+                    {{ corte!.usuario?.nombreCompleto ?? '—' }}
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- ── Acciones ── -->
+            <div class="corte-acciones">
+              @if (!cerrado) {
+                <button class="btn-realizar-corte"
+                        [class.btn-realizar-corte--manana]="
+                          item.tipo==='manana'"
+                        [class.btn-realizar-corte--tarde]="
+                          item.tipo==='tarde'"
+                        [class.btn-realizar-corte--diario]="
+                          item.tipo==='diario'"
+                        (click)="abrirFormCorte(item.tipo)">
+                  <mat-icon>point_of_sale</mat-icon>
+                  Realizar corte
+                </button>
+              } @else {
+                <button class="btn-ver-detalle"
+                        (click)="verDetalle(corte!)">
+                  <mat-icon>visibility</mat-icon>
+                  Ver detalle completo
+                </button>
+              }
+            </div>
+
+          </div>
+
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- ══════════════════════
+       RESUMEN DEL DÍA
+  ══════════════════════ -->
+  @if (!cargando() && resumen()) {
+    <div class="resumen-dia-card">
+
+      <div class="resumen-dia-header">
+        <mat-icon>bar_chart</mat-icon>
+        <h2>Resumen del día</h2>
+      </div>
+
+      <div class="resumen-metricas">
+
+        <div class="resumen-metrica resumen-metrica--destacado">
+          <mat-icon>point_of_sale</mat-icon>
+          <div>
+            <p class="rm-label">Total del día</p>
+            <p class="rm-valor">
+              ${{ (resumen()!.cortes['diario']?.total_ventas
+                   ?? resumen()!.previews['diario']?.total_ventas
+                   ?? 0) | number:'1.2-2' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="resumen-metrica">
+          <mat-icon>receipt_long</mat-icon>
+          <div>
+            <p class="rm-label">Órdenes finalizadas</p>
+            <p class="rm-valor">
+              {{ resumen()!.cortes['diario']?.total_ordenes
+                 ?? resumen()!.previews['diario']?.total_ordenes
+                 ?? 0 }}
+            </p>
+          </div>
+        </div>
+
+        <div class="resumen-metrica">
+          <mat-icon>payments</mat-icon>
+          <div>
+            <p class="rm-label">Efectivo total</p>
+            <p class="rm-valor">
+              ${{ (resumen()!.cortes['diario']?.total_efectivo
+                   ?? resumen()!.previews['diario']?.total_efectivo
+                   ?? 0) | number:'1.2-2' }}
+            </p>
+          </div>
+        </div>
+
+        <div class="resumen-metrica">
+          <mat-icon>credit_card</mat-icon>
+          <div>
+            <p class="rm-label">Tarjeta total</p>
+            <p class="rm-valor">
+              ${{ (resumen()!.cortes['diario']?.total_tarjeta
+                   ?? resumen()!.previews['diario']?.total_tarjeta
+                   ?? 0) | number:'1.2-2' }}
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  }
+
+  <!-- ══════════════════════
+       HISTORIAL
+  ══════════════════════ -->
+  <mat-card appearance="outlined" class="historial-card">
+    <mat-card-header>
+      <mat-card-title>Historial de cortes</mat-card-title>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content class="tabla-content">
+
+      @if (cargandoHistorial()) {
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+      }
+
+      <table mat-table [dataSource]="historial()"
+             class="tabla-historial mat-elevation-z0">
+
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef>Fecha</th>
+          <td mat-cell *matCellDef="let c">
+            {{ formatFecha(c.fecha) }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="tipo">
+          <th mat-header-cell *matHeaderCellDef>Turno</th>
+          <td mat-cell *matCellDef="let c">
+            <span class="tipo-badge tipo-badge--{{ c.tipo }}">
+              {{ c.tipo === 'manana' ? '☀️ Mañana'
+                 : c.tipo === 'tarde' ? '🌙 Tarde'
+                 : '📋 Diario' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="ventas">
+          <th mat-header-cell *matHeaderCellDef>Total ventas</th>
+          <td mat-cell *matCellDef="let c" class="monto-cell">
+            ${{ c.total_ventas | number:'1.2-2' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="efectivo">
+          <th mat-header-cell *matHeaderCellDef>Efectivo</th>
+          <td mat-cell *matCellDef="let c">
+            ${{ c.total_efectivo | number:'1.2-2' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="tarjeta">
+          <th mat-header-cell *matHeaderCellDef>Tarjeta</th>
+          <td mat-cell *matCellDef="let c">
+            ${{ c.total_tarjeta | number:'1.2-2' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="ordenes">
+          <th mat-header-cell *matHeaderCellDef>Órdenes</th>
+          <td mat-cell *matCellDef="let c">{{ c.total_ordenes }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="diferencia">
+          <th mat-header-cell *matHeaderCellDef>Arqueo</th>
+          <td mat-cell *matCellDef="let c">
+            @if (c.diferencia !== null) {
+              <span [class]="getColorDiferencia(c.diferencia)">
+                {{ +c.diferencia > 0 ? '+' : '' }}
+                ${{ c.diferencia | number:'1.2-2' }}
+              </span>
+            } @else {
+              <span class="sin-arqueo">Sin arqueo</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="usuario">
+          <th mat-header-cell *matHeaderCellDef>Realizó</th>
+          <td mat-cell *matCellDef="let c" class="usuario-cell">
+            {{ c.usuario?.nombreCompleto ?? '—' }}
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let c">
+            <button mat-icon-button
+                    color="primary"
+                    matTooltip="Ver detalle"
+                    (click)="verDetalle(c)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row *matRowDef="let c; columns: columnas"
+            class="fila-tabla"></tr>
+
+      </table>
+
+      @if (!cargandoHistorial() && historial().length === 0) {
+        <div class="tabla-vacia">
+          <mat-icon>point_of_sale</mat-icon>
+          <p>No hay cortes registrados aún</p>
+        </div>
+      }
+
+    </mat-card-content>
+  </mat-card>
+
+</div>

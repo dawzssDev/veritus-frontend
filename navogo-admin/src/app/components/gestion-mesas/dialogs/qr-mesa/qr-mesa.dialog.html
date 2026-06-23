@@ -1,0 +1,76 @@
+<div class="qr-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>qr_code</mat-icon>
+      Código QR - Mesa {{ mesa.identificador }}
+    </h2>
+    <button mat-icon-button (click)="cerrar()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content>
+    <!-- Loading State -->
+    @if (cargando()) {
+      <div class="loading-container">
+        <mat-spinner diameter="60"></mat-spinner>
+        <p>Generando código QR...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error() && !cargando()) {
+      <div class="error-container">
+        <mat-icon>error_outline</mat-icon>
+        <p>{{ error() }}</p>
+        <button mat-raised-button color="primary" (click)="cargarQr()">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+    }
+
+    <!-- QR Content -->
+    @if (!cargando() && !error() && qrDataUrl()) {
+      <div class="qr-content">
+        <div class="qr-container">
+          <img [src]="qrDataUrl()" alt="QR Code" class="qr-image">
+        </div>
+
+        <div class="mesa-info">
+          <h3>Mesa {{ mesa.identificador }}</h3>
+          @if (mesa.zona) {
+            <p class="zona">
+              <mat-icon>location_on</mat-icon>
+              {{ mesa.zona }}
+            </p>
+          }
+          <p class="url-info">{{ getTruncatedUrl() }}</p>
+        </div>
+      </div>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions>
+    <button 
+      mat-stroked-button 
+      (click)="regenerarQr()"
+      [disabled]="cargando() || regenerando()">
+      @if (regenerando()) {
+        <mat-spinner diameter="18"></mat-spinner>
+      } @else {
+        <mat-icon>refresh</mat-icon>
+      }
+      Regenerar QR
+    </button>
+
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="descargarPdf()"
+      [disabled]="cargando() || !qrDataUrl()">
+      <mat-icon>download</mat-icon>
+      Descargar PDF
+    </button>
+  </mat-dialog-actions>
+</div>

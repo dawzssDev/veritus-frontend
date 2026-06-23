@@ -1,0 +1,271 @@
+<div class="detalle-dialog">
+
+  <!-- ── HEADER ── -->
+  <div class="detalle-header">
+    <div class="detalle-header__izq">
+
+      <div class="tipo-icono-wrapper"
+           [class.tiw--manana]="data.corte.tipo === 'manana'"
+           [class.tiw--tarde]="data.corte.tipo === 'tarde'"
+           [class.tiw--diario]="data.corte.tipo === 'diario'">
+        <mat-icon>
+          {{ data.corte.tipo === 'manana' ? 'wb_sunny'
+             : data.corte.tipo === 'tarde' ? 'nights_stay'
+             : 'today' }}
+        </mat-icon>
+      </div>
+
+      <div>
+        <h2 class="detalle-titulo">
+          {{ data.corte.tipo === 'manana' ? 'Corte Mañana'
+             : data.corte.tipo === 'tarde' ? 'Corte Tarde'
+             : 'Corte Diario' }}
+        </h2>
+        <p class="detalle-fecha">
+          {{ formatFecha(data.corte.fecha) }}
+          ·
+          {{ data.corte.tipo === 'manana' ? '00:00 – 13:59'
+             : data.corte.tipo === 'tarde' ? '14:00 – 20:59'
+             : '00:00 – 23:59' }}
+        </p>
+      </div>
+
+    </div>
+
+    <button mat-icon-button mat-dialog-close class="btn-close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Barra de color por tipo -->
+  <div class="tipo-barra"
+       [class.tb--manana]="data.corte.tipo === 'manana'"
+       [class.tb--tarde]="data.corte.tipo === 'tarde'"
+       [class.tb--diario]="data.corte.tipo === 'diario'">
+  </div>
+
+  <mat-dialog-content class="detalle-body">
+
+    <!-- ── INFO DEL CIERRE ── -->
+    <div class="info-fila">
+      <div class="info-item">
+        <mat-icon class="info-item__icono">person</mat-icon>
+        <div>
+          <p class="info-item__label">Realizado por</p>
+          <p class="info-item__valor">
+            {{ data.corte.usuario?.nombreCompleto ?? '—' }}
+          </p>
+        </div>
+      </div>
+      <div class="info-item">
+        <mat-icon class="info-item__icono">schedule</mat-icon>
+        <div>
+          <p class="info-item__label">Cerrado el</p>
+          <p class="info-item__valor">
+            {{ data.corte.hora_cierre
+               | date:'d MMM yyyy · HH:mm' }}
+          </p>
+        </div>
+      </div>
+      <div class="info-item">
+        <mat-icon class="info-item__icono">receipt_long</mat-icon>
+        <div>
+          <p class="info-item__label">Órdenes</p>
+          <p class="info-item__valor">
+            {{ data.corte.total_ordenes }}
+            finalizadas
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TOTAL PRINCIPAL ── -->
+    <div class="total-principal">
+      <p class="total-principal__label">TOTAL DE VENTAS</p>
+      <p class="total-principal__monto">
+        ${{ data.corte.total_ventas | number:'1.2-2' }}
+      </p>
+      <p class="total-principal__sub">MXN</p>
+    </div>
+
+    <!-- ── DESGLOSE POR MÉTODO DE PAGO ── -->
+    <div class="seccion">
+      <p class="seccion__titulo">
+        <mat-icon>payments</mat-icon>
+        Desglose por método de pago
+      </p>
+      <div class="metodos-grid">
+
+        <div class="metodo-card">
+          <div class="metodo-card__icono metodo-card__icono--efectivo">
+            <mat-icon>payments</mat-icon>
+          </div>
+          <p class="metodo-card__label">Efectivo</p>
+          <p class="metodo-card__monto">
+            ${{ data.corte.total_efectivo | number:'1.2-2' }}
+          </p>
+        </div>
+
+        <div class="metodo-card">
+          <div class="metodo-card__icono metodo-card__icono--tarjeta">
+            <mat-icon>credit_card</mat-icon>
+          </div>
+          <p class="metodo-card__label">Tarjeta</p>
+          <p class="metodo-card__monto">
+            ${{ data.corte.total_tarjeta | number:'1.2-2' }}
+          </p>
+        </div>
+
+        <div class="metodo-card">
+          <div class="metodo-card__icono metodo-card__icono--transferencia">
+            <mat-icon>account_balance</mat-icon>
+          </div>
+          <p class="metodo-card__label">Transferencia</p>
+          <p class="metodo-card__monto">
+            ${{ data.corte.total_transferencia | number:'1.2-2' }}
+          </p>
+        </div>
+
+        <div class="metodo-card">
+          <div class="metodo-card__icono metodo-card__icono--propina">
+            <mat-icon>volunteer_activism</mat-icon>
+          </div>
+          <p class="metodo-card__label">Propinas</p>
+          <p class="metodo-card__monto">
+            ${{ data.corte.total_propinas | number:'1.2-2' }}
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── ARQUEO DE EFECTIVO ── -->
+    @if (data.corte.efectivo_contado !== null) {
+      <div class="seccion">
+        <p class="seccion__titulo">
+          <mat-icon>calculate</mat-icon>
+          Arqueo de efectivo
+        </p>
+
+        <div class="arqueo-grid">
+
+          <div class="arqueo-fila">
+            <div class="arqueo-fila__izq">
+              <mat-icon>account_balance_wallet</mat-icon>
+              <span>Fondo inicial</span>
+            </div>
+            <span class="arqueo-fila__monto">
+              ${{ data.corte.fondo_inicial | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="arqueo-fila">
+            <div class="arqueo-fila__izq">
+              <mat-icon>add_circle_outline</mat-icon>
+              <span>Ventas en efectivo</span>
+            </div>
+            <span class="arqueo-fila__monto">
+              + ${{ data.corte.total_efectivo | number:'1.2-2' }}
+            </span>
+          </div>
+
+          @if (+data.corte.retiro_efectivo > 0) {
+            <div class="arqueo-fila">
+              <div class="arqueo-fila__izq">
+                <mat-icon>remove_circle_outline</mat-icon>
+                <span>Retiro de efectivo</span>
+              </div>
+              <span class="arqueo-fila__monto arqueo-fila__monto--negativo">
+                - ${{ data.corte.retiro_efectivo | number:'1.2-2' }}
+              </span>
+            </div>
+          }
+
+          <div class="arqueo-separador"></div>
+
+          <div class="arqueo-fila arqueo-fila--esperado">
+            <div class="arqueo-fila__izq">
+              <mat-icon>calculate</mat-icon>
+              <span>Esperado en caja</span>
+            </div>
+            <span class="arqueo-fila__monto arqueo-fila__monto--esperado">
+              ${{ getEsperado() | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="arqueo-fila">
+            <div class="arqueo-fila__izq">
+              <mat-icon>touch_app</mat-icon>
+              <span>Efectivo contado</span>
+            </div>
+            <span class="arqueo-fila__monto">
+              ${{ data.corte.efectivo_contado | number:'1.2-2' }}
+            </span>
+          </div>
+
+        </div>
+
+        <!-- Resultado del arqueo -->
+        <div class="arqueo-resultado"
+             [class.ar--sobrante]="+data.corte.diferencia! > 0"
+             [class.ar--faltante]="+data.corte.diferencia! < 0"
+             [class.ar--cuadrado]="+data.corte.diferencia! === 0">
+
+          <div class="ar-icono">
+            <mat-icon>
+              {{ +data.corte.diferencia! > 0 ? 'trending_up'
+                 : +data.corte.diferencia! < 0 ? 'trending_down'
+                 : 'check_circle' }}
+            </mat-icon>
+          </div>
+
+          <div class="ar-info">
+            <p class="ar-label">
+              {{ +data.corte.diferencia! > 0 ? 'Sobrante en caja'
+                 : +data.corte.diferencia! < 0 ? 'Faltante en caja'
+                 : 'Caja cuadrada' }}
+            </p>
+            <p class="ar-monto">
+              {{ +data.corte.diferencia! > 0 ? '+' : '' }}
+              ${{ data.corte.diferencia | number:'1.2-2' }}
+            </p>
+          </div>
+
+          <div class="ar-estado">
+            {{ +data.corte.diferencia! > 0 ? '↑ Por encima'
+               : +data.corte.diferencia! < 0 ? '↓ Por debajo'
+               : '✓ OK' }}
+          </div>
+
+        </div>
+
+      </div>
+    }
+
+    <!-- ── NOTAS ── -->
+    @if (data.corte.notas) {
+      <div class="notas-section">
+        <mat-icon>sticky_note_2</mat-icon>
+        <div>
+          <p class="notas-label">Notas del corte</p>
+          <p class="notas-texto">{{ data.corte.notas }}</p>
+        </div>
+      </div>
+    }
+
+  </mat-dialog-content>
+
+  <!-- ── FOOTER ── -->
+  <div class="detalle-footer">
+    <div class="footer-info">
+      <mat-icon>lock</mat-icon>
+      <span>Corte cerrado · No editable</span>
+    </div>
+    <button mat-flat-button
+            color="primary"
+            mat-dialog-close>
+      Cerrar
+    </button>
+  </div>
+
+</div>

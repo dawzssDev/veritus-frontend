@@ -1,0 +1,345 @@
+<div class="detalle-shell">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar__izq">
+      <button class="btn-back" (click)="back()">
+        <mat-icon>arrow_back_ios</mat-icon>
+        <span>Pedidos</span>
+      </button>
+      <div class="topbar__sep"></div>
+      <span class="topbar__folio">#{{ folio ?? '...' }}</span>
+    </div>
+
+    <div class="topbar__der">
+      <div class="nav-arrows">
+        <button class="nav-btn" [disabled]="!prev" (click)="goPrev()">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <span class="nav-label">Folio {{ folio ?? '-' }}</span>
+        <button class="nav-btn" [disabled]="!next" (click)="goNext()">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+
+      <button class="btn-icon" (click)="imprimirTicket()">
+        <mat-icon>print</mat-icon>
+        <span>Imprimir</span>
+      </button>
+
+      <button class="btn-icon" [disabled]="isLoading" (click)="reload()">
+        <mat-icon [class.girar]="isLoading">sync</mat-icon>
+        <span>Actualizar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- LOADING -->
+  @if (isLoading) {
+    <div class="page-loading">
+      <div class="sk sk-h1"></div>
+      <div class="sk-row">
+        <div class="sk sk-block"></div>
+        <div class="sk sk-block"></div>
+      </div>
+      <div class="sk sk-comanda"></div>
+    </div>
+  }
+
+  <!-- ERROR -->
+  @if (!isLoading && errorMessage) {
+    <div class="page-error">
+      <mat-icon>error_outline</mat-icon>
+      <p>{{ errorMessage }}</p>
+      <button (click)="reload()">Reintentar</button>
+    </div>
+  }
+
+  <!-- CONTENIDO -->
+  @if (!isLoading && order) {
+    <div class="detalle-body">
+
+      <!-- ── HERO ROW ── -->
+      <div class="hero-row">
+
+        <!-- Título y meta -->
+        <div class="hero-row__izq">
+          <h1 class="hero-titulo">Pedido #{{ folio }}</h1>
+          <div class="hero-meta">
+            <span class="hero-fecha">
+              <mat-icon>schedule</mat-icon>
+              {{ order.created_at | date:'d MMM · HH:mm':'':'es' }}
+            </span>
+
+            <!-- Chip tipo -->
+            <div class="chip-tipo"
+                 [class.chip-tipo--mesa]="order.shipping_type === 'local'"
+                 [class.chip-tipo--domicilio]="order.shipping_type === 'domicilio'"
+                 [class.chip-tipo--llevar]="order.shipping_type === 'recoger'">
+              <mat-icon>
+                {{ order.shipping_type === 'local'
+                   ? 'table_restaurant'
+                   : order.shipping_type === 'domicilio'
+                   ? 'delivery_dining' : 'shopping_bag' }}
+              </mat-icon>
+              {{ order.shipping_type === 'local' ? 'Mesa'
+                 : order.shipping_type === 'domicilio' ? 'Domicilio'
+                 : 'Para llevar' }}
+            </div>
+
+            <!-- Chip estatus -->
+            <div class="chip-estatus chip-estatus--{{ order.estatus }}">
+              <mat-icon>{{ getIconoEstatus(order.estatus) }}</mat-icon>
+              {{ getEtiquetaEstatus(order.estatus) }}
+            </div>
+
+            <!-- Timer -->
+            @if (order.estatus !== 6 && order.estatus !== 7) {
+              <div class="chip-timer"
+                   [class.chip-timer--ok]="getMinutos() < 15"
+                   [class.chip-timer--alerta]="getMinutos() >= 15 && getMinutos() < 30"
+                   [class.chip-timer--urgente]="getMinutos() >= 30">
+                <mat-icon>timer</mat-icon>
+                {{ getMinutos() }}min
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Total destacado -->
+        <div class="hero-total">
+          <span class="hero-total__label">Total</span>
+          <span class="hero-total__monto">{{ formatMoney(order.total) }}</span>
+        </div>
+
+      </div>
+
+      <!-- ── FILA DE INFO COMPACTA ── -->
+      <div class="info-strip">
+
+        <!-- Cliente -->
+        <div class="info-strip__item">
+          <mat-icon class="info-strip__icono">person_outline</mat-icon>
+          <div class="info-strip__contenido">
+            <span class="info-strip__label">Cliente</span>
+            <span class="info-strip__valor">
+              {{ order.customer_name || '—' }}
+            </span>
+            @if (order.customer_phone) {
+              <a class="btn-whatsapp"
+                 [href]="'https://wa.me/' + cleanPhoneNumber(order.customer_phone)"
+                 target="_blank">
+                <mat-icon>chat</mat-icon>
+                WhatsApp
+              </a>
+            }
+          </div>
+        </div>
+
+        <div class="info-strip__sep"></div>
+
+        <!-- Pago -->
+        <div class="info-strip__item">
+          <mat-icon class="info-strip__icono">
+            {{ paymentIcon(order.payment_method) }}
+          </mat-icon>
+          <div class="info-strip__contenido">
+            <span class="info-strip__label">Pago</span>
+            <span class="info-strip__valor">
+              {{ order.payment_method | titlecase }}
+            </span>
+            <span class="info-strip__badge"
+                  [class.info-strip__badge--ok]="order.pago_confirmado"
+                  [class.info-strip__badge--pending]="!order.pago_confirmado">
+              {{ order.pago_confirmado ? 'Confirmado' : 'Pendiente' }}
+            </span>
+          </div>
+          @if (!order.pago_confirmado
+               && order.estatus !== 1
+               && order.estatus !== 6
+               && order.estatus !== 7) {
+            <button class="btn-confirmar-inline"
+                    [disabled]="procesando"
+                    (click)="confirmarPago()">
+              Confirmar
+            </button>
+          }
+        </div>
+
+        <div class="info-strip__sep"></div>
+
+        <!-- Entrega -->
+        @if (order.shipping_type !== 'local') {
+          <div class="info-strip__item">
+            <mat-icon class="info-strip__icono">local_shipping</mat-icon>
+            <div class="info-strip__contenido">
+              <span class="info-strip__label">Entrega</span>
+              <span class="info-strip__valor">
+                {{ order.shipping_type === 'domicilio'
+                   ? 'Domicilio' : 'Para llevar' }}
+              </span>
+              @if (order.shipping_type === 'domicilio' && formatDeliveryAddress(order.delivery_address) !== '-') {
+                <span class="info-strip__subvalor">{{ formatDeliveryAddress(order.delivery_address) }}</span>
+              }
+              @if (order.shipping_type === 'domicilio' && getDeliveryReferencia(order.delivery_address)) {
+                <span class="info-strip__subvalor info-strip__referencia">
+                  Ref: {{ getDeliveryReferencia(order.delivery_address) }}
+                </span>
+              }
+              <span class="info-strip__badge"
+                    [class.info-strip__badge--ok]="order.envio_confirmado"
+                    [class.info-strip__badge--pending]="!order.envio_confirmado">
+                {{ order.envio_confirmado ? 'Confirmado' : 'Pendiente' }}
+              </span>
+              @if (order.shipping_type === 'domicilio' && getGoogleMapsLink(order.delivery_address)) {
+                <a [href]="getGoogleMapsLink(order.delivery_address)!"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="maps-link">
+                  <mat-icon style="font-size:14px;width:14px;height:14px;line-height:14px">map</mat-icon>
+                  Ver en Maps
+                </a>
+              }
+            </div>
+          </div>
+          <div class="info-strip__sep"></div>
+        }
+
+        <!-- Desglose -->
+        <div class="info-strip__item info-strip__item--desglose">
+          <mat-icon class="info-strip__icono">receipt</mat-icon>
+          <div class="info-strip__contenido">
+            <span class="info-strip__label">Desglose</span>
+            <div class="desglose-mini">
+              <span>Subtotal</span>
+              <span>{{ formatMoney(order.subtotal) }}</span>
+            </div>
+            @if (+order.tip > 0) {
+              <div class="desglose-mini">
+                <span>Propina</span>
+                <span>{{ formatMoney(order.tip) }}</span>
+              </div>
+            }
+            @if (+order.shipping_cost > 0) {
+              <div class="desglose-mini">
+                <span>Envío</span>
+                <span>{{ formatMoney(order.shipping_cost) }}</span>
+              </div>
+            }
+            <div class="desglose-mini desglose-mini--total">
+              <span>Total</span>
+              <span>{{ formatMoney(order.total) }}</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── COMANDA ── -->
+      <div class="comanda-card">
+
+        <div class="comanda-card__header">
+          <div class="comanda-card__titulo">
+            <mat-icon>restaurant_menu</mat-icon>
+            Comanda
+          </div>
+          <span class="comanda-card__count">
+            {{ order.items?.length ?? 0 }}
+            {{ (order.items?.length ?? 0) === 1 ? 'producto' : 'productos' }}
+          </span>
+        </div>
+
+        <div class="comanda-lista">
+          @for (item of order.items ?? [];
+                track item.product_id ?? $index;
+                let i = $index) {
+
+            <div class="comanda-item">
+              <div class="comanda-item__num">{{ i + 1 }}</div>
+
+              <div class="comanda-item__cuerpo">
+                <div class="comanda-item__fila-top">
+                  <span class="comanda-item__nombre">{{ item.name }}</span>
+                  <div class="comanda-item__der">
+                    <span class="comanda-item__qty">× {{ item.quantity }}</span>
+                    <span class="comanda-item__precio">
+                      {{ formatMoney(calcItemTotalPrice(item)) }}
+                    </span>
+                  </div>
+                </div>
+
+                @if (item.selections?.length) {
+                  <div class="comanda-item__sels">
+                    @for (s of item.selections; track $index) {
+                      @if (s.groupTitle?.toLowerCase() !== 'nota') {
+                        <span class="sel-chip">
+                          {{ s.extra ?? s.groupTitle }}
+                          @if ((s['precio-extra'] ?? 0) > 0) {
+                            <span class="sel-precio">
+                              +{{ formatMoney(s['precio-extra']) }}
+                            </span>
+                          }
+                        </span>
+                      }
+                    }
+                  </div>
+                }
+
+                <!-- Nota del item -->
+                @if (item.selections) {
+                  @for (s of item.selections; track $index) {
+                    @if (s.groupTitle?.toLowerCase() === 'nota' && s.extra) {
+                      <div class="comanda-item__nota">
+                        <mat-icon>sticky_note_2</mat-icon>
+                        {{ s.extra }}
+                      </div>
+                    }
+                  }
+                }
+              </div>
+            </div>
+
+          }
+        </div>
+
+      </div>
+
+      <!-- NOTA DEL PEDIDO -->
+      @if (order.note) {
+        <div class="nota-pedido">
+          <mat-icon>sticky_note_2</mat-icon>
+          <div>
+            <p class="nota-pedido__label">Nota del pedido</p>
+            <p class="nota-pedido__texto">{{ order.note }}</p>
+          </div>
+        </div>
+      }
+
+    </div>
+  }
+
+  <!-- FOOTER ACCIONES -->
+  @if (!isLoading && order && puedeAvanzar()) {
+    <div class="detalle-footer">
+      <button class="btn-cancelar"
+              [disabled]="procesando"
+              (click)="cancelar()">
+        <mat-icon>close</mat-icon>
+        Cancelar pedido
+      </button>
+
+      <button class="btn-avanzar-principal"
+              [disabled]="procesando"
+              (click)="avanzarEstatus()">
+        @if (procesando) {
+          <span class="spinner-sm"></span>
+          Procesando...
+        } @else {
+          <mat-icon>{{ getIconoAccion() }}</mat-icon>
+          {{ getTextoAccion() }}
+        }
+      </button>
+    </div>
+  }
+
+</div>

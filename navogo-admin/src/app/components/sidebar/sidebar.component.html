@@ -1,0 +1,170 @@
+<!-- Overlay para móvil -->
+@if (isMobileOpen()) {
+  <div 
+    class="sidebar-overlay active" 
+    (click)="closeMobileSidebar()"
+    aria-label="Cerrar menú"></div>
+}
+
+<!-- Sidebar Container -->
+<aside 
+  class="sidebar" 
+  [class.collapsed]="isCollapsed()"
+  [class.mobile-open]="isMobileOpen()"
+  role="navigation"
+  aria-label="Navegación principal">
+  
+  <!-- Header del Sidebar -->
+  <div class="sidebar-header">
+    <!-- Logo / Título -->
+    <div class="logo-container">
+      @if (!isCollapsed()) {
+        <div class="logo-full">
+          <img class="logo-img" src="logo.png" alt="VERITUS" />
+          <span class="logo-text">VERITUS</span>
+        </div>
+      } @else {
+        <div class="logo-collapsed">
+          <img class="logo-img" src="logo.png" alt="VERITUS" />
+        </div>
+      }
+    </div>
+
+    <!-- Botón Toggle -->
+    <button 
+      mat-icon-button 
+      class="toggle-btn"
+      (click)="toggleSidebar()"
+      [matTooltip]="isCollapsed() ? 'Expandir menú' : 'Colapsar menú'"
+      matTooltipPosition="right"
+      aria-label="Toggle sidebar">
+      <mat-icon>{{ isCollapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+    </button>
+  </div>
+
+  <!-- Navegación Principal -->
+  <nav class="sidebar-nav">
+    <ul class="menu-list">
+      @for (item of menuItems(); track item.id) {
+        @if (hasPermission(item)) {
+          <li class="menu-item">
+            <!-- Item sin hijos -->
+            @if (!item.children) {
+              <a
+                class="menu-link"
+                [routerLink]="item.locked ? null : item.route"
+                [class.active]="isActive(item.route)"
+                [class.disabled]="item.disabled"
+                [class.locked]="item.locked"
+                [matTooltip]="item.locked ? 'Próximamente' : getTooltip(item)"
+                matTooltipPosition="right"
+                (click)="navigateTo(item)">
+                
+                <mat-icon class="menu-icon">{{ item.icon }}</mat-icon>
+                
+                @if (!isCollapsed()) {
+                  <span class="menu-label">{{ item.label }}</span>
+                  
+                  @if (item.badge) {
+                    <span 
+                      class="menu-badge"
+                      [class.badge-primary]="item.badgeColor === 'primary'"
+                      [class.badge-accent]="item.badgeColor === 'accent'"
+                      [class.badge-warn]="item.badgeColor === 'warn'">
+                      {{ item.badge }}
+                    </span>
+                  }
+
+                  @if (item.locked) {
+                    <mat-icon class="lock-icon">lock</mat-icon>
+                  }
+                }
+              </a>
+            }
+
+            <!-- Item con submenú -->
+            @if (item.children) {
+              <div class="menu-item-with-children">
+                <button
+                  class="menu-link submenu-trigger"
+                  [class.active]="hasActiveChild(item)"
+                  [class.expanded]="item.expanded"
+                  [matTooltip]="getTooltip(item)"
+                  matTooltipPosition="right"
+                  [matMenuTriggerFor]="isCollapsed() ? submenuPopup : null"
+                  (click)="navigateTo(item)">
+                  
+                  <mat-icon class="menu-icon">{{ item.icon }}</mat-icon>
+                  
+                  @if (!isCollapsed()) {
+                    <span class="menu-label">{{ item.label }}</span>
+                    <mat-icon class="expand-icon">
+                      {{ item.expanded ? 'expand_less' : 'expand_more' }}
+                    </mat-icon>
+                  }
+                </button>
+
+                <!-- Submenú expandido (visible cuando el sidebar NO está colapsado) -->
+                @if (!isCollapsed() && item.expanded) {
+                  <ul class="submenu">
+                    @for (child of item.children; track child.id) {
+                      @if (hasPermission(child)) {
+                        <li class="submenu-item">
+                          <a
+                            class="submenu-link"
+                            [routerLink]="child.route"
+                            [class.active]="isActive(child.route)"
+                            [class.disabled]="child.disabled">
+                            
+                            <mat-icon class="submenu-icon">{{ child.icon }}</mat-icon>
+                            <span class="submenu-label">{{ child.label }}</span>
+                            
+                            @if (child.badge) {
+                              <span 
+                                class="menu-badge"
+                                [class.badge-primary]="child.badgeColor === 'primary'"
+                                [class.badge-accent]="child.badgeColor === 'accent'"
+                                [class.badge-warn]="child.badgeColor === 'warn'">
+                                {{ child.badge }}
+                              </span>
+                            }
+                          </a>
+                        </li>
+                      }
+                    }
+                  </ul>
+                }
+
+                <!-- Menú emergente (visible cuando el sidebar ESTÁ colapsado) -->
+                <mat-menu #submenuPopup="matMenu" class="sidebar-popup-menu">
+                  @for (child of item.children; track child.id) {
+                    @if (hasPermission(child)) {
+                      <button 
+                        mat-menu-item
+                        [routerLink]="child.route"
+                        [disabled]="child.disabled">
+                        <mat-icon>{{ child.icon }}</mat-icon>
+                        <span>{{ child.label }}</span>
+                      </button>
+                    }
+                  }
+                </mat-menu>
+              </div>
+            }
+          </li>
+        }
+      }
+    </ul>
+  </nav>
+
+  <!-- Footer del Sidebar (Opcional) -->
+  <div class="sidebar-footer">
+    @if (!isCollapsed()) {
+      <div class="footer-content">
+        <span class="footer-text">v1.0.0</span>
+      </div>
+    } @else {
+      <mat-icon class="footer-icon">info</mat-icon>
+    }
+  </div>
+</aside>

@@ -1,0 +1,110 @@
+<div class="dialog-container">
+  <div mat-dialog-title class="dialog-title">
+    <div class="dialog-title-info">
+      <code class="folio-code">{{ data.factura.folio }}</code>
+      <span class="mat-body-1">{{ data.factura.periodo }}</span>
+    </div>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <mat-dialog-content class="dialog-body">
+    <!-- Chip de estatus -->
+    <div class="dialog-estatus">
+      <mat-chip
+        class="estatus-chip estatus-{{ data.factura.estatus }}"
+        [disableRipple]="true"
+      >
+        <mat-icon matChipAvatar>
+          {{
+            data.factura.estatus === 'pagada'
+              ? 'check_circle'
+              : data.factura.estatus === 'pendiente'
+                ? 'schedule'
+                : data.factura.estatus === 'vencida'
+                  ? 'warning'
+                  : 'cancel'
+          }}
+        </mat-icon>
+        {{ getEstatusLabel(data.factura.estatus) }}
+      </mat-chip>
+      @if (data.factura.fechaPago) {
+      <span class="mat-caption fecha-pago-label">
+        Pagado el {{ formatFecha(data.factura.fechaPago) }}
+      </span>
+      }
+    </div>
+
+    <!-- Concepto -->
+    <div class="dialog-campo">
+      <p class="dialog-campo__label mat-caption">Concepto</p>
+      <p class="dialog-campo__valor mat-body-1">
+        {{ data.factura.concepto }}
+      </p>
+    </div>
+
+    <!-- Fechas en grid -->
+    <div class="dialog-grid-2">
+      <div class="dialog-campo">
+        <p class="dialog-campo__label mat-caption">Fecha de emisión</p>
+        <p class="dialog-campo__valor mat-body-1">
+          {{ formatFecha(data.factura.fechaEmision) }}
+        </p>
+      </div>
+      <div class="dialog-campo">
+        <p class="dialog-campo__label mat-caption">Fecha de vencimiento</p>
+        <p class="dialog-campo__valor mat-body-1">
+          {{ formatFecha(data.factura.fechaVencimiento) }}
+        </p>
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Desglose de importes -->
+    <div class="dialog-importes">
+      <div class="importe-fila">
+        <span class="mat-body-2">Subtotal</span>
+        <span class="mat-body-2">
+          ${{ data.factura.subtotal | number : '1.2-2' }} MXN
+        </span>
+      </div>
+      <div class="importe-fila">
+        <span class="mat-body-2">IVA (16%)</span>
+        <span class="mat-body-2">
+          ${{ data.factura.iva | number : '1.2-2' }} MXN
+        </span>
+      </div>
+      <mat-divider></mat-divider>
+      <div class="importe-fila importe-total">
+        <span class="mat-subtitle-2">Total</span>
+        <span class="mat-subtitle-1 total-amount">
+          ${{ data.factura.total | number : '1.2-2' }} MXN
+        </span>
+      </div>
+    </div>
+
+    @if (data.factura.metodoPago) {
+    <div class="dialog-campo">
+      <p class="dialog-campo__label mat-caption">Método de pago</p>
+      <div class="metodo-pago-row">
+        <mat-icon class="metodo-icon">credit_card</mat-icon>
+        <p class="mat-body-1">{{ data.factura.metodoPago }}</p>
+      </div>
+    </div>
+    }
+  </mat-dialog-content>
+
+  <mat-divider></mat-divider>
+
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Cerrar</button>
+    <button mat-flat-button class="btn-pdf" (click)="descargarPDF()">
+      <mat-icon>picture_as_pdf</mat-icon>
+      Descargar PDF
+    </button>
+  </mat-dialog-actions>
+</div>

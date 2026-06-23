@@ -1,0 +1,71 @@
+<div mat-dialog-title class="dialog-title">
+  <span>{{ esEdicion ? 'Editar sucursal' : 'Nueva sucursal' }}</span>
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-divider></mat-divider>
+
+<mat-dialog-content class="dialog-body">
+  <form [formGroup]="form" class="sucursal-form">
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Nombre de la sucursal *</mat-label>
+      <mat-icon matPrefix>store</mat-icon>
+      <input matInput formControlName="nombre"
+             placeholder="ej. Centro, Sur, Norte" />
+      @if (form.get('nombre')?.hasError('required')
+           && form.get('nombre')?.touched) {
+        <mat-error>El nombre es requerido</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Dirección</mat-label>
+      <mat-icon matPrefix>location_on</mat-icon>
+      <input matInput formControlName="direccion"
+             placeholder="ej. Av. Principal 123, Col. Centro" />
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Teléfono</mat-label>
+      <mat-icon matPrefix>phone</mat-icon>
+      <input matInput type="tel" formControlName="telefono"
+             placeholder="ej. 6721234567" />
+    </mat-form-field>
+
+    <div class="toggle-row">
+      <span class="mat-body-2">Sucursal activa</span>
+      <mat-slide-toggle formControlName="estatus" color="primary">
+      </mat-slide-toggle>
+    </div>
+
+    @if (error()) {
+      <div class="form-error">
+        <mat-icon style="font-size:14px;width:14px;height:14px">warning</mat-icon>
+        {{ error() }}
+      </div>
+    }
+
+  </form>
+</mat-dialog-content>
+
+<mat-divider></mat-divider>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="guardando()">
+    Cancelar
+  </button>
+  <button mat-flat-button
+          color="primary"
+          [disabled]="form.invalid || guardando()"
+          (click)="guardar()">
+    @if (guardando()) {
+      <span class="spinner-btn"></span>
+      Guardando...
+    } @else {
+      {{ esEdicion ? 'Guardar cambios' : 'Crear sucursal' }}
+    }
+  </button>
+</mat-dialog-actions>

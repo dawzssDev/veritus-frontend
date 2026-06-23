@@ -1,0 +1,364 @@
+.soporte-page {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  // max-width: 1100px;
+}
+
+// ── Header ─────────────────────────────────────────────────────
+.soporte-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+
+  h1 { font-size: 26px; font-weight: 800; color: #1A1A11; margin: 0 0 4px; }
+  p  { font-size: 13px; color: #6b7280; margin: 0; }
+}
+
+// ── Vista toggle ────────────────────────────────────────────────
+.vista-toggle {
+  display: flex;
+  gap: 4px;
+  background: #f3f4f6;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  padding: 3px;
+
+  button {
+    display: flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border-radius: 7px;
+    border: none; background: transparent;
+    color: #6b7280; font-size: 13px;
+    font-family: inherit; cursor: pointer;
+    transition: all 0.15s;
+
+    mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+    &.activo {
+      background: white; color: #1A1A11; font-weight: 600;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+.toggle-badge {
+  background: #1C8C40; color: white; border-radius: 10px;
+  padding: 1px 7px; font-size: 11px; font-weight: 700;
+}
+
+// ── Layout del formulario ───────────────────────────────────────
+.ticket-layout {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+// ── Columna info ────────────────────────────────────────────────
+.ticket-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.info-card {
+  background: linear-gradient(135deg,
+    rgba(28, 140, 64, 0.06) 0%, rgba(15, 77, 42, 0.04) 100%);
+  border: 1px solid rgba(28, 140, 64, 0.15);
+  border-radius: 14px;
+  padding: 18px;
+
+  &__icono {
+    font-size: 28px; width: 28px; height: 28px;
+    color: #1C8C40; margin-bottom: 10px; display: block;
+  }
+  h3 { font-size: 15px; font-weight: 700; color: #1A1A11; margin: 0 0 8px; }
+  p  { font-size: 13px; color: #6b7280; margin: 0; line-height: 1.6; }
+}
+
+.tiempos-respuesta {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.tiempos-titulo {
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: #9ca3af; margin: 0 0 10px;
+}
+
+.tiempo-item {
+  display: flex; justify-content: space-between;
+  align-items: center; padding: 6px 0;
+  font-size: 13px; color: #374151;
+
+  &:not(:last-child) { border-bottom: 1px solid rgba(0, 0, 0, 0.05); }
+}
+
+.tiempo-prioridad {
+  font-weight: 600;
+  &.tiempo-alta  { color: #dc2626; }
+  &.tiempo-media { color: #d97706; }
+  &.tiempo-baja  { color: #1C8C40; }
+}
+
+.contacto-directo {
+  display: flex; align-items: center; gap: 12px;
+  background: white; border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px; padding: 14px;
+
+  > mat-icon { font-size: 22px; width: 22px; height: 22px; color: #25D366; }
+}
+
+.contacto-titulo {
+  font-size: 11px; font-weight: 700; color: #9ca3af;
+  margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+.btn-whatsapp {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #25D366; color: white; border-radius: 8px;
+  padding: 7px 14px; font-size: 13px; font-weight: 600;
+  text-decoration: none; transition: background 0.15s;
+
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+  &:hover { background: #128C7E; }
+}
+
+// ── Formulario ──────────────────────────────────────────────────
+.ticket-form-card {
+  ::ng-deep mat-card-content { padding: 20px !important; }
+}
+
+form { display: flex; flex-direction: column; gap: 16px; }
+
+.campo-full { width: 100%; }
+
+.campo-grupo { display: flex; flex-direction: column; gap: 8px; }
+
+.campo-label-custom {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em;
+  color: #9ca3af; margin: 0;
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+}
+
+// Grid categorías
+.categorias-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+
+  @media (max-width: 600px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.cat-opcion {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; padding: 12px 8px; border-radius: 10px;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  background: white; cursor: pointer;
+  transition: all 0.15s; text-align: center;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; color: #9ca3af; }
+
+  &:hover {
+    border-color: rgba(28, 140, 64, 0.3);
+    background: rgba(28, 140, 64, 0.03);
+    mat-icon { color: #1C8C40; }
+  }
+
+  &--activa {
+    border-color: #1C8C40 !important;
+    background: rgba(28, 140, 64, 0.06) !important;
+    mat-icon { color: #1C8C40 !important; }
+    .cat-label { color: #1C8C40 !important; }
+  }
+}
+
+.cat-label { font-size: 12px; font-weight: 700; color: #374151; }
+.cat-desc  { font-size: 10px; color: #9ca3af; line-height: 1.3; }
+
+// Grid prioridades
+.prioridad-grid {
+  display: flex; gap: 8px;
+  @media (max-width: 600px) { flex-direction: column; }
+}
+
+.prio-opcion {
+  flex: 1; display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; border-radius: 10px;
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  background: white; cursor: pointer;
+  transition: all 0.15s; text-align: left;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; flex-shrink: 0; }
+
+  &:hover {
+    border-color: var(--prio-color, #1C8C40);
+    background: color-mix(in srgb, var(--prio-color, #1C8C40) 6%, white);
+  }
+
+  &--activa {
+    border-color: var(--prio-color) !important;
+    background: color-mix(in srgb, var(--prio-color) 8%, white) !important;
+  }
+}
+
+.prio-label { display: block; font-size: 13px; font-weight: 700; }
+.prio-desc  { display: block; font-size: 11px; color: #9ca3af; }
+
+.char-count {
+  text-align: right; font-size: 12px; color: #9ca3af;
+  &--limite { color: #dc2626; font-weight: 700; }
+}
+
+.form-error {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(220, 38, 38, 0.06);
+  border: 1px solid rgba(220, 38, 38, 0.2);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 13px; color: #dc2626;
+  mat-icon { flex-shrink: 0; }
+}
+
+.btn-enviar {
+  width: 100%; height: 50px; border-radius: 12px; border: none;
+  background: #1C8C40; color: white;
+  font-size: 15px; font-weight: 700; font-family: inherit;
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; gap: 8px; transition: all 0.15s;
+
+  mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  &:hover:not(:disabled) { background: #0F4D2A; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.spinner-btn {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white; border-radius: 50%;
+  animation: spin 0.6s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+// ── Estado de éxito ─────────────────────────────────────────────
+.ticket-enviado {
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+  padding: 60px 24px; gap: 14px;
+  animation: fadeUp 0.4s ease;
+
+  &__icono {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: rgba(28, 140, 64, 0.1);
+    display: flex; align-items: center; justify-content: center;
+    mat-icon { font-size: 36px; width: 36px; height: 36px; color: #1C8C40; }
+  }
+
+  h2 { font-size: 24px; font-weight: 800; color: #1A1A11; margin: 0; }
+  p  { font-size: 15px; color: #6b7280; margin: 0; max-width: 400px; line-height: 1.6; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.btn-ver-tickets,
+.btn-nuevo-ticket {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #1C8C40; color: white; border: none;
+  border-radius: 10px; padding: 10px 20px;
+  font-size: 14px; font-weight: 600; font-family: inherit;
+  cursor: pointer; transition: all 0.15s;
+  mat-icon { font-size: 17px; width: 17px; height: 17px; }
+  &:hover { background: #0F4D2A; }
+}
+
+// ── Historial ───────────────────────────────────────────────────
+.historial-vacio {
+  display: flex; flex-direction: column;
+  align-items: center; padding: 80px 24px;
+  gap: 12px; text-align: center;
+
+  mat-icon { font-size: 52px; width: 52px; height: 52px; color: #d1d5db; }
+  p { font-size: 15px; color: #6b7280; margin: 0; }
+}
+
+.tickets-lista {
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.ticket-item {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-left: 4px solid;
+  border-radius: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; flex-direction: column; gap: 8px;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+  }
+
+  &__header {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+}
+
+.ticket-num {
+  font-family: monospace; font-size: 13px; font-weight: 700;
+  background: #f3f4f6; border-radius: 6px; padding: 3px 8px;
+  color: #1A1A11;
+}
+
+.ticket-estatus {
+  display: inline-flex; align-items: center; gap: 4px;
+  border-radius: 20px; padding: 3px 10px;
+  font-size: 12px; font-weight: 700;
+  mat-icon { font-size: 13px; width: 13px; height: 13px; }
+}
+
+.ticket-titulo {
+  font-size: 15px; font-weight: 700; color: #1A1A11; margin: 0;
+}
+
+.ticket-meta {
+  display: flex; flex-wrap: wrap; gap: 12px;
+}
+
+.meta-item {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; color: #6b7280;
+  mat-icon { font-size: 13px; width: 13px; height: 13px; }
+}
+
+.ticket-respuesta {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: rgba(28, 140, 64, 0.06);
+  border: 1px solid rgba(28, 140, 64, 0.15);
+  border-radius: 8px; padding: 10px 12px;
+
+  mat-icon {
+    font-size: 16px; width: 16px; height: 16px;
+    color: #1C8C40; flex-shrink: 0; margin-top: 1px;
+  }
+  p {
+    font-size: 13px; color: #374151; margin: 0;
+    overflow: hidden; text-overflow: ellipsis;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+}

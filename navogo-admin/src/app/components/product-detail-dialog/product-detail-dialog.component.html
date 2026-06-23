@@ -1,0 +1,236 @@
+@if (open) {
+<div
+  class="modal-overlay"
+  (click)="onOverlayClick()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="product-title">
+  <div #dialog class="modal-content product-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="product-title">Detalle del producto</h2>
+      <button
+        #closeButton
+        class="modal-close"
+        type="button"
+        (click)="close()"
+        aria-label="Cerrar detalle del producto">
+        <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      @if (loading) {
+        <mat-progress-spinner mode="indeterminate" diameter="28"></mat-progress-spinner>
+      }
+      @if (!loading && errorMessage) {
+        <div class="state state-error">{{ errorMessage }}</div>
+      }
+
+      @if (!loading && !errorMessage && product) {
+        <div class="product-hero">
+          <div class="product-image" (click)="expandImage()" role="button" tabindex="0" [attr.aria-label]="'Ver imagen de ' + product.nombre + ' en grande'">
+            <img [src]="imageUrl" [alt]="product.nombre" />
+            <div class="image-expand-hint">
+              <mat-icon>zoom_in</mat-icon>
+            </div>
+
+            @if (isPromo()) {
+            <div class="badge badge-promo badge-left">
+              <mat-icon class="badge-icon">local_fire_department</mat-icon>
+              <div class="badge-text">
+                <div class="badge-main">PROMO</div>
+              </div>
+            </div>
+            }
+            @else if (hasDiscount()) {
+            <div class="badge badge-discount badge-left">
+              <div class="badge-main">-{{ getDiscountPercent() }}%</div>
+              <div class="badge-sub">OFERTA</div>
+            </div>
+            }
+            
+            @if (hasCombo()) {
+            <div class="badge badge-combo badge-right">
+              <mat-icon class="badge-icon">restaurant</mat-icon>
+              <div class="badge-text">
+                <div class="badge-main">COMBO</div>
+              </div>
+            </div>
+            }
+          </div>
+
+          <div class="product-main">
+            <h3 class="product-name">{{ product.nombre }}</h3>
+            <p class="product-description">{{ product.descripcion }}</p>
+
+            @if (isPromo() && getPromoTimeRemaining(); as timeRemaining) {
+              <div class="promo-countdown">
+                <mat-icon class="countdown-icon">schedule</mat-icon>
+                <div class="countdown-timer">
+                  @if (!timeRemaining.expired) {
+                    @if (timeRemaining.days > 0) {
+                      <span class="time-unit">{{ timeRemaining.days }}d</span>
+                    }
+                    <span class="time-unit">{{ timeRemaining.hours }}h</span>
+                    <span class="time-unit">{{ timeRemaining.minutes }}m</span>
+                    <span class="time-unit">{{ timeRemaining.seconds }}s</span>
+                  } @else {
+                    <span class="expired-text">Expirada</span>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="price-block" [class.price-block--variable]="isPrecioVariable()">
+              @if (isPrecioVariable()) {
+                <label class="price-variable-label" for="custom-price-input">Precio de venta</label>
+                <div class="price-row">
+                  <div class="price-variable-input-wrap">
+                    <span class="price-currency" aria-hidden="true">$</span>
+                    <input
+                      id="custom-price-input"
+                      class="price-final price-variable-input"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      inputmode="decimal"
+                      [value]="customUnitPrice ?? ''"
+                      (input)="onCustomPriceChange($any($event.target).value)"
+                      aria-label="Precio de venta" />
+                  </div>
+                </div>
+                <p class="price-variable-hint">
+                  Precio de referencia: {{ formatPrice(product.precio) }}.
+                  El cajero define el precio al vender.
+                </p>
+                @if (priceInputError) {
+                  <p class="price-variable-error">{{ priceInputError }}</p>
+                }
+                @if (getSelectedExtraTotal() > 0) {
+                  <div class="price-total-line">
+                    Total con complementos: {{ formatPrice(getEffectiveUnitPrice()) }}
+                  </div>
+                }
+              } @else {
+                <div class="price-row">
+                  <div class="price-final" [class.is-discount]="hasDiscount()">
+                    {{ formatPrice(getEffectiveUnitPrice()) }}
+                  </div>
+                  @if (hasDiscount() && getDiscountPercent() > 0) {
+                  <div class="save-pill">
+                    -{{ getDiscountPercent() }}%
+                  </div>
+                  }
+                </div>
+
+                @if (hasDiscount()) {
+                <div class="price-original">
+                  {{ formatPrice(product.precio) }}
+                </div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (adicionales.length > 0) {
+        <div class="addons">
+          <h4 class="addons-title">Complementos</h4>
+
+          @for (group of adicionales; track group.titulo) {
+            <div class="addon-group">
+              <div class="group-title">
+                {{ group.titulo }}
+                @if (isGroupMultiSelect(group)) {
+                  <span class="group-badge">Puedes elegir varios</span>
+                }
+              </div>
+
+              <div class="options" [attr.role]="isGroupMultiSelect(group) ? 'group' : 'radiogroup'" [attr.aria-label]="group.titulo">
+                @for (opt of getActiveOptions(group); track opt.extra) {
+                  <label class="option" [class.selected]="isSelected(group.titulo, opt.extra)">
+                    @if (isGroupMultiSelect(group)) {
+                      <!-- Checkbox para opciones múltiples (precio-extra) -->
+                      <input
+                        type="checkbox"
+                        [name]="group.titulo + '_' + opt.extra"
+                        [value]="opt.extra"
+                        [checked]="isSelected(group.titulo, opt.extra)"
+                        (change)="selectOption(group.titulo, opt.extra)" />
+                    } @else {
+                      <!-- Radio para opción única (precio) -->
+                      <input
+                        type="radio"
+                        [name]="group.titulo"
+                        [value]="opt.extra"
+                        [checked]="isSelected(group.titulo, opt.extra)"
+                        (change)="selectOption(group.titulo, opt.extra)" />
+                    }
+                    <span class="option-text">{{ opt.extra }}</span>
+                    @if (opt.precio != null) {
+                      <span class="option-price">{{ formatPrice(opt.precio) }}</span>
+                    } @else if (opt['precio-extra'] != null) {
+                      <span class="option-price-extra">+{{ formatPrice(opt['precio-extra']) }}</span>
+                    }
+                  </label>
+                }
+              </div>
+            </div>
+          }
+        </div>
+        }
+      }
+    </div>
+
+    @if (product && !loading && !errorMessage) {
+    <div class="modal-footer">
+      <div class="qty" aria-label="Cantidad del producto">
+        <button type="button" class="qty-btn" (click)="decrementQty()" [disabled]="quantity <= 1" aria-label="Disminuir">
+          −
+        </button>
+        <div class="qty-val">{{ quantity }}</div>
+        <button type="button" class="qty-btn" (click)="incrementQty()" aria-label="Aumentar">
+          +
+        </button>
+      </div>
+
+      @if (selectionError) {
+        <div class="footer-error">{{ selectionError }}</div>
+      }
+
+      @if (!canAdd) {
+        <div class="footer-closed-notice">
+          <mat-icon class="notice-icon">schedule</mat-icon>
+          <div class="notice-content">
+            <strong>Cerrado en este momento</strong>
+            <p>Volveremos pronto. Mientras tanto, explora nuestro menú 🍽️</p>
+          </div>
+        </div>
+      } @else {
+        <button
+          class="btn-add-cart"
+          type="button"
+          (click)="onAddToCart()"
+          [disabled]="isPrecioVariable() && !isCustomPriceValid()"
+          aria-label="Agregar al carrito">
+          {{ addButtonLabel }}
+        </button>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Overlay de imagen expandida -->
+  @if (imageExpanded && product) {
+    <div class="image-expanded-overlay" (click)="closeImageExpanded()" role="dialog" aria-modal="true" [attr.aria-label]="'Imagen expandida de ' + product.nombre">
+      <button class="image-close-btn" type="button" (click)="closeImageExpanded(); $event.stopPropagation()" aria-label="Cerrar imagen">
+        <mat-icon>close</mat-icon>
+      </button>
+      <div class="image-expanded-container" (click)="$event.stopPropagation()">
+        <img [src]="imageUrl" [alt]="product.nombre" />
+      </div>
+    </div>
+  }
+</div>
+
+}

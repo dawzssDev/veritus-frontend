@@ -1,0 +1,480 @@
+/* You can add global styles to this file, and also import other style files */
+
+:root {
+  /* Paleta Dawz (según imagen) */
+  --brand-black: #1a1a11;
+  --brand-green-dark: #0f4d2a;
+  --brand-green: #1c8f46;
+  --brand-green-lime: #32ff00;
+  --brand-white: #ffffff;
+  
+  /* Design Tokens para Sistema POS - Pedidos */
+  /* Colores por tipo de pedido */
+  --color-pedido-local: #4F46E5;
+  --color-pedido-domicilio: #EA580C;
+  --color-pedido-llevar: #0D9488;
+  
+  /* Colores de estado */
+  --color-estado-proceso: #2563EB;
+  --color-estado-pago: #D97706;
+  --color-estado-servir: #16A34A;
+  --color-estado-cancelado: #DC2626;
+  --color-estado-finalizado: #059669;
+  
+  /* Sistema de temporizador progresivo */
+  --timer-seguro: #16A34A;
+  --timer-advertencia: #CA8A04;
+  --timer-peligro: #DC2626;
+  --color-urgente: #DC2626;
+  
+  /* Estructura de tarjetas */
+  --card-radius: 12px;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --card-border-width: 4px;
+  
+  /* Tipografía optimizada para cocina */
+  --font-size-folio: 28px;
+  --font-size-item: 16px;
+  --font-size-item-quantity: 20px;
+  --font-size-timer: 18px;
+  --font-size-badge: 14px;
+  --font-weight-folio: 900;
+  --font-weight-item: 600;
+  
+  /* Espaciado */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  
+  /* Colores de notas */
+  --notes-bg: #FEF9C3;
+  --notes-border: #F59E0B;
+  --notes-text: #92400E;
+  
+  /* Modificadores/Toppings */
+  --topping-bg: #7C3AED;
+  --topping-text: #FFFFFF;
+}
+
+html, body { 
+  height: 100%;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
+}
+
+body { 
+  margin: 0; 
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--mat-sys-surface);
+  box-sizing: border-box;
+}
+
+/* Preload inicial (antes de que Angular renderice) */
+.app-preload {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  z-index: 9999;
+}
+
+.app-preload__card {
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 28px 24px;
+  border-radius: 16px;
+  background: var(--mat-sys-surface-container, var(--mat-sys-surface));
+  outline: 1px solid var(--mat-sys-outline-variant, transparent);
+}
+
+.app-preload__logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+
+.app-preload__title {
+  font: var(--mat-sys-title-medium);
+  letter-spacing: 0.2px;
+}
+
+.app-preload__spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid var(--brand-green-dark);
+  border-top-color: var(--brand-green-lime);
+  animation: appPreloadSpin 0.9s linear infinite;
+}
+
+.app-preload--hide {
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+@keyframes appPreloadSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Animación global para contenido */
+router-outlet + * {
+  animation: fadeInPage 0.3s ease-in;
+}
+
+@keyframes fadeInPage {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================================
+   UI overlays (Dialog / Toast)
+   Nota: deben ser globales para afectar overlay containers.
+   ============================================================ */
+
+.confirm-status-dialog-panel .mat-mdc-dialog-container,
+.confirm-status-dialog-panel .mat-mdc-dialog-surface {
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.confirm-status-dialog-panel .mat-mdc-dialog-surface {
+  background: transparent;
+}
+
+.confirmar-pago-dialog-panel .mat-mdc-dialog-container,
+.confirmar-pago-dialog-panel .mat-mdc-dialog-surface {
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 0;
+  max-height: 90vh;
+}
+
+.confirmar-pago-dialog-panel .mat-mdc-dialog-surface {
+  background: #fff;
+}
+
+.confirmar-pago-dialog-panel .mat-mdc-dialog-container {
+  align-items: flex-start;
+}
+
+@media (max-width: 600px) {
+  .confirmar-pago-dialog-panel .mat-mdc-dialog-container {
+    max-width: calc(100vw - 16px) !important;
+    width: calc(100vw - 16px) !important;
+    margin: 8px auto;
+  }
+}
+
+.importar-catalogo-dialog-panel .mat-mdc-dialog-container,
+.importar-catalogo-dialog-panel .mat-mdc-dialog-surface {
+  border-radius: 16px;
+  overflow: hidden;
+  padding: 0;
+}
+
+.importar-catalogo-dialog-panel .mat-mdc-dialog-surface {
+  background: #fafaf8;
+}
+
+.importar-catalogo-dialog-panel .mdc-dialog__title,
+.importar-catalogo-dialog-panel .mat-mdc-dialog-title {
+  display: none;
+}
+
+.status-toast-panel.mat-mdc-snack-bar-container {
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--mat-sys-inverse-surface);
+  color: var(--mat-sys-inverse-on-surface);
+  border: 1px solid var(--mat-sys-outline-variant, transparent);
+  border-left: 4px solid var(--mat-sys-primary);
+}
+
+.status-toast-panel--pago.mat-mdc-snack-bar-container {
+  border-left-color: var(--mat-sys-tertiary);
+}
+
+.status-toast-panel--envio.mat-mdc-snack-bar-container {
+  border-left-color: var(--mat-sys-secondary);
+}
+
+.status-toast-panel .mat-mdc-snack-bar-label {
+  padding: 0;
+}
+
+/* ============================================================
+   RESPONSIVE UTILITIES - MOBILE OPTIMIZATIONS
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+/* Prevenir overflow horizontal en móvil */
+@media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    max-width: 100vw;
+    position: relative;
+  }
+  
+  app-root {
+    display: block;
+    width: 100%;
+    overflow-x: hidden;
+  }
+  
+  /* Asegurar que los contenedores principales no tengan padding */
+  .mat-drawer-content,
+  .mat-sidenav-content {
+    overflow-x: hidden !important;
+  }
+}
+
+/* Touch optimization para móvil */
+@media (max-width: 480px) {
+  /* Mejorar tap targets en móvil */
+  button,
+  a,
+  [mat-button],
+  [mat-raised-button],
+  [mat-icon-button],
+  [mat-fab],
+  [mat-mini-fab] {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Smooth scrolling en iOS */
+  .table-container,
+  .mat-mdc-table-container {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* ========================================
+   ESTILOS GLOBALES PARA MÓDULO FACTURACIÓN
+   ======================================== */
+
+/* Tema color para chips de estatus */
+.estatus-chip {
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  height: 26px !important;
+  min-height: 26px !important;
+}
+
+.estatus-chip .estatus-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 4px;
+  display: inline-block;
+}
+
+.estatus-chip.estatus-pagada {
+  background: #EAF3DE !important;
+  color: #3B6D11 !important;
+}
+.estatus-chip.estatus-pagada .estatus-dot {
+  background: #3B6D11;
+}
+
+.estatus-chip.estatus-pendiente {
+  background: #E6F1FB !important;
+  color: #185FA5 !important;
+}
+.estatus-chip.estatus-pendiente .estatus-dot {
+  background: #185FA5;
+}
+
+.estatus-chip.estatus-vencida {
+  background: #FCEBEB !important;
+  color: #A32D2D !important;
+}
+.estatus-chip.estatus-vencida .estatus-dot {
+  background: #A32D2D;
+}
+
+.estatus-chip.estatus-cancelada {
+  background: #f3f4f6 !important;
+  color: #6b7280 !important;
+}
+.estatus-chip.estatus-cancelada .estatus-dot {
+  background: #9ca3af;
+}
+
+/* Panel del dialog con bordes redondeados */
+.dawrz-dialog .mat-mdc-dialog-container {
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+/* Color primario del tema */
+.mat-mdc-chip.mat-primary,
+.mat-mdc-chip-selected {
+  --mdc-chip-elevated-selected-container-color: #1C8C40;
+  --mdc-chip-label-text-color: white;
+}
+
+/* Tabla sin elevación */
+.tabla-facturas {
+  width: 100%;
+}
+
+.tabla-facturas .mat-mdc-header-cell {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.tabla-facturas .mat-mdc-row:hover .mat-mdc-cell {
+  background: var(--mat-sys-surface-variant);
+}
+
+/* Alerta card */
+.alerta-card {
+  border-color: rgba(133,79,11,0.3) !important;
+  background: rgba(133,79,11,0.05) !important;
+}
+
+/* Card alerta metric */
+.card-alerta {
+  border-color: rgba(133,79,11,0.3) !important;
+}
+
+/* ══════════════════════════════════════
+   RESPONSIVO GLOBAL — DAWRZ
+   ══════════════════════════════════════ */
+
+/* Sidebar: en móvil se oculta con clase .sidebar-collapsed
+   que ya maneja el componente existente */
+@media (max-width: 768px) {
+  /* El contenido principal ocupa todo el ancho en móvil */
+  .main-content,
+  .content-wrapper,
+  .page-content {
+    padding: 12px !important;
+  }
+
+  /* Ocultar textos del sidebar en tablet */
+  .sidebar-label { display: none; }
+}
+
+/* Tablas — scroll horizontal en tablet y pantallas medianas */
+@media (max-width: 1279px) {
+  .table-container,
+  .table-view {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .table-container .custom-table,
+  .table-view .productos-table,
+  .table-view table[mat-table] {
+    min-width: 700px;
+  }
+}
+
+/* Tablas de Angular Material — evitar colapso de columnas en móvil */
+@media (max-width: 768px) {
+  .mat-mdc-table-wrapper,
+  .mat-mdc-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+}
+
+/* Dialogs — full width en móvil */
+.dawrz-dialog {
+  @media (max-width: 600px) {
+    .mat-mdc-dialog-container {
+      width: 100vw !important;
+      max-width: 100vw !important;
+      margin: 0 !important;
+      border-radius: 16px 16px 0 0 !important;
+    }
+  }
+}
+
+/* Chips de Angular Material — wrap en móvil */
+.mat-mdc-chip-set {
+  @media (max-width: 600px) {
+    flex-wrap: wrap !important;
+  }
+}
+
+/* Grids genéricos de 4 columnas → 2 en tablet → 1 en móvil */
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .grid-4 { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 480px) {
+  .grid-4 { grid-template-columns: 1fr; }
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .grid-3 { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 580px) {
+  .grid-3 { grid-template-columns: 1fr; }
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 580px) {
+  .grid-2 { grid-template-columns: 1fr; }
+}

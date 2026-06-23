@@ -1,0 +1,387 @@
+<div class="page">
+  <div class="page-header">
+    <div class="page-title">
+      <button mat-icon-button type="button" (click)="cancel()" aria-label="Volver" class="btn-back">
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      </button>
+      <div class="page-title-text">
+        <div class="page-title-main">{{ title }}</div>
+        <div class="page-title-sub">Registra la información del producto y sus complementos</div>
+      </div>
+    </div>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="submitType()" class="form-container">
+
+    <!-- Datos del producto -->
+    <mat-card class="section-card">
+      <div class="section-header">
+        <mat-icon aria-hidden="true">inventory_2</mat-icon>
+        <h3>Información del producto</h3>
+      </div>
+
+      <div class="form-grid-full">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre</mat-label>
+          <input matInput formControlName="nombre" placeholder="Ej: Jabón de mano" />
+          <mat-icon matPrefix>title</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid-full">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Descripción</mat-label>
+          <textarea matInput formControlName="descripcion" rows="3" placeholder="Describe el producto"></textarea>
+          <mat-icon matPrefix>description</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Categoría</mat-label>
+          <mat-select formControlName="categoria" (closed)="categoriaBusqueda = ''">
+            <div class="cat-search-wrapper">
+              <input
+                class="cat-search-input"
+                placeholder="Buscar categoría..."
+                autocomplete="off"
+                [value]="categoriaBusqueda"
+                (input)="categoriaBusqueda = $any($event.target).value"
+                (click)="$event.stopPropagation()"
+                (keydown)="$event.stopPropagation()">
+            </div>
+            @for (item of categoriasFiltradas; track item.nombre) {
+              <mat-option [value]="item.nombre">{{ item.nombre }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>category</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Precio</mat-label>
+          <input matInput formControlName="precio" type="number" min="0" inputmode="decimal" placeholder="0.00" />
+          <mat-icon matPrefix>attach_money</mat-icon>
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>Descuento (%)</mat-label>
+          <input matInput formControlName="descuento_porcentaje" type="number" min="0" inputmode="decimal" placeholder="0 (sin descuento)" />
+          <mat-icon matPrefix>local_offer</mat-icon>
+          <mat-hint>
+            Solo aplica si es ≥ 1. Equivale a ${{ form.value?.descuento ?? 0 }} MXN
+          </mat-hint>
+          @if (form.controls['descuento_porcentaje']?.touched && form.controls['descuento_porcentaje']?.errors?.['minOne']) {
+            <mat-error>El descuento debe ser 0 o ≥ 1.</mat-error>
+          }
+          @if (form.controls['descuento_porcentaje']?.touched && form.controls['descuento_porcentaje']?.errors?.['number']) {
+            <mat-error>Ingresa un número válido.</mat-error>
+          }
+          @if (form.controls['descuento_porcentaje']?.touched && form.controls['descuento_porcentaje']?.errors?.['min']) {
+            <mat-error>El descuento no puede ser negativo.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>¿Es combo?</mat-label>
+          <mat-select formControlName="is_combo">
+            <mat-option [value]="0">No</mat-option>
+            <mat-option [value]="1">Sí</mat-option>
+          </mat-select>
+          <mat-icon matPrefix>inventory</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>¿Es promoción?</mat-label>
+          <mat-select formControlName="is_promo">
+            <mat-option [value]="0">No</mat-option>
+            <mat-option [value]="1">Sí</mat-option>
+          </mat-select>
+          <mat-icon matPrefix>local_offer</mat-icon>
+        </mat-form-field>
+      </div>
+
+      @if (isPromoActive()) {
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha inicio de promoción</mat-label>
+            <input matInput [matDatepicker]="pickerInicio" formControlName="fecha_inicio_promo" placeholder="Selecciona fecha">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+            <mat-datepicker #pickerInicio></mat-datepicker>
+            <mat-icon matPrefix>event</mat-icon>
+            @if (form.controls['fecha_inicio_promo']?.touched && form.controls['fecha_inicio_promo']?.invalid) {
+              <mat-error>La fecha de inicio es requerida para promociones</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha fin de promoción</mat-label>
+            <input matInput [matDatepicker]="pickerFin" formControlName="fecha_fin_promo" placeholder="Selecciona fecha">
+            <mat-datepicker-toggle matIconSuffix [for]="pickerFin"></mat-datepicker-toggle>
+            <mat-datepicker #pickerFin></mat-datepicker>
+            <mat-icon matPrefix>event</mat-icon>
+            @if (form.controls['fecha_fin_promo']?.touched && form.controls['fecha_fin_promo']?.invalid) {
+              <mat-error>La fecha de fin es requerida para promociones</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- ¿Es recurrente? -->
+        <div class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>¿Aplica días específicos?</mat-label>
+            <mat-select formControlName="is_recurrente">
+              <mat-option [value]="0">No — aplica todo el período</mat-option>
+              <mat-option [value]="1">Sí — solo ciertos días de la semana</mat-option>
+            </mat-select>
+            <mat-icon matPrefix>event_repeat</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Días de la semana — solo si is_recurrente=1 -->
+        @if (isRecurrenteActivo()) {
+          <div class="dias-semana-wrap">
+            <label class="campo-label">Días en que aplica la promoción</label>
+            <div class="dias-semana-grid">
+              @for (dia of diasSemana; track dia.valor) {
+                <button
+                  type="button"
+                  class="dia-btn"
+                  [class.dia-btn--activo]="isDiaSeleccionado(dia.valor)"
+                  (click)="toggleDia(dia.valor)">
+                  {{ dia.label.substring(0, 3) }}
+                </button>
+              }
+            </div>
+            @if ((form.get('dias_promo')?.value ?? []).length === 0) {
+              <span class="campo-error">Selecciona al menos un día</span>
+            }
+          </div>
+        }
+      }
+
+      <div class="form-grid toggles-row">
+        <div class="toggle-wrap">
+          <mat-slide-toggle formControlName="estatus">Activo</mat-slide-toggle>
+          <div class="toggle-hint">Si está inactivo, el producto no se mostrará en el menú.</div>
+        </div>
+
+        <div class="toggle-wrap precio-variable-wrap">
+          <mat-slide-toggle
+            formControlName="precio_variable"
+            [checked]="isPrecioVariable()"
+            (change)="form.get('precio_variable')
+              ?.setValue($event.checked ? 1 : 0)">
+            Precio variable
+          </mat-slide-toggle>
+          @if (isPrecioVariable()) {
+            <span class="precio-variable-hint">
+              El cajero define el precio al vender.
+              El precio registrado es solo referencia.
+            </span>
+          }
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Imagen del producto -->
+    <mat-card class="section-card logo-section">
+      <div class="logo-header">
+        <mat-icon aria-hidden="true">image</mat-icon>
+        <h3>Imagen del producto</h3>
+      </div>
+
+      <div class="logo-content">
+        <div class="logo-preview">
+          @if (getDisplayImageUrl()) {
+            <img [src]="getDisplayImageUrl()" [alt]="form.value?.nombre || 'Imagen del producto'" class="logo-image" />
+          } @else {
+            <div class="logo-placeholder">
+              <mat-icon>add_photo_alternate</mat-icon>
+              <span>Sin imagen</span>
+            </div>
+          }
+        </div>
+
+        <div class="logo-actions">
+          <div class="logo-info">
+            <p class="logo-info-title">Sube la imagen del producto</p>
+            <p class="logo-info-subtitle">Formatos aceptados: JPG, PNG. Recomendado: 1200x800px</p>
+          </div>
+
+          <label for="file-upload" class="file-upload-label">
+            <mat-icon>cloud_upload</mat-icon>
+            <span>{{ getDisplayImageUrl() ? 'Cambiar imagen' : 'Seleccionar imagen' }}</span>
+          </label>
+          <input
+            id="file-upload"
+            type="file"
+            (change)="onFileSelected($event)"
+            accept="image/*"
+            class="file-input-hidden"
+          />
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Adicionales / Complementos -->
+    <mat-card class="section-card">
+      <div class="section-row">
+        <div class="section-header section-header--compact">
+          <mat-icon aria-hidden="true">tune</mat-icon>
+          <h3>Complementos (Adicionales)</h3>
+        </div>
+        <div class="comp-acciones">
+          <button
+            mat-stroked-button
+            type="button"
+            class="btn-importar-catalogo"
+            (click)="abrirCatalogo()">
+            <mat-icon aria-hidden="true">library_add</mat-icon>
+            Importar del catálogo
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            class="add-title-btn"
+            (click)="addAdicionalGroup()">
+            <mat-icon aria-hidden="true">add</mat-icon>
+            Agregar título
+          </button>
+        </div>
+      </div>
+
+      <div class="section-hint">
+        Crea títulos como “Tamaño” o “Tipo de leche”. En cada título, activa una o más opciones por defecto.
+      </div>
+
+      <div formArrayName="adicionales" class="adicionales-list">
+        @for (groupCtrl of adicionalesArray.controls; track groupCtrl; let groupIndex = $index) {
+          <mat-card class="addon-card" [formGroupName]="groupIndex">
+            <div class="addon-header">
+              <div class="addon-header-left">
+                <mat-icon aria-hidden="true">tune</mat-icon>
+                <span class="addon-header-title">Título</span>
+              </div>
+
+              <button
+                mat-icon-button
+                type="button"
+                aria-label="Eliminar título"
+                (click)="removeAdicionalGroup(groupIndex)">
+                <mat-icon aria-hidden="true">delete</mat-icon>
+              </button>
+            </div>
+
+            <mat-form-field appearance="fill" class="full">
+              <mat-label>Nombre del título</mat-label>
+              <input matInput formControlName="titulo" placeholder="Ej: Tamaño" />
+              @if (groupCtrl.controls.titulo.touched && groupCtrl.controls.titulo.invalid) {
+                <mat-error>Escribe un título válido.</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="options-title">
+              <span>Opciones</span>
+              <span class="options-sub">Selecciona una opción por defecto</span>
+            </div>
+
+            <div formArrayName="opciones" class="options-list">
+              <div class="options-head" aria-hidden="true">
+                <span class="head-default">Por defecto</span>
+                <span class="head-extra">Extra</span>
+                <span class="head-price">Precio total</span>
+                <span class="head-price-extra">Complemento</span>
+                <span class="head-actions"></span>
+              </div>
+
+              <div class="options-radio">
+                @for (optCtrl of optionsAt(groupIndex).controls; track optCtrl; let optIndex = $index) {
+                  <div class="option-row" [formGroupName]="optIndex">
+                    <mat-slide-toggle class="option-default" formControlName="estatus">
+                      <span class="sr-only">Por defecto</span>
+                    </mat-slide-toggle>
+
+                    <mat-form-field appearance="fill" class="option-extra">
+                      <mat-label>Extra</mat-label>
+                      <input matInput formControlName="extra" placeholder="Ej: Mediano" />
+                      @if (optCtrl.controls.extra.touched && optCtrl.controls.extra.invalid) {
+                        <mat-error>Requerido.</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="option-price">
+                      <mat-label>Precio total</mat-label>
+                      <input matInput type="number" min="0" inputmode="numeric" formControlName="precio" placeholder="Opcional" />
+                      @if (optCtrl.controls.precio.touched && optCtrl.controls.precio.invalid) {
+                        <mat-error>Debe ser ≥ 0.</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <mat-form-field appearance="fill" class="option-price-extra">
+                      <mat-label>Complemento ($)</mat-label>
+                      <input matInput type="number" min="0" inputmode="numeric" formControlName="precioExtra" placeholder="Opcional" />
+                      @if (optCtrl.controls.precioExtra.touched && optCtrl.controls.precioExtra.invalid) {
+                        <mat-error>Debe ser ≥ 0.</mat-error>
+                      }
+                    </mat-form-field>
+
+                    <button
+                      mat-icon-button
+                      type="button"
+                      class="option-remove"
+                      aria-label="Eliminar opción"
+                      (click)="removeAdicionalOption(groupIndex, optIndex)">
+                      <mat-icon aria-hidden="true">close</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+
+              @if (groupCtrl.errors?.['noOptions']) {
+                <div class="group-error">Agrega al menos una opción.</div>
+              }
+              @if (groupCtrl.errors?.['invalidDefault']) {
+                <div class="group-error">Activa al menos una opción por defecto.</div>
+              }
+            </div>
+
+            <div class="addon-actions">
+              <button mat-stroked-button type="button" (click)="addAdicionalOption(groupIndex)">
+                <mat-icon aria-hidden="true">add</mat-icon>
+                Agregar opción
+              </button>
+            </div>
+
+            <div class="tip-note">
+              <strong>Precio total:</strong> Reemplaza el precio base del producto.<br>
+              <strong>Complemento:</strong> Se suma al precio original del producto.<br>
+              Si no aplica, déjalos vacíos.
+            </div>
+          </mat-card>
+        }
+
+        @if (adicionalesArray.length === 0) {
+          <div class="empty-state">
+            <mat-icon aria-hidden="true">playlist_add</mat-icon>
+            <div>
+              <div class="empty-title">Aún no tienes complementos</div>
+              <div class="empty-sub">Agrega un título para empezar</div>
+            </div>
+          </div>
+        }
+      </div>
+    </mat-card>
+
+
+
+    <!-- Acciones -->
+    <div class="acciones-container">
+      <button mat-stroked-button type="button" (click)="cancel()" class="btn-secondary">Cancelar</button>
+      <button mat-raised-button color="primary" type="submit" class="btn-primary">{{ nameButton }}</button>
+    </div>
+  </form>
+
+</div>

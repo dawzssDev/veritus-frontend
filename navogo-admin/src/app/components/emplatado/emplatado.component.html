@@ -1,0 +1,192 @@
+<div class="emplatado-shell">
+
+  <!-- TOP BAR -->
+  <header class="top-bar">
+    <div class="top-bar__izq">
+      <mat-icon class="top-bar__icono">
+        countertops
+      </mat-icon>
+      <div class="top-bar__titulo">
+        <span class="top-bar__nombre">Emplatado</span>
+        <span class="top-bar__sub">
+          @if (itemsVista.length > 0) {
+            <b style="color:#1C8C40">
+              {{ itemsVista.length }}
+            </b>
+            item{{ itemsVista.length !== 1 ? 's' : '' }}
+            listo{{ itemsVista.length !== 1 ? 's' : '' }}
+            para emplatar
+          } @else {
+            Sin items pendientes
+          }
+        </span>
+      </div>
+    </div>
+
+    <div class="top-bar__der">
+      <div class="refresh-pill"
+           [class.refresh-pill--activo]="refrescando()"
+           (click)="cargar()">
+        <mat-icon [class.girar]="refrescando()">
+          sync
+        </mat-icon>
+        @if (!refrescando()) {
+          <span>{{ segundos() }}s</span>
+        } @else {
+          <span>Actualizando...</span>
+        }
+      </div>
+      <span class="ultima-act">
+        {{ ultimaActualizacion() | date:'HH:mm:ss' }}
+      </span>
+    </div>
+  </header>
+
+  <!-- CONTENIDO -->
+  <main class="emplatado-main">
+
+    @if (cargando()) {
+      <div class="estado-centro">
+        <mat-spinner diameter="36"></mat-spinner>
+        <span>Cargando...</span>
+      </div>
+    }
+
+    @if (!cargando() && itemsVista.length === 0) {
+      <div class="estado-centro">
+        <mat-icon>check_circle_outline</mat-icon>
+        <p>No hay items listos para emplatar</p>
+        <span>
+          Los items aparecen aquí cuando cocina
+          los marca como listos desde pedidos
+        </span>
+      </div>
+    }
+
+    @if (!cargando() && itemsVista.length > 0) {
+      <div class="items-grid">
+        @for (vista of itemsVista; track vista.item_id) {
+
+          <article class="item-card"
+                   [class.item-card--urgente]="esUrgente(vista)">
+
+            <div class="item-card__franja"></div>
+
+            <div class="item-card__orden">
+              <span class="orden-folio">
+                {{ vista.folio }}
+              </span>
+              <div [class]="'orden-tipo orden-tipo--' + vista.shipping_type">
+                <mat-icon>
+                  {{ getShippingIcon(vista.shipping_type) }}
+                </mat-icon>
+                {{ getShippingLabel(vista.shipping_type) }}
+                · {{ vista.customer_name }}
+              </div>
+            </div>
+
+            <div class="item-card__tiempos">
+              <div class="empl-timer"
+                   [class.empl-timer--normal]="getMinutosPedido(vista.pedido) < 15"
+                   [class.empl-timer--alerta]="getMinutosPedido(vista.pedido) >= 15
+                                               && getMinutosPedido(vista.pedido) < 30"
+                   [class.empl-timer--urgente]="getMinutosPedido(vista.pedido) >= 30">
+                <mat-icon>schedule</mat-icon>
+                <div class="empl-timer__info">
+                  <span class="empl-timer__valor">
+                    {{ getMinutosPedido(vista.pedido) }}min
+                  </span>
+                  <span class="empl-timer__label">en pedido</span>
+                </div>
+              </div>
+
+              <div class="empl-timer empl-timer--listo"
+                   [class.empl-timer--alerta]="getMinutosListo(vista.created_at) >= 5
+                                               && getMinutosListo(vista.created_at) < 10"
+                   [class.empl-timer--urgente]="getMinutosListo(vista.created_at) >= 10">
+                <mat-icon>countertops</mat-icon>
+                <div class="empl-timer__info">
+                  <span class="empl-timer__valor">
+                    {{ tiempoTranscurrido(vista.created_at) }}
+                  </span>
+                  <span class="empl-timer__label">listo</span>
+                </div>
+              </div>
+
+              @if (tieneTiempoEntrega(vista.pedido)) {
+                <div class="reloj-comprometido"
+                     [class]="'reloj-comprometido '
+                               + getClaseReloj(vista.pedido, relojTick())">
+                  <mat-icon class="reloj-icono">
+                    {{ getIconoReloj(vista.pedido, relojTick()) }}
+                  </mat-icon>
+                  <div class="reloj-info">
+                    <span class="reloj-tiempo">
+                      {{ getTextoReloj(vista.pedido, relojTick()) }}
+                    </span>
+                    <span class="reloj-label">
+                      {{ getMinutosRestantes(vista.pedido) >= 0
+                         ? 'para entregar'
+                         : 'de retraso' }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <div class="item-card__producto">
+              <span class="prod-qty">
+                {{ vista.item.quantity }}×
+              </span>
+              <div class="prod-info">
+                <span class="prod-nombre">
+                  {{ vista.item.name }}
+                </span>
+                @if (formatSelections(vista.item)) {
+                  <span class="prod-sels">
+                    {{ formatSelections(vista.item) }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            <div class="item-card__footer">
+              <button
+                class="btn-entregar"
+                type="button"
+                [disabled]="procesandoItemId() !== null"
+                (click)="marcarEntregado(vista, $event)">
+
+                @if (procesandoItemId() === vista.item_id) {
+                  <span class="spinner-btn"></span>
+                  Procesando...
+                } @else {
+                  <mat-icon>check_circle</mat-icon>
+                  Entregado
+                }
+
+              </button>
+
+              <button
+                class="btn-merma"
+                type="button"
+                [disabled]="procesandoItemId() !== null"
+                [matTooltip]="'No fue recogido — marcar merma'"
+                (click)="marcarMerma(vista, $event)">
+                <mat-icon>delete_sweep</mat-icon>
+              </button>
+            </div>
+
+            @if (esUrgente(vista)) {
+              <div class="item-card__urgencia"></div>
+            }
+
+          </article>
+
+        }
+      </div>
+    }
+
+  </main>
+
+</div>

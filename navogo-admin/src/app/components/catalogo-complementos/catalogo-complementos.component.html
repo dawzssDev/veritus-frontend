@@ -1,0 +1,222 @@
+<div class="catalogo-page">
+
+  <header class="catalogo-topbar">
+    <div class="catalogo-topbar__izq">
+      <button class="btn-volver" type="button" (click)="volver()">
+        <mat-icon>arrow_back_ios</mat-icon>
+        Catálogo
+      </button>
+      <div class="topbar-sep"></div>
+      <h1 class="catalogo-topbar__titulo">
+        Complementos globales
+      </h1>
+    </div>
+
+    <div class="catalogo-topbar__der">
+      <button
+        class="btn-sincronizar"
+        type="button"
+        [disabled]="sincronizando()"
+        (click)="sincronizar()"
+        matTooltip="Aplica cambios a todos los productos vinculados">
+        <mat-icon [class.girar]="sincronizando()">sync</mat-icon>
+        {{ sincronizando() ? 'Sincronizando...' : 'Sincronizar productos' }}
+      </button>
+    </div>
+  </header>
+
+  <div class="catalogo-body" [formGroup]="form">
+
+    <div class="catalogo-aside">
+      <div class="aside-card">
+        <mat-icon class="aside-card__icono">tune</mat-icon>
+        <h3>¿Para qué sirve?</h3>
+        <p>
+          Define grupos de complementos reutilizables
+          como "Tamaño" o "Término de carne". Cuando
+          importes un grupo a un producto y luego
+          sincronices, todos los productos vinculados
+          se actualizan automáticamente.
+        </p>
+      </div>
+
+      <button class="btn-agregar-grupo" type="button" (click)="agregarGrupo()">
+        <mat-icon>add</mat-icon>
+        Agregar grupo
+      </button>
+
+      @if (grupos.length > 0) {
+        <div class="grupos-indice">
+          @for (g of grupos.controls; track $index; let i = $index) {
+            <a
+              class="grupos-indice__item"
+              [href]="'#grupo-' + i"
+              (click)="$event.preventDefault(); scrollToGrupo(i)">
+              <mat-icon>drag_indicator</mat-icon>
+              {{ grupoAt(i).get('titulo')?.value || 'Grupo ' + (i + 1) }}
+            </a>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="catalogo-content" formArrayName="grupos">
+
+      @if (cargando()) {
+        <div class="estado-carga">
+          <div class="spinner-lg"></div>
+          <p>Cargando catálogo...</p>
+        </div>
+      }
+
+      @if (!cargando() && grupos.length === 0) {
+        <div class="estado-vacio">
+          <mat-icon>tune</mat-icon>
+          <p>Aún no tienes complementos globales</p>
+          <span>
+            Crea grupos reutilizables para tus productos
+          </span>
+          <button class="btn-agregar-grupo" type="button" (click)="agregarGrupo()">
+            <mat-icon>add</mat-icon>
+            Crear primer grupo
+          </button>
+        </div>
+      }
+
+      @for (grupoCtrl of grupos.controls; track $index; let i = $index) {
+        <div class="grupo-card" [id]="'grupo-' + i" [formGroupName]="i">
+
+          <div class="grupo-card__header">
+            <mat-icon class="grupo-card__icono">list_alt</mat-icon>
+            <mat-form-field
+              appearance="outline"
+              subscriptSizing="dynamic"
+              class="grupo-titulo-field">
+              <mat-label>Nombre del grupo</mat-label>
+              <input matInput formControlName="titulo" placeholder="ej. Tamaño" />
+              @if (
+                grupoAt(i).get('titulo')?.invalid &&
+                grupoAt(i).get('titulo')?.touched
+              ) {
+                <mat-error>Requerido (mín. 2 caracteres)</mat-error>
+              }
+            </mat-form-field>
+
+            <button
+              class="btn-eliminar-grupo"
+              type="button"
+              matTooltip="Eliminar grupo"
+              (click)="eliminarGrupo(i)">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </div>
+
+          <div class="opciones-tabla">
+            <div class="opciones-tabla__head">
+              <span class="col-activo">Activo</span>
+              <span class="col-extra">Opción</span>
+              <span
+                class="col-precio"
+                matTooltip="Reemplaza el precio base del producto">
+                Precio total
+              </span>
+              <span
+                class="col-precio-extra"
+                matTooltip="Se suma al precio base del producto">
+                Complemento ($)
+              </span>
+              <span class="col-accion"></span>
+            </div>
+            <div class="opciones-tabla__hints">
+              <span class="col-activo"></span>
+              <span class="col-extra"></span>
+              <span class="col-precio hint">Precio total: reemplaza el precio base</span>
+              <span class="col-precio-extra hint">Complemento: se suma al precio base</span>
+              <span class="col-accion"></span>
+            </div>
+
+            <div formArrayName="opciones">
+              @for (opCtrl of opcionesAt(i).controls; track $index; let j = $index) {
+                <div class="opcion-fila" [formGroupName]="j">
+                  <mat-slide-toggle
+                    class="col-activo"
+                    formControlName="estatus">
+                  </mat-slide-toggle>
+
+                  <mat-form-field
+                    appearance="outline"
+                    subscriptSizing="dynamic"
+                    class="col-extra">
+                    <input matInput formControlName="extra" placeholder="ej. Grande" />
+                  </mat-form-field>
+
+                  <mat-form-field
+                    appearance="outline"
+                    subscriptSizing="dynamic"
+                    class="col-precio">
+                    <input
+                      matInput
+                      type="number"
+                      min="0"
+                      formControlName="precio"
+                      placeholder="Opcional" />
+                    <span matPrefix>$</span>
+                  </mat-form-field>
+
+                  <mat-form-field
+                    appearance="outline"
+                    subscriptSizing="dynamic"
+                    class="col-precio-extra">
+                    <input
+                      matInput
+                      type="number"
+                      min="0"
+                      formControlName="precioExtra"
+                      placeholder="Opcional" />
+                    <span matPrefix>+$</span>
+                  </mat-form-field>
+
+                  <button
+                    class="btn-eliminar-opcion"
+                    type="button"
+                    (click)="eliminarOpcion(i, j)"
+                    [disabled]="opcionesAt(i).length <= 1">
+                    <mat-icon>close</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="grupo-card__footer">
+            <div class="grupo-card__footer-izq">
+              <button class="btn-agregar-opcion" type="button" (click)="agregarOpcion(i)">
+                <mat-icon>add</mat-icon>
+                Agregar opción
+              </button>
+              <button
+                class="btn-guardar-grupo"
+                type="button"
+                (click)="guardarGrupo(i)"
+                [disabled]="grupoAt(i).invalid || guardandoGrupoIdx() === i">
+                @if (guardandoGrupoIdx() === i) {
+                  <span class="spinner-sm-grupo"></span>
+                  Guardando...
+                } @else {
+                  <mat-icon>save</mat-icon>
+                  Guardar
+                }
+              </button>
+            </div>
+            <span class="grupo-card__count">
+              {{ opcionesAt(i).length }}
+              {{ opcionesAt(i).length === 1 ? 'opción' : 'opciones' }}
+            </span>
+          </div>
+
+        </div>
+      }
+
+    </div>
+  </div>
+</div>

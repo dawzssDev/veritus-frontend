@@ -1,0 +1,453 @@
+// ── Variables de breakpoints
+$mobile:  480px;
+$tablet:  768px;
+$desktop: 1024px;
+
+// ── Página principal
+.pedidos-page {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (min-width: $tablet) { padding: 20px; gap: 16px; }
+  @media (min-width: $desktop){ padding: 24px; }
+}
+
+// ── Header
+.pedidos-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &__titulo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    h1 { margin: 0; font-size: 20px; }
+  }
+}
+
+.badge-total {
+  background: #1C8C40;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+// El botón de filtros solo visible en móvil/tablet
+.btn-filtros-toggle {
+  @media (min-width: $desktop) { display: none; }
+}
+
+// ── Filtros
+.pedidos-filtros {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  background: var(--mat-sys-surface-variant);
+  border-radius: 12px;
+  padding: 14px;
+
+  // En desktop siempre visibles, en fila
+  @media (min-width: $desktop) {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    background: transparent;
+    padding: 0;
+  }
+
+  // En móvil/tablet: colapsable
+  &--visible {
+    display: flex;
+  }
+}
+
+.filtro-busqueda {
+  width: 100%;
+  @media (min-width: $desktop) { width: 260px; }
+}
+
+.filtro-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+// ── Grid de tarjetas
+.pedidos-grid {
+  display: grid;
+  gap: 12px;
+
+  // Mobile: 1 columna
+  grid-template-columns: 1fr;
+
+  // Tablet horizontal: 2 columnas
+  @media (min-width: $tablet) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  // Desktop: 3 columnas
+  @media (min-width: $desktop) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  // Desktop grande: 4 columnas
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// ── Tarjeta de pedido
+.pedido-card {
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important;
+  }
+
+  &--urgente {
+    border-color: #dc2626 !important;
+  }
+
+  &--nuevo {
+    border-color: #1C8C40 !important;
+  }
+}
+
+// Barra de urgencia en la parte inferior
+.urgencia-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #dc2626;
+  animation: pulso 1.5s ease-in-out infinite;
+}
+
+@keyframes pulso {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+// ── Header de la tarjeta
+.pedido-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 12px 10px;
+
+  &-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+}
+
+.pedido-folio {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.pedido-tipo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 3px 8px;
+
+  &--local      { background: #E6F1FB; color: #185FA5; }
+  &--domicilio { background: #FAEEDA; color: #854F0B; }
+  &--recoger    { background: #EAF3DE; color: #3B6D11; }
+}
+
+.tipo-icono {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+// Temporizador
+.pedido-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 3px 8px;
+
+  &.timer--normal  { background: #EAF3DE; color: #3B6D11; }
+  &.timer--alerta  { background: #FAEEDA; color: #854F0B; }
+  &.timer--urgente {
+    background: #FCEBEB;
+    color: #dc2626;
+    animation: pulso 1.5s ease-in-out infinite;
+  }
+}
+
+.timer-icono {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+}
+
+// ── Chips de estatus
+.estatus-chip {
+  font-size: 11px !important;
+  height: 22px !important;
+  min-height: 22px !important;
+  font-weight: 600 !important;
+
+  &.estatus-1 { background: #E6F1FB !important; color: #185FA5 !important; }
+  &.estatus-2 { background: #FAEEDA !important; color: #854F0B !important; }
+  &.estatus-3 { background: #EAF3DE !important; color: #3B6D11 !important; }
+  &.estatus-4 { background: #f3f4f6 !important; color: #6b7280 !important; }
+}
+
+// ── Cliente
+.pedido-cliente {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.cliente-icono {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+// ── Items
+.pedido-items {
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pedido-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.item-cantidad {
+  font-weight: 700;
+  color: #1C8C40;
+  flex-shrink: 0;
+  min-width: 24px;
+}
+
+.item-nombre {
+  flex: 1;
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-nota {
+  font-size: 11px;
+  color: var(--mat-sys-on-surface-variant);
+  font-style: italic;
+  flex-shrink: 0;
+}
+
+.items-mas {
+  font-size: 12px;
+  color: var(--mat-sys-on-surface-variant);
+  margin: 2px 0 0;
+}
+
+// ── Nota
+.pedido-nota {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(133,79,11,0.06);
+  border-left: 3px solid rgba(133,79,11,0.4);
+  margin: 0 12px 4px;
+  border-radius: 0 6px 6px 0;
+  font-size: 12px;
+  color: #854F0B;
+}
+
+.nota-icono {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+// ── Footer de la tarjeta
+.pedido-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px 12px;
+}
+
+.pedido-total {
+  display: flex;
+  flex-direction: column;
+}
+
+.total-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.total-valor {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+// ── Botones de acción
+.pedido-acciones {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.btn-accion {
+  height: 40px;             // Tamaño touch-friendly
+  border-radius: 20px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  padding: 0 14px !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  // En móvil muy pequeño ocultar el texto del botón
+  @media (max-width: 360px) {
+    padding: 0 10px !important;
+    .btn-texto { display: none; }
+  }
+
+  &--primario {
+    background: #1C8C40 !important;
+    color: white !important;
+  }
+
+  &--success {
+    background: #185FA5 !important;
+    color: white !important;
+  }
+
+  &--info {
+    background: #854F0B !important;
+    color: white !important;
+  }
+}
+
+// ── Skeleton loader
+.pedidos-loading {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+
+  @media (min-width: $tablet)  { grid-template-columns: repeat(2,1fr); }
+  @media (min-width: $desktop) { grid-template-columns: repeat(3,1fr); }
+}
+
+.skeleton-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
+}
+
+.skeleton-header { height: 20px; width: 70%; }
+.skeleton-line   { height: 14px; width: 90%; }
+.skeleton-line--short { width: 50%; }
+.skeleton-footer { height: 40px; width: 100%; margin-top: 6px; }
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ── Estado vacío
+.pedidos-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+  gap: 10px;
+  text-align: center;
+
+  .vacio-icon {
+    font-size: 52px;
+    width: 52px;
+    height: 52px;
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.4;
+  }
+
+  p { margin: 0; }
+}
+
+.text-secondary { color: var(--mat-sys-on-surface-variant); }

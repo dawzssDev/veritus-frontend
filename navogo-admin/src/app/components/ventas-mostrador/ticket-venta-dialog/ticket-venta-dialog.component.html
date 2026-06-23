@@ -1,0 +1,232 @@
+<div class="ticket-dialog">
+
+  <!-- Zona izquierda — Preview del ticket -->
+  <div class="ticket-preview-zona">
+
+    <div class="tk ticket-contenido" #ticketPreview>
+
+      <!-- HEADER -->
+      <div class="tk-head">
+        <p class="tk-head__empresa">{{ nombreEmpresa }}</p>
+        @if (direccionEmpresa) {
+          <p class="tk-head__dato">{{ direccionEmpresa }}</p>
+        }
+      </div>
+
+      <div class="tk-dash"></div>
+
+      <!-- FOLIO Y META -->
+      <div class="tk-meta">
+        <div class="tk-meta__folio">{{ folioTicket }}</div>
+        <div class="tk-meta__datos">
+          <span>{{ hoy | date:'dd/MM/yyyy' }}</span>
+          <span class="tk-meta__sep">·</span>
+          <span>{{ hoy | date:'HH:mm' }}</span>
+          @if (data.orden.mesa && data.orden.tipo_servicio !== 'domicilio') {
+            <span class="tk-meta__sep">·</span>
+            <span>Mesa {{ data.orden.mesa }}</span>
+          }
+        </div>
+        @if (data.orden.nombre_cliente) {
+          <div class="tk-meta__cliente">
+            Cliente: {{ data.orden.nombre_cliente }}@if (ciudadEntrega) {, {{ ciudadEntrega }}}
+          </div>
+        }
+        @if (data.orden.telefono_cliente) {
+          <div class="tk-meta__telefono">
+            Tel: {{ data.orden.telefono_cliente }}
+          </div>
+        }
+        @if (data.orden.tipo_servicio === 'domicilio' && (direccionEntregaPrincipal || coloniaEntrega || ciudadEntrega || data.orden.direccion_entrega?.referencias)) {
+          <div class="tk-meta__domicilio">
+            @if (data.orden.direccion_entrega?.referencias) {
+              <span class="tk-meta__domicilio-ref">
+                Ref: {{ data.orden.direccion_entrega?.referencias }}
+              </span>
+            }
+          </div>
+        }
+      </div>
+
+      @if (formatearNota(data.orden.nota)) {
+        <div class="tk-meta__nota">
+          {{ formatearNota(data.orden.nota) }}
+        </div>
+      }
+
+      <div class="tk-dash"></div>
+      <table class="tk-tabla">
+        <thead>
+          <tr>
+            <th class="tk-tabla__cant">CANT</th>
+            <th class="tk-tabla__prod">PRODUCTO</th>
+            <th class="tk-tabla__precio">TOTAL</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of data.orden.items; track $index) {
+            <tr class="tk-tabla__fila">
+              <td class="tk-tabla__cant">{{ item.cantidad }}</td>
+              <td class="tk-tabla__prod">
+                <span class="tk-tabla__nombre">{{ item.nombre }}</span>
+                @if (item.cantidad > 1) {
+                  <span class="tk-tabla__unitario">
+                    ${{ item.precio | number:'1.2-2' }} c/u
+                  </span>
+                }
+                @if (item.complementos && item.complementos.length > 0) {
+                  @for (comp of item.complementos; track $index) {
+                    <span class="tk-tabla__comp">
+                      + {{ comp.nombre }}@if (comp.precio > 0) {
+                        (+${{ comp.precio | number:'1.2-2' }})
+                      }
+                    </span>
+                  }
+                }
+                @if (item.nota) {
+                  <span class="tk-tabla__nota">📌 {{ item.nota }}</span>
+                }
+              </td>
+              <td class="tk-tabla__precio">
+                ${{ item.subtotal | number:'1.2-2' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <div class="tk-dash"></div>
+
+      <!-- TOTALES -->
+      <div class="tk-totales">
+        <div class="tk-totales__fila">
+          <span>Subtotal</span>
+          <span>${{ data.orden.subtotal | number:'1.2-2' }}</span>
+        </div>
+        @if (data.orden.propina > 0) {
+          <div class="tk-totales__fila">
+            <span>Propina</span>
+            <span>${{ data.orden.propina | number:'1.2-2' }}</span>
+          </div>
+        }
+        @if (data.orden.costo_envio > 0) {
+          <div class="tk-totales__fila">
+            <span>Envío</span>
+            <span>${{ data.orden.costo_envio | number:'1.2-2' }}</span>
+          </div>
+        }
+
+        <div class="tk-totales__total">
+          <span>TOTAL</span>
+          <span>${{ data.orden.total | number:'1.2-2' }}</span>
+        </div>
+
+        @if (data.orden.metodo_pago === 'combinado'
+             && data.orden.pagos_combinado?.length) {
+          <div class="ticket-pago-combinado">
+            <div class="ticket-row ticket-row--label">
+              <span>Método de pago</span>
+              <span>Combinado</span>
+            </div>
+            @for (p of data.orden.pagos_combinado; track p.metodo) {
+              <div class="ticket-row ticket-row--combinado">
+                <span class="combinado-metodo">
+                  — {{ p.metodo | titlecase }}
+                </span>
+                <span>${{ p.monto | number:'1.2-2' }}</span>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="ticket-row">
+            <span>Método de pago</span>
+            <span>{{ getMetodoLabel(data.orden.metodo_pago) }}</span>
+          </div>
+        }
+
+        @if (data.orden.cambio !== undefined && data.orden.cambio > 0) {
+          <div class="tk-totales__cambio">
+            <span>Cambio</span>
+            <span>${{ data.orden.cambio | number:'1.2-2' }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="tk-dash"></div>
+
+      <!-- PIE -->
+      <div class="tk-pie">
+        <p class="tk-pie__gracias">¡Gracias por tu visita!</p>
+        <p class="tk-pie__vuelva">Esperamos verte pronto</p>
+        <p class="tk-pie__legal">
+          Este documento no es un comprobante fiscal (CFDI)
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Zona derecha — Acciones -->
+  <div class="ticket-acciones-zona">
+    <mat-icon class="ticket-acciones__icono">check_circle</mat-icon>
+    
+    <h2 class="ticket-acciones__titulo">
+      Venta registrada<br>exitosamente
+    </h2>
+
+    <p class="ticket-acciones__total">
+      ${{ data.orden.total.toFixed(2) }}
+    </p>
+
+    <p class="ticket-acciones__metodo">
+      @if (data.orden.metodo_pago === 'efectivo') {
+        Efectivo
+      } @else if (data.orden.metodo_pago === 'tarjeta') {
+        Tarjeta
+      } @else if (data.orden.metodo_pago === 'transferencia') {
+        Transferencia
+      } @else if (data.orden.metodo_pago === 'combinado') {
+        Pago combinado
+      }
+    </p>
+
+    @if (data.orden.metodo_pago === 'efectivo' && data.orden.cambio !== undefined) {
+      <p class="ticket-acciones__cambio">
+        Cambio: ${{ data.orden.cambio.toFixed(2) }}
+      </p>
+    }
+
+    @if (esLlevarODomicilio()) {
+      <div class="aviso-dos-copias">
+        <mat-icon>content_copy</mat-icon>
+        Se imprimirán 2 copias —
+        una para el cliente y una para el negocio
+      </div>
+    }
+
+    <button 
+      class="btn-imprimir-ticket" 
+      [disabled]="imprimiendo()"
+      (click)="imprimir()">
+      @if (imprimiendo()) {
+        <mat-spinner [diameter]="20"></mat-spinner>
+        Imprimiendo...
+      } @else {
+        <mat-icon>print</mat-icon>
+        Imprimir ticket
+      }
+    </button>
+
+    <p class="ticket-acciones__hint">
+      También puedes imprimir el ticket más tarde desde el historial de ventas
+    </p>
+
+    <button 
+      class="btn-cerrar-ticket" 
+      (click)="cerrar()">
+      Cerrar
+    </button>
+  </div>
+
+</div>

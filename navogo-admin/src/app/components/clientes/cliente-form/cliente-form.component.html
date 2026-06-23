@@ -1,0 +1,192 @@
+<div class="form-page">
+
+  <!-- ── Topbar sticky ──────────────────────────────── -->
+  <div class="topbar">
+    <button class="btn-volver" mat-button (click)="volver()">
+      <mat-icon>arrow_back</mat-icon>
+      <span>Volver</span>
+    </button>
+
+    <h1 class="topbar-title">
+      {{ modoEditar() ? 'Editar cliente' : 'Nuevo cliente' }}
+    </h1>
+
+    <button class="btn-guardar" mat-raised-button
+            (click)="onSubmit()"
+            [disabled]="guardando()">
+      @if (guardando()) {
+        <mat-spinner diameter="18" class="spinner-btn"></mat-spinner>
+      } @else {
+        <mat-icon>save</mat-icon>
+      }
+      Guardar
+    </button>
+  </div>
+
+  <!-- ── Loading ────────────────────────────────────── -->
+  @if (cargando()) {
+    <div class="loading-wrap">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Cargando cliente...</p>
+    </div>
+  }
+
+  <!-- ── Formulario ─────────────────────────────────── -->
+  @if (!cargando()) {
+    <form [formGroup]="form" class="form-body" (ngSubmit)="onSubmit()">
+
+      <!-- COLUMNA IZQUIERDA -->
+      <div class="col-left">
+        <div class="card">
+          <div class="card-header">
+            <mat-icon>person</mat-icon>
+            <h2>Información personal</h2>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-field">
+            <mat-label>Nombre completo</mat-label>
+            <mat-icon matPrefix>badge</mat-icon>
+            <input matInput formControlName="nombre" placeholder="Ej. Juan García López">
+            @if (err(ctrl('nombre'), 'required')) {
+              <mat-error>El nombre es obligatorio</mat-error>
+            }
+            @if (err(ctrl('nombre'), 'minlength')) {
+              <mat-error>Mínimo 2 caracteres</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-field">
+            <mat-label>Teléfono</mat-label>
+            <mat-icon matPrefix>phone</mat-icon>
+            <input matInput formControlName="telefono" type="tel" placeholder="Ej. 5551234567">
+            @if (err(ctrl('telefono'), 'required')) {
+              <mat-error>El teléfono es obligatorio</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-field">
+            <mat-label>Correo electrónico (opcional)</mat-label>
+            <mat-icon matPrefix>email</mat-icon>
+            <input matInput formControlName="email" type="email" placeholder="correo@ejemplo.com">
+            @if (err(ctrl('email'), 'email')) {
+              <mat-error>Correo no válido</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-field">
+            <mat-label>Notas (opcional)</mat-label>
+            <mat-icon matPrefix>notes</mat-icon>
+            <textarea matInput formControlName="notas" rows="4"
+                      placeholder="Preferencias, alergias, observaciones..."></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- COLUMNA DERECHA -->
+      <div class="col-right">
+        <div class="card">
+          <div class="card-header">
+            <div class="header-left">
+              <mat-icon>location_on</mat-icon>
+              <h2>Direcciones de entrega</h2>
+            </div>
+            <button mat-stroked-button class="btn-add-dir" type="button"
+                    (click)="agregarDireccion()">
+              <mat-icon>add</mat-icon> Agregar dirección
+            </button>
+          </div>
+
+          <!-- Estado vacío -->
+          @if (dirs.length === 0) {
+            <div class="empty-dirs">
+              <mat-icon>location_off</mat-icon>
+              <p>Sin direcciones registradas</p>
+              <button mat-stroked-button type="button" (click)="agregarDireccion(true)">
+                <mat-icon>add</mat-icon> Agregar primera dirección
+              </button>
+            </div>
+          }
+
+          <!-- FormArray de direcciones -->
+          <div formArrayName="direcciones" class="dirs-list">
+            @for (dir of dirs.controls; track $index; let i = $index) {
+              <div [formGroupName]="i"
+                   class="dir-card"
+                   [class.es-pred]="dirCtrl(i, 'predeterminada').value">
+
+                <!-- Header de la dir-card -->
+                <div class="dir-card-header">
+                  <div class="dir-numero">
+                    <mat-icon>location_on</mat-icon>
+                    <span>Dirección {{ i + 1 }}</span>
+                    @if (dirCtrl(i, 'predeterminada').value) {
+                      <span class="badge-pred">Principal</span>
+                    }
+                  </div>
+                  <div class="dir-header-actions">
+                    <mat-checkbox
+                      formControlName="predeterminada"
+                      (change)="$event.checked && setPredeterminada(i)">
+                      Predeterminada
+                    </mat-checkbox>
+                    @if (dirs.length > 1) {
+                      <button mat-icon-button class="btn-del-dir" type="button"
+                              matTooltip="Eliminar dirección"
+                              (click)="eliminarDireccion(i)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <!-- Campos en grid 2 cols -->
+                <div class="dir-fields">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Alias</mat-label>
+                    <input matInput formControlName="alias" placeholder="Casa, Trabajo...">
+                    @if (err(dirCtrl(i, 'alias'), 'required')) {
+                      <mat-error>Requerido</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Calle y número</mat-label>
+                    <input matInput formControlName="calle" placeholder="Av. Principal 123">
+                    @if (err(dirCtrl(i, 'calle'), 'required')) {
+                      <mat-error>Requerido</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Colonia</mat-label>
+                    <input matInput formControlName="colonia" placeholder="Col. Centro">
+                    @if (err(dirCtrl(i, 'colonia'), 'required')) {
+                      <mat-error>Requerido</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Ciudad</mat-label>
+                    <input matInput formControlName="ciudad" placeholder="Monterrey">
+                    @if (err(dirCtrl(i, 'ciudad'), 'required')) {
+                      <mat-error>Requerido</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-ref">
+                    <mat-label>Referencia (opcional)</mat-label>
+                    <input matInput formControlName="referencia"
+                           placeholder="Casa azul, portón negro, frente al parque...">
+                  </mat-form-field>
+                </div>
+
+              </div>
+            }
+          </div>
+
+        </div>
+      </div>
+
+    </form>
+  }
+</div>

@@ -1,0 +1,113 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>{{ titulo }}</h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="form" class="mesa-form">
+      
+      <!-- Identificador -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Identificador</mat-label>
+        <input 
+          matInput 
+          formControlName="identificador" 
+          placeholder="ej. Mesa 1, Barra A, VIP 2"
+          maxlength="50">
+        <mat-icon matPrefix>label</mat-icon>
+        @if (form.get('identificador')?.hasError('required') && form.get('identificador')?.touched) {
+          <mat-error>El identificador es obligatorio</mat-error>
+        }
+        @if (form.get('identificador')?.hasError('maxlength')) {
+          <mat-error>Máximo 50 caracteres</mat-error>
+        }
+        @if (form.get('identificador')?.hasError('duplicado')) {
+          <mat-error>Este identificador ya está en uso</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Capacidad con botones -->
+      <div class="capacidad-container">
+        <label class="capacidad-label">Capacidad</label>
+        <div class="capacidad-controls">
+          <button 
+            type="button" 
+            mat-mini-fab 
+            color="primary" 
+            (click)="decrementarCapacidad()"
+            [disabled]="(form.get('capacidad')?.value ?? 4) <= 1">
+            <mat-icon>remove</mat-icon>
+          </button>
+          
+          <div class="capacidad-display">
+            <mat-icon>person</mat-icon>
+            <span class="capacidad-numero">{{ form.get('capacidad')?.value }}</span>
+          </div>
+          
+          <button 
+            type="button" 
+            mat-mini-fab 
+            color="primary" 
+            (click)="incrementarCapacidad()"
+            [disabled]="(form.get('capacidad')?.value ?? 4) >= 12">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+        @if (form.get('capacidad')?.hasError('required') && form.get('capacidad')?.touched) {
+          <div class="error-message">La capacidad es obligatoria</div>
+        }
+        @if (form.get('capacidad')?.hasError('min') || form.get('capacidad')?.hasError('max')) {
+          <div class="error-message">Capacidad debe estar entre 1 y 12 personas</div>
+        }
+      </div>
+
+      <!-- Zona -->
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Zona (opcional)</mat-label>
+        <input 
+          matInput 
+          formControlName="zona" 
+          placeholder="ej. Interior, Terraza, Barra">
+        <mat-icon matPrefix>location_on</mat-icon>
+      </mat-form-field>
+
+      <!-- Nombre del cliente (solo visible en edición si está ocupada) -->
+      @if (mostrarCliente) {
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nombre del cliente</mat-label>
+          <input 
+            matInput 
+            formControlName="nombreCliente" 
+            placeholder="Nombre del cliente">
+          <mat-icon matPrefix>person</mat-icon>
+        </mat-form-field>
+      }
+
+      <!-- Mensaje de error general -->
+      @if (errorMensaje()) {
+        <div class="error-banner">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorMensaje() }}</span>
+        </div>
+      }
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button 
+      mat-stroked-button 
+      (click)="cancelar()"
+      [disabled]="guardando()">
+      Cancelar
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="guardar()"
+      [disabled]="form.invalid || guardando()">
+      @if (guardando()) {
+        <mat-spinner diameter="20" class="button-spinner"></mat-spinner>
+      }
+      <span>Guardar</span>
+    </button>
+  </mat-dialog-actions>
+</div>

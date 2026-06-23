@@ -1,0 +1,193 @@
+<div class="usuarios-page">
+
+  <!-- Header Compacto -->
+  <header class="page-header">
+    <div class="header-title">
+      <mat-icon class="header-icon">people</mat-icon>
+      <h1>Usuarios</h1>
+    </div>
+    <div class="header-actions">
+      <button mat-icon-button [matMenuTriggerFor]="exportMenu" class="action-icon">
+        <mat-icon>download</mat-icon>
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportExcel()">
+          <mat-icon>table_view</mat-icon>
+          Excel
+        </button>
+        <button mat-menu-item (click)="exportPDF()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          PDF
+        </button>
+      </mat-menu>
+      <button mat-fab extended color="primary" (click)="open()" class="add-button">
+        <mat-icon>add</mat-icon>
+        <span class="btn-text-full">Nuevo Usuario</span>
+        <span class="btn-text-short">Nuevo</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Overlay de carga -->
+  <div class="loading-overlay" [class.active]="isLoading">
+    <div class="loading-content">
+      <mat-spinner [diameter]="50"></mat-spinner>
+      <p>Cargando usuarios...</p>
+    </div>
+  </div>
+
+  <!-- Vista de Cards (Mobile) -->
+  <div class="cards-view">
+    <div class="product-card" *ngFor="let usuario of dataSource.data">
+      <div class="card-header">
+        <div class="card-image-user">
+          <img [src]="usuario.fotoPerfil_url" [alt]="usuario.nombreCompleto" *ngIf="usuario.fotoPerfil_url">
+          <div class="card-image-placeholder" *ngIf="!usuario.fotoPerfil_url">
+            <mat-icon>person</mat-icon>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card-content">
+        <h3 class="card-title">{{ usuario.nombreCompleto }}</h3>
+        
+        <div class="card-info">
+          <p class="card-detail">
+            <mat-icon>email</mat-icon>
+            {{ usuario.email }}
+          </p>
+          <p class="card-detail" *ngIf="usuario.telefono">
+            <mat-icon>phone</mat-icon>
+            {{ usuario.telefono }}
+          </p>
+          <p class="card-detail">
+            <mat-icon>badge</mat-icon>
+            {{ usuario.roleId == 2 ? 'Caja' : usuario.roleId == 3 ? 'Mesero' : usuario.roleId == 4 ? 'Cocina' : 'Administrador' }}
+          </p>
+        </div>
+        
+        <div class="card-footer">
+          <span class="card-status" [class.active]="usuario.activo === true || usuario.activo === 1">
+            <mat-icon>{{ (usuario.activo === true || usuario.activo === 1) ? 'check_circle' : 'cancel' }}</mat-icon>
+            {{ (usuario.activo === true || usuario.activo === 1) ? 'Activo' : 'Inactivo' }}
+          </span>
+          
+          <div class="card-actions">
+            <button mat-icon-button color="primary" (click)="openById(usuario.id)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="delete(usuario.id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty state para cards -->
+    <div class="empty-cards" *ngIf="dataSource.data.length === 0">
+      <mat-icon>people</mat-icon>
+      <h3>No hay usuarios</h3>
+      <p>Agrega tu primer usuario</p>
+      <button mat-raised-button color="primary" (click)="open()">
+        <mat-icon>add</mat-icon>
+        Crear Usuario
+      </button>
+    </div>
+  </div>
+
+  <!-- Vista de Tabla (Desktop) -->
+  <div class="table-view">
+    <table mat-table [dataSource]="dataSource" matSort class="productos-table">
+
+      <ng-container matColumnDef="nombreCompleto">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Usuario </th>
+        <td mat-cell *matCellDef="let row">
+          <div class="table-product">
+            <img [src]="row.fotoPerfil_url" [alt]="row.nombreCompleto" class="table-img" *ngIf="row.fotoPerfil_url">
+            <div class="table-img-placeholder" *ngIf="!row.fotoPerfil_url">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="table-product-info">
+              <span class="table-name">{{ row.nombreCompleto }}</span>
+            </div>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Email </th>
+        <td mat-cell *matCellDef="let row">
+          <span class="table-category">{{ row.email }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="telefono">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Teléfono </th>
+        <td mat-cell *matCellDef="let row">
+          <span class="table-category">{{ row.telefono || '-' }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="roleId">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Rol </th>
+        <td mat-cell *matCellDef="let row">
+          <span class="table-role" [class.admin]="row.roleId == 1">
+            <mat-icon>{{ row.roleId == 1 ? 'admin_panel_settings' : row.roleId == 2 ? 'point_of_sale' : row.roleId == 3 ? 'restaurant_menu' : 'restaurant' }}</mat-icon>
+            {{ row.roleId == 2 ? 'Caja' : row.roleId == 3 ? 'Mesero' : row.roleId == 4 ? 'Cocina' : 'Administrador' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="activo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Estado </th>
+        <td mat-cell *matCellDef="let row">
+          <span class="table-status" [class.active]="row.activo === true || row.activo === 1">
+            <mat-icon>{{ (row.activo === true || row.activo === 1) ? 'check_circle' : 'cancel' }}</mat-icon>
+            {{ (row.activo === true || row.activo === 1) ? 'Activo' : 'Inactivo' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <th mat-header-cell *matHeaderCellDef> Acciones </th>
+        <td mat-cell *matCellDef="let row">
+          <div class="table-actions">
+            <button mat-icon-button color="primary" (click)="openById(row.id)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="delete(row.id)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          <div class="empty-table">
+            <mat-icon>people</mat-icon>
+            <h3>No hay usuarios registrados</h3>
+            <p>Comienza agregando tu primer usuario</p>
+            <button mat-raised-button color="primary" (click)="open()">
+              <mat-icon>add</mat-icon>
+              Crear Usuario
+            </button>
+          </div>
+        </td>
+      </tr>
+
+    </table>
+  </div>
+
+  <!-- Paginador -->
+  <mat-paginator 
+    [pageSizeOptions]="[5, 10, 25, 50]" 
+    [pageSize]="10"
+    showFirstLastButtons>
+  </mat-paginator>
+
+</div>

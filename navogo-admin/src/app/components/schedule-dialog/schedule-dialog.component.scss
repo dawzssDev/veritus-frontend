@@ -1,0 +1,214 @@
+// Homologado con LocationDialog (mismo patrón visual y animación)
+
+$gray-light: #e2e8f0;
+$gray: #718096;
+$gray-dark: #2d3748;
+$dark: #1a202c;
+$white: #ffffff;
+$primary: #1c8f46;
+$danger: #ef4444;
+$border-radius: 16px;
+$spacing-xs: 8px;
+$spacing-sm: 12px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2100;
+  padding: $spacing-lg;
+}
+
+.modal-overlay.is-open {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content {
+  background: $white;
+  border-radius: $spacing-lg;
+  max-width: 540px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUpModal 0.28s ease-out;
+}
+
+.modal-header {
+  padding: $spacing-lg;
+  border-bottom: 1px solid $gray-light;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    color: $dark;
+  }
+
+  .modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    background: $gray-light;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 20px;
+    color: $gray-dark;
+
+    &:hover {
+      background: $gray;
+      color: $white;
+      transform: rotate(90deg);
+    }
+
+    &:focus-visible {
+      outline: 3px solid rgba(102, 126, 234, 0.3);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.modal-body {
+  padding: $spacing-lg;
+  max-height: 65vh;
+  overflow: auto;
+}
+
+.horario-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-md 0;
+  border-bottom: 1px solid $gray-light;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &.horario-today {
+    background: linear-gradient(90deg, rgba(102, 126, 234, 0.08) 0%, transparent 100%);
+    padding-left: $spacing-md;
+    padding-right: $spacing-md;
+    margin: 0 (-$spacing-md);
+    border-radius: 8px;
+
+    .horario-day {
+      color: $primary;
+      font-weight: 800;
+    }
+  }
+
+  .horario-day {
+    font-size: 15px;
+    font-weight: 700;
+    color: $dark;
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+
+    .today-badge {
+      display: inline-block;
+      background: $primary;
+      color: $white;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+  }
+
+  .horario-time {
+    font-size: 14px;
+    color: $gray;
+    font-weight: 600;
+
+    &.horario-closed {
+      color: $danger;
+      font-weight: 700;
+    }
+  }
+}
+
+.modal-footer {
+  padding: $spacing-lg;
+  border-top: 1px solid $gray-light;
+
+  .btn-modal-close {
+    width: 100%;
+    padding: $spacing-md;
+    background: $gray-light;
+    color: $dark;
+    border: none;
+    border-radius: $border-radius;
+    font-size: 15px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: darken($gray-light, 10%);
+    }
+
+    &:focus-visible {
+      outline: 3px solid rgba(102, 126, 234, 0.3);
+      outline-offset: 2px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .modal-content {
+    border-radius: 18px 18px 0 0;
+    max-height: 92vh;
+    animation: slideUpSheet 0.28s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUpModal {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(24px);
+  }
+  to {
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,151 @@
+<div class="seleccionar-mesa-dialog">
+  
+  <!-- Header -->
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>table_restaurant</mat-icon>
+      Seleccionar Mesa
+    </h2>
+    <button mat-icon-button (click)="cancelar()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  @if (cargando()) {
+    <div class="loading-container">
+      <mat-spinner [diameter]="50"></mat-spinner>
+      <p>Cargando mesas...</p>
+    </div>
+  }
+
+  <!-- Content -->
+  @if (!cargando()) {
+    <div mat-dialog-content class="dialog-content">
+      
+      <!-- Filtros -->
+      <div class="filtros-container">
+        
+        <!-- Filtro de zona -->
+        <div class="filtro-grupo">
+          <label>Zona:</label>
+          <mat-chip-listbox 
+            [value]="filtroZona()"
+            (change)="cambiarFiltroZona($event.value)"
+            class="chips-filter">
+            @for (zona of zonasDisponibles(); track zona) {
+              <mat-chip-option 
+                [value]="zona"
+                [selected]="filtroZona() === zona">
+                {{ zona === 'todas' ? 'Todas' : zona }}
+              </mat-chip-option>
+            }
+          </mat-chip-listbox>
+        </div>
+
+        <!-- Filtro de estado -->
+        <div class="filtro-grupo">
+          <label>Estado:</label>
+          <mat-chip-listbox 
+            [value]="filtroEstado()"
+            (change)="cambiarFiltroEstado($event.value)"
+            class="chips-filter">
+            <mat-chip-option value="todas" [selected]="filtroEstado() === 'todas'">
+              Todas
+            </mat-chip-option>
+            <mat-chip-option value="libre" [selected]="filtroEstado() === 'libre'">
+              <mat-icon>check_circle</mat-icon>
+              Libres ({{ resumenEstados().libres }})
+            </mat-chip-option>
+            <mat-chip-option value="ocupada" [selected]="filtroEstado() === 'ocupada'">
+              <mat-icon>people</mat-icon>
+              Ocupadas ({{ resumenEstados().ocupadas }})
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </div>
+      </div>
+
+      <!-- Mapa de mesas -->
+      <div class="mesas-mapa-container">
+        @if (mesasFiltradas().length === 0) {
+          <div class="empty-state">
+            <mat-icon>table_restaurant</mat-icon>
+            <p>No hay mesas disponibles</p>
+            <small>{{ filtroEstado() !== 'todas' ? 'Intenta cambiar los filtros' : 'Parece que no hay mesas creadas' }}</small>
+          </div>
+        } @else {
+          <div class="mesas-mapa">
+            @for (mesa of mesasFiltradas(); track mesa.id) {
+              <div 
+                class="mesa-card"
+                [class.libre]="mesa.estado === 'libre'"
+                [class.ocupada]="mesa.estado === 'ocupada'"
+                [class.cuenta-pendiente]="mesa.estado === 'cuenta_pendiente'"
+                [class.reservada]="mesa.estado === 'reservada'"
+                [class.seleccionada]="mesaSeleccionada()?.id === mesa.id"
+                [style.position]="'absolute'"
+                [style.left.px]="mesa.posicion_x"
+                [style.top.px]="mesa.posicion_y"
+                [style.width.px]="mesa.ancho"
+                [style.height.px]="mesa.alto"
+                (click)="seleccionarMesa(mesa)">
+                
+                <div class="mesa-content">
+                  <div class="mesa-header">
+                    <mat-icon class="mesa-icono">{{ getEstadoIcon(mesa.estado) }}</mat-icon>
+                    <span class="mesa-identificador">{{ mesa.identificador }}</span>
+                    
+                    @if (mesaSeleccionada()?.id === mesa.id) {
+                      <mat-icon class="check-icon">check_circle</mat-icon>
+                    }
+                  </div>
+
+                  <div class="mesa-detalles">
+                    <div class="detalle-item">
+                      <mat-icon>person</mat-icon>
+                      <span>{{ mesa.capacidad }}</span>
+                    </div>
+                    
+                    @if (mesa.zona) {
+                      <div class="detalle-zona">{{ mesa.zona }}</div>
+                    }
+
+                    @if (mesa.nombreCliente) {
+                      <div class="detalle-cliente">
+                        {{ mesa.nombreCliente }}
+                      </div>
+                    }
+
+                    @if (mesa.tiempo_transcurrido != null && mesa.tiempo_transcurrido > 0) {
+                      <div class="detalle-tiempo">
+                        <mat-icon>schedule</mat-icon>
+                        {{ mesa.tiempo_transcurrido }}m
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div mat-dialog-actions class="dialog-actions">
+      <button mat-stroked-button (click)="cancelar()">
+        Cancelar
+      </button>
+      <button 
+        mat-raised-button 
+        color="primary"
+        [disabled]="!mesaSeleccionada()"
+        (click)="confirmarSeleccion()">
+        <mat-icon>check</mat-icon>
+        Confirmar Selección
+      </button>
+    </div>
+  }
+
+</div>

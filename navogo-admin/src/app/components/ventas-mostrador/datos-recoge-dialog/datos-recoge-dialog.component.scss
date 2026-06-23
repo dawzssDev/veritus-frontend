@@ -1,0 +1,84 @@
+.datos-recoge-dialog {
+  max-width: 420px;
+  width: 100%;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+
+  .dialog-header {
+    position: relative;
+    padding: 20px 24px;
+    background: linear-gradient(135deg, #1c8f46 0%, #0f4d2a 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .header-icon {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      mat-icon {
+        font-size: 26px;
+        width: 26px;
+        height: 26px;
+      }
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 19px;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .close-button {
+      color: white;
+      position: absolute;
+      top: 8px;
+      right: 8px;
+    }
+  }
+
+  .dialog-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .dialog-hint {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #616161;
+      line-height: 1.45;
+    }
+
+    .full-width {
+      width: 100%;
+    }
+  }
+
+  .dialog-footer {
+    padding: 16px 24px;
+    background: #fafafa;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+
+    button[color='primary'] {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+}
+
+:host {
+  display: block;
+}

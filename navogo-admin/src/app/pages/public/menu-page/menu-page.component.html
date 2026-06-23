@@ -1,0 +1,356 @@
+<!-- ============================================================ -->
+<!-- SKELETON LOADER - Mientras carga -->
+<!-- ============================================================ -->
+<div *ngIf="loading" class="menu-skeleton">
+  <div class="skeleton-banner"></div>
+  <div class="skeleton-header">
+    <div class="skeleton-logo"></div>
+    <div class="skeleton-text-block">
+      <div class="skeleton-title"></div>
+      <div class="skeleton-subtitle"></div>
+    </div>
+  </div>
+  <div class="skeleton-categories">
+    @for (i of [1, 2, 3, 4]; track i) {
+      <div class="skeleton-chip"></div>
+    }
+  </div>
+  <div class="skeleton-products">
+    @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+      <div class="skeleton-card"></div>
+    }
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- ERROR 404 - Negocio no encontrado -->
+<!-- ============================================================ -->
+<div *ngIf="error && !loading" class="error-container">
+  <div class="error-content">
+    <div class="error-icon" aria-hidden="true"><mat-icon>restaurant</mat-icon></div>
+    <h1>Negocio no encontrado</h1>
+    <p>{{ errorMessage }}</p>
+    <p class="error-hint">Verifica que la URL sea correcta</p>
+    <button class="btn-primary" (click)="router.navigate(['/'])">
+      Volver al inicio
+    </button>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MENÚ PRINCIPAL - Contenido -->
+<!-- ============================================================ -->
+<div *ngIf="business && !loading" class="menu-container">
+  <!-- ══ HERO SECTION ══ -->
+  <div class="menu-hero">
+
+    <!-- Logo -->
+    <div class="menu-logo-wrapper">
+      @if (business.logo) {
+        <img [src]="business.logo"
+             [alt]="business.nombre"
+             class="menu-logo" />
+      } @else {
+        <div class="menu-logo-placeholder">
+          {{ business.nombre.charAt(0) }}
+        </div>
+      }
+    </div>
+
+    <!-- Nombre y descripción -->
+    <h1 class="menu-nombre">{{ business.nombre }}</h1>
+
+    @if (business.descripcion) {
+      <p class="menu-descripcion">{{ business.descripcion }}</p>
+    }
+
+    <!-- Horario del día actual -->
+    @if (getTodaySchedule(); as todaySchedule) {
+      <div class="menu-horario-hoy">
+        <div class="horario-dot"
+             [class.horario-dot--abierto]="todaySchedule.isOpen"
+             [class.horario-dot--cerrado]="!todaySchedule.isOpen">
+        </div>
+        <span class="horario-texto">
+          {{ todaySchedule.day }}: {{ todaySchedule.hours }}
+        </span>
+      </div>
+    }
+
+  </div>
+
+  <!-- ══ ACCIONES PRINCIPALES ══ -->
+  <div class="menu-acciones">
+
+    <!-- Grid de botones de info -->
+    <div class="acciones-grid">
+
+      @if (business.horarios) {
+        <button class="accion-card" (click)="openHorariosModal()">
+          <div class="accion-card__icono">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div class="accion-card__texto">
+            <span class="accion-card__titulo">Horarios</span>
+            <span class="accion-card__sub">Ver todos los días</span>
+          </div>
+          <div class="accion-card__arrow">›</div>
+        </button>
+      }
+
+      @if (business.direccion) {
+        <button class="accion-card" (click)="openLocationModal()">
+          <div class="accion-card__icono">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.5">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <div class="accion-card__texto">
+            <span class="accion-card__titulo">Ubicación</span>
+            <span class="accion-card__sub">Cómo llegar</span>
+          </div>
+          <div class="accion-card__arrow">›</div>
+        </button>
+      }
+
+      @if (sucursales.length > 0) {
+        <button class="accion-card" (click)="openSucursalModal()">
+          <div class="accion-card__icono">
+            <svg viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="1.5">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5
+                       a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+          </div>
+          <div class="accion-card__texto">
+            <span class="accion-card__titulo">Sucursal</span>
+            <span class="accion-card__sub">
+              {{ selectedSucursal?.nombre ?? 'Seleccionar' }}
+            </span>
+          </div>
+          <div class="accion-card__arrow">›</div>
+        </button>
+      }
+
+    </div>
+
+    <!-- Botón compartir -->
+    <button class="btn-compartir" (click)="shareOnSocial('whatsapp')">
+      <svg viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.5"
+           width="16" height="16">
+        <circle cx="18" cy="5" r="3"/>
+        <circle cx="6" cy="12" r="3"/>
+        <circle cx="18" cy="19" r="3"/>
+        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+      </svg>
+      Compartir menú
+    </button>
+
+  </div>
+
+  <!-- ══ BANNER CERRADO ══ -->
+  @if (!isBusinessOpen()) {
+    <div class="banner-cerrado">
+      <div class="banner-cerrado__contenido">
+        <span class="banner-cerrado__badge">Cerrado ahora</span>
+        <p class="banner-cerrado__titulo">¡Volvemos pronto!</p>
+        <p class="banner-cerrado__sub">
+          Los pedidos están deshabilitados.
+          Puedes explorar el menú.
+        </p>
+        @if (getNextOpeningTime(); as proximaApertura) {
+          <p class="banner-cerrado__apertura">
+            {{ proximaApertura }}
+          </p>
+        }
+        <button class="banner-cerrado__btn"
+                (click)="openHorariosModal()">
+          Ver horarios
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- NAVEGACIÓN DE CATEGORÍAS (Sticky) -->
+  <div class="categories-nav" *ngIf="business.categorias && business.categorias.length > 0">
+    <div class="categories-scroll">
+      <button
+        *ngIf="getActivePromos().length > 0"
+        class="category-chip promo-chip-nav"
+        [class.active]="selectedCategory === 'promos'"
+        (click)="scrollToCategory('promos')">
+        <mat-icon class="promo-icon">local_fire_department</mat-icon>
+        Promociones
+      </button>
+      @for (category of business.categorias; track category.id) {
+        <button
+          class="category-chip"
+          [class.active]="selectedCategory === category.id"
+          (click)="scrollToCategory(category.id)">
+          {{ category.nombre }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- SECCIÓN DE PROMOCIONES ACTIVAS -->
+  <div *ngIf="getActivePromos().length > 0" class="flash-deals-section" id="category-promos">
+    <div class="flash-deals-header">
+      <div class="flash-deals-icon">
+        <mat-icon>local_fire_department</mat-icon>
+      </div>
+      <div class="flash-deals-title">
+        <h2>Promociones</h2>
+        <p>¡Por tiempo limitado!</p>
+      </div>
+    </div>
+
+    <div class="products-grid">
+      @for (promo of getActivePromos(); track promo.id) {
+        <app-product-card
+          [product]="promo"
+          [disableAdd]="!isBusinessOpen()"
+          (select)="viewProduct($event)"
+          (add)="addFromCard($event)">
+        </app-product-card>
+      }
+    </div>
+  </div>
+
+  <!-- LISTADO DE PRODUCTOS POR CATEGORÍA -->
+  <div class="menu-content">
+    
+    <!-- Sin productos -->
+    <div *ngIf="!business.categorias || business.categorias.length === 0" class="empty-menu">
+      <div class="empty-icon" aria-hidden="true"><mat-icon>receipt_long</mat-icon></div>
+      <h3>Menú en construcción</h3>
+      <p>Este negocio aún no ha agregado productos</p>
+      <button class="btn-primary" (click)="contactWhatsApp()" *ngIf="business.whatsapp">
+        Contactar por WhatsApp
+      </button>
+    </div>
+
+    <!-- Con productos -->
+    @for (category of business.categorias ?? []; track category.id) {
+      <div class="category-section" [id]="'category-' + category.id">
+      
+      <div class="category-header">
+        <h2 class="category-title">{{ category.nombre }}</h2>
+        <p class="category-description" *ngIf="category.descripcion">
+          {{ category.descripcion }}
+        </p>
+      </div>
+
+      <!-- Grid de productos -->
+      <div class="products-grid">
+        @for (product of getProductsWithoutPromos(category.productos ?? []); track product.id) {
+          <app-product-card
+            [product]="product"
+            [disableAdd]="!isBusinessOpen()"
+            (select)="viewProduct($event)"
+            (add)="addFromCard($event)">
+          </app-product-card>
+        }
+      </div>
+      </div>
+    }
+
+  </div>
+
+  <!-- FOOTER FLOTANTE CON ACCIONES -->
+  <div class="floating-footer" *ngIf="isBusinessOpen() && cartCount() > 0; else whatsappFooter">
+    <button class="btn-pay" (click)="goToCart()" aria-label="Ir a pagar">
+      <span class="btn-icon" aria-hidden="true"><mat-icon>shopping_cart</mat-icon></span>
+      <div class="btn-text">
+        <span class="btn-label">Pagar</span>
+        <span class="btn-sublabel">{{ cartCount() }} productos · {{ formatPrice(cartTotal()) }}</span>
+      </div>
+    </button>
+  </div>
+
+  <ng-template #whatsappFooter>
+    <div class="floating-footer" *ngIf="business.whatsapp">
+      <button class="btn-order" (click)="contactWhatsApp()">
+        <span class="btn-icon" aria-hidden="true"><mat-icon>chat</mat-icon></span>
+        <div class="btn-text">
+          <span class="btn-label">Hacer pedido</span>
+          <span class="btn-sublabel">Vía WhatsApp</span>
+        </div>
+      </button>
+    </div>
+  </ng-template>
+
+</div>
+
+<!-- ============================================================ -->
+<!-- LOCATION DIALOG (MAPA) -->
+<!-- ============================================================ -->
+<app-location-dialog
+  [(open)]="showLocationModal"
+  [address]="business?.direccion || null"
+  [lat]="business?.lat ?? null"
+  [lng]="business?.lng ?? null">
+</app-location-dialog>
+
+<!-- ============================================================ -->
+<!-- SCHEDULE DIALOG (HORARIOS) -->
+<!-- ============================================================ -->
+<app-schedule-dialog
+  [(open)]="showHorariosModal"
+  [horarios]="(business?.horarios && (typeof business?.horarios === 'object')) ? (business?.horarios) : null">
+</app-schedule-dialog>
+
+<!-- ============================================================ -->
+<!-- PRODUCT DETAIL DIALOG (BOTTOM SHEET) -->
+<!-- ============================================================ -->
+<app-product-detail-dialog
+  [(open)]="showProductModal"
+  [productId]="selectedProductId"
+  [canAdd]="isBusinessOpen()"
+  (addToCart)="onAddFromDetail($event)">
+</app-product-detail-dialog>
+
+<!-- ============================================================ -->
+<!-- MODAL DE SUCURSALES -->
+<!-- ============================================================ -->
+@if (showSucursalModal) {
+  <div class="sucursal-overlay" (click)="closeSucursalModal()">
+    <div class="sucursal-sheet" (click)="$event.stopPropagation()">
+      <div class="sucursal-sheet-handle"></div>
+      <div class="sucursal-sheet-header">
+        <h3 class="sucursal-sheet-title">Selecciona la sucursal</h3>
+        <button class="sucursal-close-btn" (click)="closeSucursalModal()" aria-label="Cerrar">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="sucursal-list">
+        @for (sucursal of sucursales; track sucursal.id) {
+          <button
+            class="sucursal-item"
+            [class.active]="selectedSucursal?.id === sucursal.id"
+            (click)="selectSucursal(sucursal)">
+            <span class="sucursal-item-icon"><mat-icon>store</mat-icon></span>
+            <div class="sucursal-item-info">
+              <span class="sucursal-item-name">{{ sucursal.nombre }}</span>
+              @if (sucursal.direccion) {
+                <span class="sucursal-item-address">{{ sucursal.direccion }}</span>
+              }
+            </div>
+            @if (selectedSucursal?.id === sucursal.id) {
+              <mat-icon class="sucursal-check">check_circle</mat-icon>
+            }
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}

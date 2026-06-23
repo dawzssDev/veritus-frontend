@@ -1,0 +1,267 @@
+<div class="pedidos-page">
+
+  <!-- ── HEADER ── -->
+  <div class="pedidos-header">
+    <div class="pedidos-header__titulo">
+      <h1 class="mat-headline-6">Pedidos</h1>
+      <!-- Badge con total de pedidos activos -->
+      @if (pedidosActivos().length > 0) {
+        <span class="badge-total">
+          {{ pedidosActivos().length }}
+        </span>
+      }
+    </div>
+
+    <!-- Indicador de auto-refresh -->
+    <div class="refresh-info">
+      <!-- Spinner cuando está refrescando -->
+      @if (refrescando()) {
+        <mat-icon class="refresh-spinner">sync</mat-icon>
+      } @else {
+        <!-- Botón de refresh manual -->
+        <button mat-icon-button
+                matTooltip="Actualizar ahora"
+                (click)="refrescarManual()">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      }
+
+      <!-- Contador regresivo (solo en tablet/desktop) -->
+      <span class="refresh-countdown">
+        {{ segundosProximoRefresh() }}s
+      </span>
+    </div>
+
+    <!-- Botón para mostrar/ocultar filtros en móvil -->
+    <button mat-icon-button
+            class="btn-filtros-toggle"
+            (click)="toggleFiltros()"
+            [matBadge]="filtrosActivos() > 0 ? filtrosActivos() : null"
+            matBadgeColor="warn"
+            matBadgeSize="small">
+      <mat-icon>tune</mat-icon>
+    </button>
+  </div>
+
+  <!-- ── FILTROS (colapsables en móvil) ── -->
+  <div class="pedidos-filtros"
+       [class.pedidos-filtros--visible]="mostrarFiltros()">
+
+    <!-- Búsqueda -->
+    <mat-form-field appearance="outline"
+                    subscriptSizing="dynamic"
+                    class="filtro-busqueda">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput
+             placeholder="Folio, cliente..."
+             [(ngModel)]="busquedaValue"
+             (ngModelChange)="busqueda.set($event)" />
+    </mat-form-field>
+
+    <!-- Chips de estatus -->
+    <div class="filtro-chips">
+      <mat-chip-listbox [(ngModel)]="filtroEstatusValue"
+                        (ngModelChange)="filtroEstatus.set($event)"
+                        hideSingleSelectionIndicator>
+        @for (op of estatusOpciones; track op.valor) {
+          <mat-chip-option [value]="op.valor">
+            {{ op.label }}
+          </mat-chip-option>
+        }
+      </mat-chip-listbox>
+    </div>
+
+    <!-- Filtro tipo de servicio -->
+    <div class="filtro-chips">
+      <mat-chip-listbox [(ngModel)]="filtroTipoValue"
+                        (ngModelChange)="filtroTipo.set($event)"
+                        hideSingleSelectionIndicator>
+        @for (op of tipoOpciones; track op.valor) {
+          <mat-chip-option [value]="op.valor">
+            {{ op.label }}
+          </mat-chip-option>
+        }
+      </mat-chip-listbox>
+    </div>
+
+  </div>
+
+  <!-- ── ESTADO VACÍO ── -->
+  @if (!cargando() && pedidosFiltrados().length === 0) {
+    <div class="pedidos-vacio">
+      <mat-icon class="vacio-icon">receipt_long</mat-icon>
+      <p class="mat-body-1">No hay pedidos</p>
+      <p class="mat-body-2 text-secondary">
+        Los pedidos nuevos aparecerán aquí automáticamente
+      </p>
+    </div>
+  }
+
+  <!-- ── LOADING ── -->
+  @if (cargando()) {
+    <div class="pedidos-loading">
+      @for (i of [1,2,3]; track i) {
+        <div class="skeleton-card">
+          <div class="skeleton skeleton-header"></div>
+          <div class="skeleton skeleton-line"></div>
+          <div class="skeleton skeleton-line skeleton-line--short"></div>
+          <div class="skeleton skeleton-footer"></div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- ── GRID DE TARJETAS ── -->
+  @if (!cargando()) {
+    <div class="pedidos-grid">
+
+      @for (pedido of pedidosFiltrados(); track pedido.id) {
+
+        <mat-card appearance="outlined"
+                  class="pedido-card"
+                  [class.pedido-card--urgente]="esUrgente(pedido)"
+                  [class.pedido-card--nuevo]="esNuevo(pedido)">
+
+          <!-- ── HEADER DE LA TARJETA ── -->
+          <div class="pedido-card__header">
+
+            <div class="pedido-card__header-left">
+              <!-- Folio -->
+              <span class="pedido-folio">#{{ dailyFolio(pedido) ?? pedido.id }}</span>
+              <!-- Tipo de servicio -->
+              <span class="pedido-tipo pedido-tipo--{{ pedido.shipping_type }}">
+                <mat-icon class="tipo-icono">
+                  {{ pedido.shipping_type === 'local'      ? 'table_restaurant'
+                   : pedido.shipping_type === 'domicilio' ? 'delivery_dining'
+                   : 'shopping_bag' }}
+                </mat-icon>
+                {{ pedido.shipping_type === 'local'      ? 'Mesa'
+                 : pedido.shipping_type === 'domicilio' ? 'Domicilio'
+                 : 'Para llevar' }}
+              </span>
+            </div>
+
+            <div class="pedido-card__header-right">
+              <!-- Temporizador -->
+              <span class="pedido-timer"
+                    [class.timer--normal]="getMinutos(pedido) < 15"
+                    [class.timer--alerta]="getMinutos(pedido) >= 15
+                                           && getMinutos(pedido) < 30"
+                    [class.timer--urgente]="getMinutos(pedido) >= 30">
+                <mat-icon class="timer-icono">schedule</mat-icon>
+                {{ getMinutos(pedido) }}min
+              </span>
+              <!-- Estatus chip -->
+              <mat-chip [class]="'estatus-chip ' + getClaseEstatus(pedido.estatus)"
+                        [disableRipple]="true">
+                <mat-icon class="chip-icono">
+                  {{ getIconoEstatus(pedido.estatus) }}
+                </mat-icon>
+                {{ getEtiquetaEstatus(pedido.estatus) }}
+              </mat-chip>
+            </div>
+
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <!-- ── CLIENTE ── -->
+          @if (pedido.customer_name) {
+            <div class="pedido-cliente">
+              <mat-icon class="cliente-icono">person</mat-icon>
+              <span>{{ pedido.customer_name }}</span>
+            </div>
+          }
+
+          <!-- ── ITEMS ── -->
+          <div class="pedido-items">
+            @for (item of pedido.items?.slice(0, 4); track $index) {
+              <div class="pedido-item">
+                <span class="item-cantidad">{{ item.quantity }}x</span>
+                <span class="item-nombre">{{ item.name }}</span>
+                @if (item.selections && item.selections.length > 0) {
+                  <span class="item-nota">{{ formatSelections(item) }}</span>
+                }
+              </div>
+            }
+            @if ((pedido.items?.length ?? 0) > 4) {
+              <p class="items-mas">
+                +{{ (pedido.items?.length ?? 0) - 4 }} más...
+              </p>
+            }
+          </div>
+
+          <!-- ── NOTA ── -->
+          @if (pedido.note) {
+            <div class="pedido-nota">
+              <mat-icon class="nota-icono">sticky_note_2</mat-icon>
+              <span>{{ pedido.note }}</span>
+            </div>
+          }
+
+          <mat-divider></mat-divider>
+
+          <!-- ── FOOTER: TOTAL + ACCIONES ── -->
+          <div class="pedido-card__footer">
+
+            <div class="pedido-total">
+              <span class="total-label">Total</span>
+              <span class="total-valor">
+                ${{ pedido.total | number:'1.2-2' }}
+              </span>
+            </div>
+
+            <!-- Acciones según estatus -->
+            <div class="pedido-acciones">
+
+              <!-- Botón de acción principal — avanza el estatus -->
+              @if (puedeAvanzar(pedido)) {
+                <button mat-flat-button
+                        [class]="'btn-accion ' + getClaseBoton(pedido)"
+                        [disabled]="procesando() === pedido.id"
+                        (click)="avanzarEstatus(pedido)">
+                  @if (procesando() === pedido.id) {
+                    <span class="btn-spinner-small"></span>
+                  } @else {
+                    <mat-icon>{{ getIconoAccion(pedido) }}</mat-icon>
+                  }
+                  <span class="btn-texto">{{ getTextoAccion(pedido) }}</span>
+                </button>
+              }
+
+              <!-- Botón cancelar (solo en estatus 1 y 2) -->
+              @if (pedido.estatus === ESTATUS.SIN_INICIAR
+                   || pedido.estatus === ESTATUS.EN_PROCESO) {
+                <button mat-icon-button
+                        color="warn"
+                        matTooltip="Cancelar pedido"
+                        [disabled]="procesando() === pedido.id"
+                        (click)="cancelarPedido(pedido)">
+                  <mat-icon>cancel</mat-icon>
+                </button>
+              }
+
+              <!-- Botón ver detalle -->
+              <button mat-icon-button
+                      matTooltip="Ver detalle"
+                      (click)="verDetalle(pedido)">
+                <mat-icon>visibility</mat-icon>
+              </button>
+
+            </div>
+
+          </div>
+
+          <!-- Indicador de urgencia -->
+          @if (esUrgente(pedido)) {
+            <div class="urgencia-bar"></div>
+          }
+
+        </mat-card>
+
+      }
+
+    </div>
+  }
+
+</div>

@@ -1,0 +1,201 @@
+<div class="page">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="page-title">
+      <button mat-icon-button type="button" (click)="cancel()" aria-label="Volver" class="btn-back">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div class="page-title-text">
+        <div class="page-title-main">
+          <mat-icon class="title-icon">local_shipping</mat-icon>
+          Configuración de Envío
+        </div>
+        <div class="page-title-sub">Gestiona los costos y zonas de entrega</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p class="loading-text">Cargando configuración...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="!isLoading && errorMessage" class="error-container">
+    <mat-icon class="error-icon">error_outline</mat-icon>
+    <h3>Error al cargar</h3>
+    <p>{{ errorMessage }}</p>
+    <button mat-raised-button color="primary" (click)="loadShippingConfig()">
+      <mat-icon>refresh</mat-icon>
+      Reintentar
+    </button>
+  </div>
+
+  <!-- Formulario -->
+  <form *ngIf="!isLoading && !errorMessage" [formGroup]="form" (ngSubmit)="onSubmit()" class="form-container">
+    
+    <!-- Card: Estado del envío -->
+    <mat-card class="section-card">
+      <div class="section-header">
+        <mat-icon>power_settings_new</mat-icon>
+        <h3>Estado del servicio</h3>
+      </div>
+      
+      <div class="toggle-section">
+        <div class="toggle-info">
+          <div class="toggle-label">
+            <mat-icon [class.active]="isEnvioEnabled">{{ isEnvioEnabled ? 'check_circle' : 'cancel' }}</mat-icon>
+            <span>Servicio de envío</span>
+          </div>
+          <p class="toggle-description">
+            {{ isEnvioEnabled ? 'El servicio de envío está activo' : 'Activa el servicio de envío para tus clientes' }}
+          </p>
+        </div>
+        <mat-slide-toggle formControlName="status_envio" color="primary" class="status-toggle">
+        </mat-slide-toggle>
+      </div>
+
+      <!-- Mensaje cuando está desactivado -->
+      <div *ngIf="!isEnvioEnabled" class="info-banner info-banner--warning">
+        <mat-icon>info</mat-icon>
+        <div>
+          <strong>Servicio desactivado</strong>
+          <p>Activa el servicio de envío para configurar los costos y zonas de entrega.</p>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Card: Costos básicos -->
+    <mat-card class="section-card" [class.disabled]="!isEnvioEnabled">
+      <div class="section-header">
+        <mat-icon>attach_money</mat-icon>
+        <h3>Costos de envío</h3>
+      </div>
+
+      <div class="form-grid">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Costo base</mat-label>
+          <input matInput type="number" formControlName="costo_base" min="0" step="0.01" placeholder="Ej: 50" />
+          <span matTextPrefix>$&nbsp;</span>
+          <mat-icon matPrefix>monetization_on</mat-icon>
+          <mat-hint>Costo fijo que se cobra en todos los envíos</mat-hint>
+          <mat-error *ngIf="form.get('costo_base')?.hasError('required')">
+            Este campo es requerido
+          </mat-error>
+          <mat-error *ngIf="form.get('costo_base')?.hasError('min')">
+            El valor debe ser positivo
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Costo por kilómetro</mat-label>
+          <input matInput type="number" formControlName="costo_por_km" min="0" step="0.01" placeholder="Ej: 10" />
+          <span matTextPrefix>$&nbsp;</span>
+          <mat-icon matPrefix>straighten</mat-icon>
+          <mat-hint>Costo adicional por cada kilómetro de distancia</mat-hint>
+          <mat-error *ngIf="form.get('costo_por_km')?.hasError('required')">
+            Este campo es requerido
+          </mat-error>
+          <mat-error *ngIf="form.get('costo_por_km')?.hasError('min')">
+            El valor debe ser positivo
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </mat-card>
+
+    <!-- Card: Configuración avanzada -->
+    <mat-card class="section-card" [class.disabled]="!isEnvioEnabled">
+      <div class="section-header">
+        <mat-icon>tune</mat-icon>
+        <h3>Configuración avanzada</h3>
+        <span class="optional-badge">Opcional</span>
+      </div>
+
+      <div class="form-grid">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Radio máximo (km)</mat-label>
+          <input matInput type="number" formControlName="radio_max_km" min="0" step="0.1" placeholder="Ej: 15" />
+          <mat-icon matPrefix>radar</mat-icon>
+          <mat-hint>Distancia máxima para realizar entregas (dejar vacío para sin límite)</mat-hint>
+          <mat-error *ngIf="form.get('radio_max_km')?.hasError('min')">
+            El valor debe ser positivo
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Envío gratis hasta (km)</mat-label>
+          <input matInput type="number" formControlName="envio_gratis_km" min="0" step="0.1" placeholder="Ej: 3" />
+          <mat-icon matPrefix>card_giftcard</mat-icon>
+          <mat-hint>Distancia máxima para envío gratis (dejar vacío para no aplicar)</mat-hint>
+          <mat-error *ngIf="form.get('envio_gratis_km')?.hasError('min')">
+            El valor debe ser positivo
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Envío gratis desde monto</mat-label>
+          <input matInput type="number" formControlName="envio_gratis_monto" min="0" step="0.01" placeholder="Ej: 500" />
+          <span matTextPrefix>$&nbsp;</span>
+          <mat-icon matPrefix>shopping_cart</mat-icon>
+          <mat-hint>Monto mínimo del pedido para envío gratis (dejar vacío para no aplicar)</mat-hint>
+          <mat-error *ngIf="form.get('envio_gratis_monto')?.hasError('min')">
+            El valor debe ser positivo
+          </mat-error>
+        </mat-form-field>
+      </div>
+    </mat-card>
+
+    <!-- Card: Vista previa / Ejemplo -->
+    <mat-card *ngIf="hasValidExample" class="section-card example-card">
+      <div class="section-header">
+        <mat-icon>calculate</mat-icon>
+        <h3>Vista previa del cálculo</h3>
+      </div>
+
+      <div class="example-content">
+        <div class="example-input">
+          <mat-icon>location_on</mat-icon>
+          <span>Ejemplo: Un pedido a <strong>{{ exampleDistance }} km</strong></span>
+        </div>
+
+        <div class="example-calculation">
+          <div class="calc-row">
+            <span>Costo base:</span>
+            <span class="calc-value">${{ form.get('costo_base')?.value || 0 }}</span>
+          </div>
+          <div class="calc-row">
+            <span>Distancia ({{ exampleDistance }} km × ${{ form.get('costo_por_km')?.value || 0 }}):</span>
+            <span class="calc-value">${{ (form.get('costo_por_km')?.value || 0) * exampleDistance }}</span>
+          </div>
+          <div class="calc-divider"></div>
+          <div class="calc-row calc-total">
+            <span>Costo total de envío:</span>
+            <span class="calc-value">
+              <mat-icon *ngIf="calculatedCost === 0">card_giftcard</mat-icon>
+              <strong>{{ calculatedCost === 0 ? 'GRATIS' : '$' + calculatedCost }}</strong>
+            </span>
+          </div>
+        </div>
+
+        <div *ngIf="calculatedCost === 0 && form.get('envio_gratis_km')?.value" class="free-shipping-badge">
+          <mat-icon>celebration</mat-icon>
+          <span>Envío gratis por estar dentro de {{ form.get('envio_gratis_km')?.value }} km</span>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Acciones -->
+    <div class="acciones-container">
+      <button mat-stroked-button type="button" (click)="cancel()" class="btn-cancel" [disabled]="isSaving">
+        <mat-icon>close</mat-icon>
+        Cancelar
+      </button>
+      <button mat-raised-button color="primary" type="submit" class="btn-submit" [disabled]="isSaving || form.invalid">
+        <mat-spinner *ngIf="isSaving" diameter="20" class="btn-spinner"></mat-spinner>
+        <mat-icon *ngIf="!isSaving">save</mat-icon>
+        {{ isSaving ? 'Guardando...' : 'Guardar configuración' }}
+      </button>
+    </div>
+  </form>
+</div>

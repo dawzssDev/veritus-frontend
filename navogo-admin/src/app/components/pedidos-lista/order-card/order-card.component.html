@@ -1,0 +1,169 @@
+<mat-card 
+  class="order-card"
+  [class.timer-warning]="timerClass() === 'warning'"
+  [class.timer-danger]="timerClass() === 'danger'"
+  [class.estado-finalizado]="order().estado === 'finalizado'"
+  [class.estado-cancelado]="order().estado === 'cancelado'"
+  [style.--tipo-color]="tipoConfig().color"
+  [style.--estado-color]="estadoConfig().color"
+  [@cardEntry]
+  (click)="onCardClick()"
+>
+  <!-- Borde lateral de color según tipo de pedido -->
+  <div class="card-border-indicator" [style.background]="tipoConfig().color"></div>
+  
+  <!-- Header con folio, tipo, timer y estado -->
+  <div class="card-header">
+    <div class="header-left">
+      <div class="folio-number">
+        <mat-icon class="folio-icon">receipt</mat-icon>
+        <span class="folio-text">Folio #{{ order().folio }}</span>
+      </div>
+      
+      <div class="order-time">{{ formatTime(order().creadoEn) }}</div>
+    </div>
+    
+    <div class="header-right">
+      <!-- Timer con animación progresiva -->
+      @if (order().estado !== 'finalizado' && order().estado !== 'cancelado') {
+        <div 
+          class="timer-badge" 
+          [class.timer-pulse]="mostrarTimerPulse()"
+          [style.background]="timerColor()"
+          [@urgentPulse]="timerClass()"
+        >
+          <mat-icon>schedule</mat-icon>
+          <span>{{ formatTimerDisplay() }}</span>
+        </div>
+      }
+    </div>
+  </div>
+  
+  <!-- Badge de tipo de pedido PROMINENTE -->
+  <div class="tipo-badge-container">
+    <div class="tipo-badge" [style.background]="tipoConfig().color">
+      <span class="tipo-emoji">{{ tipoConfig().emoji }}</span>
+      <mat-icon class="tipo-icon">{{ tipoConfig().icono }}</mat-icon>
+      <span class="tipo-text">{{ tipoConfig().texto }}</span>
+    </div>
+  </div>
+  
+  <!-- Estado pill en esquina superior derecha -->
+  <div class="estado-pill" [style.background]="estadoConfig().color">
+    <mat-icon>{{ estadoConfig().icono }}</mat-icon>
+    <span>{{ estadoConfig().texto }}</span>
+  </div>
+  
+  <!-- Información del cliente -->
+  <div class="customer-info">
+    <div class="customer-name">{{ order().nombreCliente }}</div>
+    @if (order().telefono) {
+      <div class="customer-phone">
+        <mat-icon>phone</mat-icon>
+        <span>{{ order().telefono }}</span>
+      </div>
+    }
+    @if (order().mesa) {
+      <div class="mesa-info">
+        <mat-icon>table_restaurant</mat-icon>
+        <span>Mesa {{ order().mesa }}</span>
+      </div>
+    }
+    @if (order().tipo === 'domicilio' && formatDeliveryAddress(order().delivery_address)) {
+      <div class="delivery-address-info">
+        <mat-icon>location_on</mat-icon>
+        <span>
+          {{ formatDeliveryAddress(order().delivery_address) }}
+          @if (getDeliveryReferencia(order().delivery_address)) {
+            <br><span class="delivery-referencia">Ref: {{ getDeliveryReferencia(order().delivery_address) }}</span>
+          }
+        </span>
+      </div>
+    }
+  </div>
+  
+  <!-- Lista de items de comanda - TAMAÑO LEGIBLE -->
+  <div class="comanda-section">
+    <div class="comanda-header">
+      <mat-icon>restaurant_menu</mat-icon>
+      <span>Comanda ({{ totalItems() }} items)</span>
+    </div>
+    
+    <div class="items-list">
+      @for (item of order().items; track item.nombre) {
+        <div class="comanda-item">
+          <span class="item-quantity">{{ item.cantidad }}×</span>
+          <div class="item-details">
+            <span class="item-name">{{ item.nombre }}</span>
+            @if (item.modificadores && item.modificadores.length > 0) {
+              <div class="item-modifiers">
+                @for (mod of item.modificadores; track mod) {
+                  <span class="modifier-badge">{{ mod }}</span>
+                }
+              </div>
+            }
+          </div>
+          <span class="item-price">{{ formatMoney(item.precio) }}</span>
+        </div>
+      }
+    </div>
+  </div>
+  
+  <!-- Notas especiales - SIEMPRE VISIBLES si existen -->
+  @if (order().notas && order().notas!.trim()) {
+    <div class="notas-especiales">
+      <div class="notas-header">
+        <mat-icon>sticky_note_2</mat-icon>
+        <span>NOTAS ESPECIALES</span>
+      </div>
+      <div class="notas-content">{{ order().notas }}</div>
+    </div>
+  }
+  
+  <!-- Total -->
+  <div class="total-section">
+    <span class="total-label">Total</span>
+    <span class="total-amount">{{ formatMoney(order().total) }}</span>
+  </div>
+  
+  <!-- Botones de acción con ETIQUETAS -->
+  <div class="actions-section">
+    @if (order().estado !== 'finalizado' && order().estado !== 'cancelado') {
+      @if (canMarcarPagado()) {
+        <button 
+          mat-raised-button 
+          color="primary" 
+          class="action-btn action-btn-pago"
+          (click)="$event.stopPropagation(); onMarcarPagado()"
+        >
+          <mat-icon>paid</mat-icon>
+          <span>Marcar Pagado</span>
+        </button>
+      }
+      
+      @if (canServir()) {
+        <button 
+          mat-raised-button 
+          color="accent" 
+          class="action-btn action-btn-servir"
+          (click)="$event.stopPropagation(); onServir()"
+        >
+          <mat-icon>{{ order().tipo === 'local' ? 'room_service' : 'local_shipping' }}</mat-icon>
+          <span>{{ order().tipo === 'local' ? 'Servir' : 'Enviar' }}</span>
+        </button>
+      }
+      
+      @if (canCancelar()) {
+        <button 
+          mat-stroked-button 
+          color="warn" 
+          class="action-btn action-btn-cancelar"
+          (click)="$event.stopPropagation(); onCancelar()"
+        >
+          <mat-icon>cancel</mat-icon>
+          <span>Cancelar</span>
+        </button>
+      }
+    }
+  </div>
+</mat-card>

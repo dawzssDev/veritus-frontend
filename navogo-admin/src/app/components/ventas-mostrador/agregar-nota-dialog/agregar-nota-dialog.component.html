@@ -1,0 +1,52 @@
+<div class="agregar-nota-dialog">
+  <div class="dialog-header">
+    <div class="header-icon">
+      <mat-icon>edit_note</mat-icon>
+    </div>
+    <h2>Agregar nota</h2>
+    <button mat-icon-button class="close-button" (click)="cancel()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-body">
+    <p class="producto-nombre">
+      <mat-icon inline>restaurant</mat-icon>
+      {{ nombreProducto }}
+    </p>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nota del producto</mat-label>
+      <textarea 
+        matInput 
+        [(ngModel)]="nota"
+        rows="4"
+        maxlength="200"
+        placeholder="Ej: sin cebolla, bien cocido, sin picante..."
+        autofocus>
+      </textarea>
+      <mat-hint align="end">{{ nota.length }}/200</mat-hint>
+    </mat-form-field>
+
+    @if (nota.trim()) {
+      <button 
+        mat-button 
+        color="warn" 
+        class="btn-limpiar-nota"
+        (click)="limpiarNota()">
+        <mat-icon>clear</mat-icon>
+        Limpiar nota
+      </button>
+    }
+  </div>
+
+  <div class="dialog-footer">
+    <button mat-stroked-button type="button" (click)="cancel()">
+      Cancelar
+    </button>
+    <button mat-raised-button color="primary" type="button" (click)="confirm()">
+      <mat-icon>check</mat-icon>
+      Confirmar
+    </button>
+  </div>
+</div>

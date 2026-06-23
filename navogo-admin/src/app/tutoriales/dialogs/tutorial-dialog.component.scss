@@ -1,0 +1,174 @@
+/* ========================================
+   TUTORIAL DIALOG - Material Design
+   ======================================== */
+
+.tutorial-dialog-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.title-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-cerrar-dialog {
+  flex-shrink: 0;
+}
+
+/* Zona del video (FUERA del mat-dialog-content) */
+.video-zona {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: #1a1a11;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.video-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0f4d2a 0%, #1a1a11 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholder-content {
+  text-align: center;
+  padding: 24px;
+  color: white;
+}
+
+.placeholder-icon-circle {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: rgba(28, 140, 64, 0.2);
+  border: 2px solid rgba(28, 140, 64, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.placeholder-icon {
+  font-size: 52px;
+  width: 52px;
+  height: 52px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.placeholder-content h3 {
+  color: white;
+  margin: 8px 0;
+}
+
+.placeholder-content .text-secondary {
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 16px;
+}
+
+.placeholder-duracion {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 13px;
+}
+
+/* Body del dialog */
+.tutorial-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tutorial-dialog-titulo {
+  margin: 0;
+}
+
+.tutorial-dialog-desc {
+  margin: 0;
+  line-height: 1.7;
+  color: var(--color-text-secondary, #666);
+}
+
+/* Detalles */
+.tutorial-detalles {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.detalle-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+/* Chips reutilizados del componente principal */
+.categoria-chip {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  min-height: 20px;
+  height: 20px;
+  padding: 0 8px;
+  background: rgba(28, 140, 64, 0.08);
+  color: #1c8c40;
+}
+
+.nivel-chip {
+  font-size: 11px;
+  font-weight: 500;
+  min-height: 20px;
+  height: 20px;
+  padding: 0 8px;
+
+  &.nivel-básico {
+    background: #eaf3de;
+    color: #3b6d11;
+  }
+
+  &.nivel-intermedio {
+    background: #faeeda;
+    color: #854f0b;
+  }
+
+  &.nivel-avanzado {
+    background: #fcebeb;
+    color: #a32d2d;
+  }
+}
+
+/* Utility classes */
+.text-secondary {
+  color: var(--color-text-secondary, #666);
+}

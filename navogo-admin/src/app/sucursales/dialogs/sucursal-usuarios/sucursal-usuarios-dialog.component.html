@@ -1,0 +1,89 @@
+<div mat-dialog-title class="dialog-title">
+  <span>Usuarios — {{ data.sucursal.nombre }}</span>
+  <button mat-icon-button mat-dialog-close>
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-divider></mat-divider>
+
+<mat-dialog-content class="dialog-body">
+
+  @if (cargando()) {
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  }
+
+  <!-- Usuarios asignados -->
+  <p class="seccion-titulo">
+    <mat-icon style="font-size:16px;width:16px;height:16px;
+                     color:#1C8C40">check_circle</mat-icon>
+    Asignados a esta sucursal
+    ({{ usuariosAsignados().length }})
+  </p>
+
+  @if (usuariosAsignados().length === 0) {
+    <p class="sin-usuarios">Sin usuarios asignados aún</p>
+  }
+
+  @for (u of usuariosAsignados(); track u.id) {
+    <div class="usuario-fila">
+      <div class="usuario-avatar">
+        {{ u.nombreCompleto.charAt(0).toUpperCase() }}
+      </div>
+      <div class="usuario-info">
+        <p class="usuario-nombre">{{ u.nombreCompleto }}</p>
+        <p class="usuario-email">{{ u.email }}</p>
+      </div>
+      <button mat-icon-button
+              color="warn"
+              matTooltip="Remover de esta sucursal"
+              [disabled]="procesando() === u.id"
+              (click)="remover(u)">
+        <mat-icon>person_remove</mat-icon>
+      </button>
+    </div>
+  }
+
+  <mat-divider style="margin: 16px 0"></mat-divider>
+
+  <!-- Usuarios disponibles para asignar -->
+  <p class="seccion-titulo">
+    <mat-icon style="font-size:16px;width:16px;height:16px;
+                     color:#9ca3af">person_add</mat-icon>
+    Disponibles para asignar
+    ({{ usuariosDisponibles().length }})
+  </p>
+
+  @if (usuariosDisponibles().length === 0) {
+    <p class="sin-usuarios">Todos los usuarios ya están asignados</p>
+  }
+
+  @for (u of usuariosDisponibles(); track u.id) {
+    <div class="usuario-fila usuario-fila--disponible">
+      <div class="usuario-avatar usuario-avatar--gris">
+        {{ u.nombreCompleto.charAt(0).toUpperCase() }}
+      </div>
+      <div class="usuario-info">
+        <p class="usuario-nombre">{{ u.nombreCompleto }}</p>
+        <p class="usuario-email">{{ u.email }}</p>
+        @if (u.sucursal_id) {
+          <p class="usuario-otra-sucursal">
+            Actualmente en otra sucursal
+          </p>
+        }
+      </div>
+      <button mat-icon-button
+              color="primary"
+              matTooltip="Asignar a esta sucursal"
+              [disabled]="procesando() === u.id"
+              (click)="asignar(u)">
+        <mat-icon>person_add</mat-icon>
+      </button>
+    </div>
+  }
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

@@ -1,0 +1,122 @@
+<!-- Profile Dialog -->
+<div class="profile-dialog">
+  
+  <!-- Header con Avatar -->
+  <div class="profile-header">
+    <button 
+      mat-icon-button 
+      class="close-btn"
+      (click)="close()"
+      matTooltip="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="avatar-section">
+      @if (user.fotoPerfil_url || user.avatar) {
+        <img 
+          [src]="user.fotoPerfil_url || user.avatar" 
+          [alt]="user.nombreCompleto"
+          class="profile-avatar" />
+      } @else {
+        <div class="profile-avatar-placeholder">
+          <span class="initials">{{ userInitials }}</span>
+        </div>
+      }
+    </div>
+
+    <h2 class="profile-name">{{ user.nombreCompleto }}</h2>
+    <p class="profile-email">{{ user.email }}</p>
+
+    <div class="profile-role">
+      <mat-chip [color]="getRoleColor()" highlighted>
+        <mat-icon>badge</mat-icon>
+        {{ getRoleDisplay() }}
+      </mat-chip>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Contenido del perfil -->
+  <div class="profile-content" mat-dialog-content>
+    
+    <!-- Información Personal -->
+    <div class="info-section">
+      <h3 class="section-title">
+        <mat-icon>person</mat-icon>
+        Información Personal
+      </h3>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <mat-icon class="info-icon">email</mat-icon>
+          <div class="info-details">
+            <span class="info-label">Correo Electrónico</span>
+            <span class="info-value">{{ user.email }}</span>
+            @if (isEmailVerified()) {
+              <mat-icon class="verified-icon" matTooltip="Email verificado">verified</mat-icon>
+            }
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon class="info-icon">badge</mat-icon>
+          <div class="info-details">
+            <span class="info-label">Rol</span>
+            <span class="info-value">{{ getRoleDisplay() }}</span>
+          </div>
+        </div>
+
+        <div class="info-item">
+          <mat-icon class="info-icon">fingerprint</mat-icon>
+          <div class="info-details">
+            <span class="info-label">ID de Usuario</span>
+            <span class="info-value">#{{ user.id }}</span>
+          </div>
+        </div>
+
+        @if (user.id_empresa || user.empresa_id || user.empresaId) {
+          <div class="info-item">
+            <mat-icon class="info-icon">business</mat-icon>
+            <div class="info-details">
+              <span class="info-label">ID de Empresa</span>
+              <span class="info-value">#{{ user.id_empresa || user.empresa_id || user.empresaId }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Información de Cuenta -->
+    <div class="info-section">
+      <h3 class="section-title">
+        <mat-icon>account_circle</mat-icon>
+        Información de Cuenta
+      </h3>
+      
+      <div class="info-grid">
+        <div class="info-item">
+          <mat-icon class="info-icon">calendar_today</mat-icon>
+          <div class="info-details">
+            <span class="info-label">Miembro desde</span>
+            <span class="info-value">{{ memberSince }}</span>
+          </div>
+        </div>
+
+        @if (user.updated_at) {
+          <div class="info-item">
+            <mat-icon class="info-icon">update</mat-icon>
+            <div class="info-details">
+              <span class="info-label">Última actualización</span>
+              <span class="info-value">{{ user.updated_at | date: 'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+</div>

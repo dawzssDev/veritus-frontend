@@ -1,0 +1,97 @@
+<div
+  class="product-card"
+  [class.featured]="product.destacado"
+  (click)="onClick()"
+  role="button"
+  tabindex="0"
+  (keydown.enter)="onClick()"
+  (keydown.space)="onClick()"
+  aria-label="Ver detalle del producto">
+
+  <!-- Imagen -->
+  <div class="product-image">
+    <img [src]="imageUrl" [alt]="product.nombre" loading="lazy" />
+
+    <!-- Badge promoción (izquierda, máxima prioridad) -->
+    @if (isPromo()) {
+      <div class="badge badge-promo badge-left">
+        <mat-icon class="badge-icon">local_fire_department</mat-icon>
+        <div class="badge-text">
+          <div class="badge-main">PROMO</div>
+        </div>
+      </div>
+    } 
+    <!-- Badge descuento (izquierda, solo si NO es promo) -->
+    @else if (hasDiscount()) {
+      <div class="badge badge-discount badge-left">
+        <div class="badge-main">{{ getDiscountBadgeText() }}</div>
+        <div class="badge-sub">OFERTA</div>
+      </div>
+    }
+    
+    <!-- Badge combo (derecha, siempre visible si es combo) -->
+    @if (hasCombo()) {
+      <div class="badge badge-combo badge-right">
+        <mat-icon class="badge-icon">restaurant</mat-icon>
+        <div class="badge-text">
+          <div class="badge-main">COMBO</div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Info -->
+  <div class="product-info">
+    <h3 class="product-name">{{ product.nombre }}</h3>
+    <p class="product-description">{{ product.descripcion }}</p>
+
+    <!-- Contador de promoción -->
+    @if (isPromo() && getPromoTimeRemaining(); as timeRemaining) {
+      <div class="promo-countdown">
+        <mat-icon class="countdown-icon">schedule</mat-icon>
+        <div class="countdown-timer">
+          @if (!timeRemaining.expired) {
+            @if (timeRemaining.days > 0) {
+              <span class="time-unit">{{ timeRemaining.days }}d</span>
+            }
+            <span class="time-unit">{{ timeRemaining.hours }}h</span>
+            <span class="time-unit">{{ timeRemaining.minutes }}m</span>
+            <span class="time-unit">{{ timeRemaining.seconds }}s</span>
+          } @else {
+            <span class="expired-text">Expirada</span>
+          }
+        </div>
+      </div>
+    }
+
+    <div class="product-footer">
+      <!-- Precio: misma estructura SIEMPRE para mantener altura constante -->
+      <div class="price-stack">
+        <div class="price-row">
+          <span class="price-final" [class.is-discount]="hasDiscount()">
+            {{ formatPrice(getFinalPrice()) }}
+          </span>
+          @if (hasDiscount() && getDiscountPercent() > 0) {
+            <span class="save-pill">-{{ getDiscountPercent() }}%</span>
+          }
+        </div>
+
+        @if (hasDiscount()) {
+          <div class="price-original">{{ formatPrice(product.precio) }}</div>
+        } @else {
+          <div class="price-original price-spacer" aria-hidden="true">—</div>
+        }
+      </div>
+
+      <button
+        class="btn-add"
+        type="button"
+        aria-label="Agregar"
+        [disabled]="disableAdd"
+        [class.is-disabled]="disableAdd"
+        (click)="onAddClick($event)">
+        <span>+</span>
+      </button>
+    </div>
+  </div>
+</div>

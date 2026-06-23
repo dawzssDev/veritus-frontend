@@ -1,0 +1,80 @@
+<div mat-dialog-title class="tutorial-dialog-title">
+  <div class="title-content">
+    <div class="title-chips">
+      <mat-chip class="categoria-chip" [disableRipple]="true">
+        {{ data.tutorial.categoria }}
+      </mat-chip>
+      <mat-chip
+        class="nivel-chip nivel-{{ data.tutorial.nivel | lowercase }}"
+        [disableRipple]="true"
+      >
+        {{ data.tutorial.nivel }}
+      </mat-chip>
+    </div>
+  </div>
+  <button mat-icon-button mat-dialog-close class="btn-cerrar-dialog">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<!-- Zona del video (FUERA del mat-dialog-content) -->
+<div class="video-zona">
+  @if (data.tutorial.videoUrl) {
+  <iframe
+    [src]="data.tutorial.videoUrl"
+    frameborder="0"
+    allowfullscreen
+    class="video-iframe"
+  ></iframe>
+  } @else {
+  <div class="video-placeholder">
+    <div class="placeholder-content">
+      <div class="placeholder-icon-circle">
+        <mat-icon class="placeholder-icon">video_library</mat-icon>
+      </div>
+      <h3 class="mat-subtitle-1">Video próximamente</h3>
+      <p class="mat-body-2 text-secondary">
+        Estamos preparando este tutorial.<br />
+        ¡Vuelve pronto para aprenderlo!
+      </p>
+      <div class="placeholder-duracion">
+        <mat-icon style="font-size: 14px; width: 14px; height: 14px">
+          schedule
+        </mat-icon>
+        Duración estimada: {{ data.tutorial.duracion }}
+      </div>
+    </div>
+  </div>
+  }
+</div>
+
+<mat-dialog-content class="tutorial-dialog-body">
+  <h2 class="mat-headline-6 tutorial-dialog-titulo">
+    {{ data.tutorial.titulo }}
+  </h2>
+
+  <p class="mat-body-1 tutorial-dialog-desc">
+    {{ data.tutorial.descripcion }}
+  </p>
+
+  <mat-divider></mat-divider>
+
+  <div class="tutorial-detalles">
+    <div class="detalle-item">
+      <mat-icon color="primary">schedule</mat-icon>
+      <span class="mat-body-2">Duración: {{ data.tutorial.duracion }}</span>
+    </div>
+    <div class="detalle-item">
+      <mat-icon color="primary">category</mat-icon>
+      <span class="mat-body-2">Módulo: {{ data.tutorial.categoria }}</span>
+    </div>
+    <div class="detalle-item">
+      <mat-icon color="primary">signal_cellular_alt</mat-icon>
+      <span class="mat-body-2">Nivel: {{ data.tutorial.nivel }}</span>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Cerrar</button>
+</mat-dialog-actions>

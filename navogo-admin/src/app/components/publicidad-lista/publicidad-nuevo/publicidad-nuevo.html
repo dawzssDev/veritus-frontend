@@ -1,0 +1,53 @@
+<h2 mat-dialog-title class="dialog-title">
+  Crear Publicidad
+  <button mat-icon-button mat-dialog-close class="close-btn">
+    <mat-icon>close</mat-icon>
+  </button>
+</h2>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="form" (ngSubmit)="submitType()" class="form-container">
+
+    <!-- Datos básicos -->
+    <mat-card class="section-card">
+        <h3>Datos de la publicidad</h3>
+      <div class="form-grid">
+        <mat-form-field appearance="fill">
+          <mat-label>Título</mat-label>
+          <input matInput formControlName="titulo" placeholder="Ej: Oferta 2x1" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Descripción</mat-label>
+          <input matInput formControlName="descripcion" type="text" placeholder="Escribe la descripcion" />
+        </mat-form-field>
+      </div>
+
+      <div class="form-grid">
+        <mat-form-field appearance="fill">
+          <mat-label>Fecha inicio</mat-label>
+          <input matInput type="date" formControlName="fecha_inicio" />
+        </mat-form-field>
+
+        <mat-form-field appearance="fill">
+          <mat-label>Fecha fin</mat-label>
+          <input matInput type="date" formControlName="fecha_fin" />
+        </mat-form-field>
+      </div>
+    </mat-card>
+
+    <!-- Agregar imagen -->
+    <mat-card class="section-card light-section">
+        <h3>Imagen de la publicidad</h3>
+        <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+    </mat-card>
+
+    <!-- Acciones -->
+    <div class="acciones-container">
+      <button mat-button mat-dialog-close>Cancelar</button>
+      <button mat-raised-button color="primary" type="submit" >
+        Guardar
+      </button>
+    </div>
+  </form>
+</mat-dialog-content>

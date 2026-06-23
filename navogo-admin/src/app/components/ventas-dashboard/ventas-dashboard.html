@@ -1,0 +1,270 @@
+<div class="dashboard-container ventas">
+  <div class="header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="title">
+          <mat-icon>show_chart</mat-icon>
+          Dashboard
+        </h1>
+        <p>
+          Pago confirmado · {{ dateFrom() | date: 'mediumDate' }} — {{ dateTo() | date: 'mediumDate' }}
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button mat-raised-button type="button" (click)="downloadPDF()">
+          <mat-icon>picture_as_pdf</mat-icon>
+          Descargar PDF
+        </button>
+        <button mat-raised-button type="button" (click)="load()">
+          <mat-icon>refresh</mat-icon>
+          Actualizar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-card ventas__body">
+    <div class="ventas__toolbar">
+      <div class="actions">
+        <button mat-stroked-button type="button" (click)="onQuickRange(0)">Hoy</button>
+        <button mat-stroked-button type="button" (click)="onQuickRange(6)">7 días</button>
+        <button mat-stroked-button type="button" (click)="onQuickRange(29)">30 días</button>
+      </div>
+
+      <button mat-stroked-button type="button" (click)="clearFilters()">Limpiar filtros</button>
+    </div>
+
+    <mat-card class="filters">
+      <div class="filters__row">
+        <mat-form-field appearance="outline">
+          <mat-label>Desde</mat-label>
+          <input matInput [matDatepicker]="pickerFrom" [ngModel]="dateFrom()" (ngModelChange)="dateFrom.set($event)" />
+          <mat-datepicker-toggle matSuffix [for]="pickerFrom"></mat-datepicker-toggle>
+          <mat-datepicker #pickerFrom></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Hasta</mat-label>
+          <input matInput [matDatepicker]="pickerTo" [ngModel]="dateTo()" (ngModelChange)="dateTo.set($event)" />
+          <mat-datepicker-toggle matSuffix [for]="pickerTo"></mat-datepicker-toggle>
+          <mat-datepicker #pickerTo></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Día</mat-label>
+          <mat-select [ngModel]="dayOfWeek()" (ngModelChange)="dayOfWeek.set($event)">
+            <mat-option value="all">Todos</mat-option>
+            <mat-option value="lunes">Lunes</mat-option>
+            <mat-option value="martes">Martes</mat-option>
+            <mat-option value="miercoles">Miércoles</mat-option>
+            <mat-option value="jueves">Jueves</mat-option>
+            <mat-option value="viernes">Viernes</mat-option>
+            <mat-option value="sabado">Sábado</mat-option>
+            <mat-option value="domingo">Domingo</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Pago</mat-label>
+          <mat-select multiple [ngModel]="paymentMethods()" (ngModelChange)="paymentMethods.set($event)">
+            <mat-option value="efectivo">Efectivo</mat-option>
+            <mat-option value="transferencia">Transferencia</mat-option>
+            <mat-option value="tarjeta">Tarjeta</mat-option>
+            <mat-option value="combinado">Combinado</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Entrega</mat-label>
+          <mat-select multiple [ngModel]="shippingTypes()" (ngModelChange)="shippingTypes.set($event)">
+            <mat-option value="domicilio">Domicilio</mat-option>
+            <mat-option value="recoger">Recoger</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card>
+
+    @if (isLoading()) {
+      <div class="center">
+        <mat-progress-spinner diameter="44" mode="indeterminate"></mat-progress-spinner>
+      </div>
+    } @else {
+      @if (errorMessage()) {
+        <mat-card class="error">
+          <mat-icon>error</mat-icon>
+          <div>{{ errorMessage() }}</div>
+        </mat-card>
+      }
+
+      @if (!errorMessage() && filteredOrders().length === 0) {
+        <div class="empty-state">
+          <mat-icon>query_stats</mat-icon>
+          <div class="empty-state__title">Sin resultados</div>
+          <div class="empty-state__text">No hay pedidos con pago confirmado en el rango seleccionado.</div>
+        </div>
+      }
+
+      <div class="kpis">
+        <mat-card class="kpi kpi--primary kpi--clickable" (click)="openVentasDialog()">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">payments</mat-icon>
+            Ventas
+          </div>
+          <div class="kpi__value">{{ formatCompact(kpiVentas()) }}</div>
+          <div class="kpi__delta" [class]="deltaClass(deltaVentas())">{{ deltaLabel(deltaVentas()) }}</div>
+        </mat-card>
+
+        <mat-card class="kpi kpi--clickable" (click)="openPedidosDialog()">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">receipt_long</mat-icon>
+            Pedidos
+          </div>
+          <div class="kpi__value">{{ kpiPedidos() }}</div>
+          <div class="kpi__delta" [class]="deltaClass(deltaPedidos())">{{ deltaLabel(deltaPedidos()) }}</div>
+        </mat-card>
+
+        <mat-card class="kpi kpi--clickable" (click)="openTicketDialog()">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">local_atm</mat-icon>
+            Ticket promedio
+          </div>
+          <div class="kpi__value">{{ formatMoney(kpiTicket()) }}</div>
+          <div class="kpi__delta" [class]="deltaClass(deltaTicket())">{{ deltaLabel(deltaTicket()) }}</div>
+        </mat-card>
+
+        <mat-card class="kpi kpi--clickable" (click)="openHoraPicoDialog()">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">schedule</mat-icon>
+            Hora pico
+          </div>
+          <div class="kpi__value">{{ kpiHoraPico().label }}</div>
+          <div class="kpi__sub">{{ formatMoney(kpiHoraPico().value) }}</div>
+        </mat-card>
+
+        <mat-card class="kpi kpi--clickable" (click)="openEntregaDialog()">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">local_shipping</mat-icon>
+            Entrega dominante
+          </div>
+          <div class="kpi__value">
+            {{ kpiEntrega().winner === 'recoger' ? 'Recoger' : 'Domicilio' }}
+            <span class="pill">{{ kpiEntrega().pct }}%</span>
+          </div>
+          <div class="kpi__sub">Dom: {{ kpiEntrega().counts.domicilio }} · Rec: {{ kpiEntrega().counts.recoger }}</div>
+        </mat-card>
+      </div>
+
+    <div class="grid">
+      <mat-card class="panel">
+        <div class="panel__header">
+          <div>
+            <div class="panel__title">Ventas por día</div>
+            <div class="panel__subtitle">{{ seriesByDay().labels[0] }} — {{ seriesByDay().labels[seriesByDay().labels.length - 1] }}</div>
+          </div>
+        </div>
+
+        <div class="bars" aria-label="Ventas por día">
+          @for (v of seriesByDay().values; track $index) {
+            <div class="bar-wrapper">
+              <div class="bar" 
+                   [style.height.%]="barHeight(v, seriesByDay().max)"
+                   [matTooltip]="v > 0 ? formatBarValue(v, seriesByDay().orderCounts[$index]) : ''"
+                   matTooltipPosition="above"></div>
+              <div class="bar-label">{{ formatDayLabel(seriesByDay().labels[$index]) }}</div>
+            </div>
+          }
+        </div>
+      </mat-card>
+
+      <mat-card class="panel">
+        <div class="panel__header">
+          <div>
+            <div class="panel__title">Ventas por hora</div>
+            <div class="panel__subtitle">0–23h</div>
+          </div>
+        </div>
+
+        <div class="bars" aria-label="Ventas por hora">
+          @for (v of seriesByHour().values; track $index) {
+            <div class="bar-wrapper">
+              <div class="bar" 
+                   [style.height.%]="barHeight(v, seriesByHour().max)"
+                   [matTooltip]="v > 0 ? formatBarValue(v, seriesByHour().orderCounts[$index]) : ''"
+                   matTooltipPosition="above"></div>
+              @if ($index % 2 === 0 || $index === 23) {
+                <div class="bar-label">{{ formatHourLabel($index) }}</div>
+              }
+            </div>
+          }
+        </div>
+      </mat-card>
+
+      <mat-card class="panel">
+        <div class="panel__header">
+          <div>
+            <div class="panel__title">Métodos de pago</div>
+            <div class="panel__subtitle">% del total</div>
+          </div>
+        </div>
+
+        <div class="breakdown">
+          <div class="row">
+            <span>Efectivo</span>
+            <span class="muted">{{ paymentBreakdown().by.efectivo.count }} pedidos</span>
+            <strong>{{ formatMoney(paymentBreakdown().by.efectivo.total) }}</strong>
+          </div>
+          <div class="row">
+            <span>Transferencia</span>
+            <span class="muted">{{ paymentBreakdown().by.transferencia.count }} pedidos</span>
+            <strong>{{ formatMoney(paymentBreakdown().by.transferencia.total) }}</strong>
+          </div>
+          <div class="row">
+            <span>Tarjeta</span>
+            <span class="muted">{{ paymentBreakdown().by.tarjeta.count }} pedidos</span>
+            <strong>{{ formatMoney(paymentBreakdown().by.tarjeta.total) }}</strong>
+          </div>
+          <div class="row">
+            <span>Combinado</span>
+            <span class="muted">{{ paymentBreakdown().by.combinado.count }} pedidos</span>
+            <strong>{{ formatMoney(paymentBreakdown().by.combinado.total) }}</strong>
+          </div>
+        </div>
+      </mat-card>
+
+      <mat-card class="panel">
+        <div class="panel__header">
+          <div>
+            <div class="panel__title">Top productos</div>
+            <div class="panel__subtitle">por venta estimada</div>
+          </div>
+        </div>
+
+        @if (!topProducts().hasItems) {
+          <div class="empty">No hay items disponibles en las órdenes para calcular top productos.</div>
+        } @else {
+          <div class="top">
+            @for (p of topProducts().rows; track p.key) {
+              <div class="top__row">
+                <div class="top__name">{{ p.name }}</div>
+                <div class="top__meta">
+                  <span class="muted">{{ p.units }} uds</span>
+                  <strong>{{ formatMoney(p.total) }}</strong>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </mat-card>
+    </div>
+
+      <mat-card class="footer">
+        <div>
+          <strong>Pedidos filtrados:</strong> {{ filteredOrders().length }}
+          <span class="muted">(válidos: {{ validOrders().length }} / total: {{ allOrdersCount() }})</span>
+        </div>
+        <div class="muted">Comparación vs. periodo anterior del mismo tamaño.</div>
+      </mat-card>
+    }
+  </div>
+</div>

@@ -1,0 +1,178 @@
+@import '../../../../styles/design-tokens';
+
+.filter-bar {
+  background: #ffffff;
+  border-bottom: 2px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.filter-bar-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+}
+
+.date-selector {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.date-field {
+  min-width: 240px;
+  
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    background: #f9fafb;
+  }
+  
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}
+
+.today-btn,
+.refresh-btn {
+  min-height: 48px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.refresh-btn {
+  mat-icon {
+    animation: none;
+  }
+  
+  &:active mat-icon {
+    animation: spin 0.6s ease-in-out;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Filtros con chips
+.filter-chips {
+  display: flex;
+  gap: var(--spacing-xl);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-top: 1px solid #e5e7eb;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.filter-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.filter-chip {
+  font-weight: 700;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  
+  &:not(.mdc-evolution-chip--selected) {
+    background: #ffffff;
+    border: 2px solid #d1d5db;
+    
+    &:hover {
+      background: #f9fafb;
+      border-color: #9ca3af;
+    }
+  }
+  
+  &.mdc-evolution-chip--selected {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .chip-emoji {
+    font-size: 18px;
+    margin-right: 4px;
+  }
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    margin-right: 4px;
+  }
+}
+
+// Colores específicos por tipo
+.filter-chip-pendientes.mdc-evolution-chip--selected {
+  background: #f59e0b;
+  color: #ffffff;
+  border-color: #f59e0b;
+}
+
+.filter-chip-local.mdc-evolution-chip--selected {
+  background: var(--color-pedido-local);
+  color: #ffffff;
+  border-color: var(--color-pedido-local);
+}
+
+.filter-chip-domicilio.mdc-evolution-chip--selected {
+  background: var(--color-pedido-domicilio);
+  color: #ffffff;
+  border-color: var(--color-pedido-domicilio);
+}
+
+.filter-chip-recoger.mdc-evolution-chip--selected {
+  background: var(--color-pedido-llevar);
+  color: #ffffff;
+  border-color: var(--color-pedido-llevar);
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .filter-bar-main {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .date-selector {
+    flex-direction: column;
+  }
+  
+  .date-field {
+    width: 100%;
+  }
+  
+  .filter-chips {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+  
+  .filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

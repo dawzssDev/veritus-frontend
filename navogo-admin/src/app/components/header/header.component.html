@@ -1,0 +1,160 @@
+<!-- Header Container -->
+<div class="header-wrapper" [class.sidebar-collapsed]="isSidebarCollapsed">
+
+  <!-- ── FILA 1: Header principal ── -->
+  <header class="header">
+    
+    <!-- Sección izquierda: Botón menú mobile + Breadcrumb/Título -->
+    <div class="header-left">
+      <!-- Botón toggle sidebar (visible en mobile) -->
+      <button 
+        mat-icon-button 
+        class="menu-toggle"
+        (click)="openMobileSidebar()"
+        aria-label="Toggle menu">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <!-- Título de la página actual (opcional) -->
+      <div class="page-title">
+        <!-- <h1>Dashboard</h1> -->
+      </div>
+    </div>
+
+    <!-- Sección central: Búsqueda (opcional) -->
+    <div class="header-center">
+      <!-- Puedes agregar una barra de búsqueda aquí -->
+    </div>
+
+    <!-- Sección derecha: Acciones y usuario -->
+    <div class="header-right">
+      
+      <!-- Notificaciones 
+      <button 
+        mat-icon-button 
+        class="notification-btn"
+        (click)="openNotifications()"
+        aria-label="Notificaciones">
+        <mat-icon [matBadge]="3" matBadgeColor="warn" matBadgeSize="small">
+          notifications
+        </mat-icon>
+      </button>-->
+
+      <!-- Separador -->
+      <div class="divider"></div>
+
+      <!-- Usuario -->
+      <div class="user-section">
+        <!-- Saludo -->
+        <div class="user-greeting">
+          <span class="greeting-text">Hola,</span>
+          <span class="user-name">{{ userName }}</span>
+        </div>
+
+        <!-- Avatar y menú -->
+        <button 
+          mat-button
+          class="user-menu-trigger"
+          [matMenuTriggerFor]="userMenu"
+          aria-label="Menú de usuario">
+          
+          @if (userAvatar) {
+            <img 
+              [src]="userAvatar" 
+              alt="Avatar"
+              class="user-avatar" />
+          } @else {
+            <div class="user-avatar-placeholder">
+              <mat-icon>account_circle</mat-icon>
+            </div>
+          }
+          
+          <mat-icon class="dropdown-icon">arrow_drop_down</mat-icon>
+        </button>
+
+        <!-- Menú desplegable del usuario -->
+        <mat-menu #userMenu="matMenu" class="user-dropdown">
+          <div class="user-info-card">
+            <div class="user-info-name">{{ userName }}</div>
+            <div class="user-info-email">{{ authService.currentUser()?.email }}</div>
+          </div>
+
+          <mat-divider></mat-divider>
+
+          <button mat-menu-item (click)="goToProfile()">
+            <mat-icon>person</mat-icon>
+            <span>Mi Perfil</span>
+          </button>
+
+          <mat-divider></mat-divider>
+
+          <button mat-menu-item (click)="logout()" class="logout-btn">
+            <mat-icon>logout</mat-icon>
+            <span>Cerrar Sesión</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── FILA 2: Banner de trial ── -->
+  @if (trialService.enTrial() && trialService.cargado()) {
+    <div class="trial-banner"
+         [class.trial-banner--advertencia]="trialService.advertencia()"
+         [class.trial-banner--urgente]="trialService.urgente()">
+
+      <div class="trial-banner__inner">
+
+        <!-- Ícono -->
+        <mat-icon class="trial-icono">
+          {{ trialService.urgente() ? 'warning' : 'hourglass_top' }}
+        </mat-icon>
+
+        <!-- Mensaje -->
+        <span class="trial-mensaje">
+          @if (trialService.diasRestantes() === 0) {
+            ⚠️ Tu período de prueba vence <strong>HOY</strong>
+          } @else if (trialService.diasRestantes() === 1) {
+            Te queda <strong>1 día</strong> de prueba gratuita
+          } @else {
+            Te quedan
+            <strong>{{ trialService.diasRestantes() | number:'1.0-0' }} días</strong>
+            de tu período de prueba
+          }
+        </span>
+
+        <!-- Barra de progreso -->
+        <div class="trial-barra-wrapper">
+          <div class="trial-barra">
+            <div class="trial-barra__fill"
+                 [style.width.%]="
+                   (trialService.diasRestantes() / 14) * 100
+                 ">
+            </div>
+          </div>
+          <span class="trial-barra__dias">
+            {{ trialService.diasRestantes() | number:'1.0-0' }}d
+          </span>
+        </div>
+
+        <!-- Fecha fin -->
+        @if (trialService.estado()?.trial_fin) {
+          <span class="trial-fecha">
+            Vence el
+            {{ trialService.estado()!.trial_fin!
+               | date:'d MMM yyyy' }}
+          </span>
+        }
+
+        <!-- CTA -->
+        <a class="trial-cta" routerLink="/suscripcion">
+          <mat-icon>upgrade</mat-icon>
+          Activar ahora
+        </a>
+
+      </div>
+
+    </div>
+  }
+
+</div>

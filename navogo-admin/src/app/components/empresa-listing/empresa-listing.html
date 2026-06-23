@@ -1,0 +1,384 @@
+<div class="dashboard-container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="title">
+          <mat-icon>business</mat-icon>
+          Mi Empresa
+        </h1>
+        <p>Información de tu negocio y link del menú público</p>
+      </div>
+      <div class="header-actions" *ngIf="empresa">
+        <button 
+          mat-stroked-button
+          color="accent"
+          (click)="openEnvioConfig()"
+          matTooltip="Configurar costos y zonas de envío">
+          <mat-icon>local_shipping</mat-icon>
+          Configuración de Envío
+        </button>
+        <button 
+          mat-raised-button 
+          (click)="openById(empresa.id)"
+          matTooltip="Editar información de la empresa">
+          <mat-icon>edit</mat-icon>
+          Editar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-card">
+    
+    <!-- Estado de carga -->
+    <div *ngIf="isLoading" class="state-card">
+      <div class="state-card__icon-wrap state-card__icon-wrap--spin">
+        <mat-icon>hourglass_empty</mat-icon>
+      </div>
+      <div>
+        <h3 class="state-card__title">Cargando información</h3>
+        <p class="state-card__sub">Obteniendo datos de tu empresa...</p>
+      </div>
+    </div>
+
+    <!-- Estado de error -->
+    <div *ngIf="!isLoading && errorMessage" class="state-card state-card--error">
+      <div class="state-card__icon-wrap">
+        <mat-icon>error_outline</mat-icon>
+      </div>
+      <div>
+        <h3 class="state-card__title">Error al cargar</h3>
+        <p class="state-card__sub">{{ errorMessage }}</p>
+      </div>
+    </div>
+
+    <!-- Tarjeta de la empresa -->
+    <div *ngIf="!isLoading && empresa" class="company-card">
+
+    <!-- Identidad -->
+    <div class="company-identity">
+      <div class="company-avatar">
+        <img 
+          *ngIf="empresaImageUrl" 
+          [src]="empresaImageUrl" 
+          [alt]="empresa.nombre" />
+        <span *ngIf="!empresaImageUrl">
+          {{ (empresa.nombre || 'E').charAt(0).toUpperCase() }}
+        </span>
+      </div>
+
+      <div class="company-identity__info">
+        <div class="company-identity__name-row">
+          <h2 class="company-identity__name">{{ empresa.nombre }}</h2>
+        
+
+          <span 
+            class="cbadge"
+            [class.cbadge--active]="empresa.estatus === 'activo' || empresa.estatus === 1"
+            [class.cbadge--inactive]="empresa.estatus === 'inactivo' || empresa.estatus === 0">
+            <mat-icon>{{ (empresa.estatus === 'activo' || empresa.estatus === 1) ? 'check_circle' : 'cancel' }}</mat-icon>
+            {{ (empresa.estatus === 'activo' || empresa.estatus === 1) ? 'Activa' : 'Inactiva' }}
+          </span>
+        </div>
+
+        <p class="company-identity__desc" *ngIf="empresa.descripcion">
+          {{ empresa.descripcion }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Cuerpo de dos columnas -->
+    <div class="company-body">
+      
+      <!-- Columna izquierda: Contacto y Datos Bancarios -->
+      <div class="company-col company-col--left">
+        
+        <!-- Información de contacto -->
+        <div class="info-section">
+          <div class="info-section__header">
+            <mat-icon>contacts</mat-icon>
+            Información de contacto
+          </div>
+          <div class="info-rows">
+            <div class="info-row" *ngIf="empresa.telefono">
+              <div class="info-row__icon">
+                <mat-icon>call</mat-icon>
+              </div>
+              <div class="info-row__body">
+                <div class="info-row__label">Teléfono</div>
+                <a [href]="'tel:' + empresa.telefono" class="info-row__link">{{ empresa.telefono }}</a>
+              </div>
+            </div>
+
+            <div class="info-row" *ngIf="empresa.whatsapp">
+              <div class="info-row__icon info-row__icon--whatsapp">
+                <mat-icon>phone_android</mat-icon>
+              </div>
+              <div class="info-row__body">
+                <div class="info-row__label">WhatsApp</div>
+                <a [href]="'https://wa.me/' + empresa.whatsapp" target="_blank" class="info-row__link">
+                  {{ empresa.whatsapp }}
+                </a>
+              </div>
+            </div>
+
+            <div class="info-row" *ngIf="empresa.email">
+              <div class="info-row__icon">
+                <mat-icon>mail</mat-icon>
+              </div>
+              <div class="info-row__body">
+                <div class="info-row__label">Email</div>
+                <a [href]="'mailto:' + empresa.email" class="info-row__link">{{ empresa.email }}</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Redes sociales -->
+        <div class="info-section" *ngIf="empresa.facebook || empresa.instagram">
+          <div class="info-section__header">
+            <mat-icon>share</mat-icon>
+            Redes sociales
+          </div>
+          <div class="social-chips">
+            <a 
+              *ngIf="empresa.facebook" 
+              [href]="empresa.facebook" 
+              target="_blank"
+              class="social-chip social-chip--facebook">
+              <mat-icon>facebook</mat-icon>
+              Facebook
+            </a>
+            <a 
+              *ngIf="empresa.instagram" 
+              [href]="empresa.instagram" 
+              target="_blank"
+              class="social-chip social-chip--instagram">
+              <mat-icon>camera_alt</mat-icon>
+              Instagram
+            </a>
+          </div>
+        </div>
+
+        <!-- Métodos de pago -->
+        <div class="info-section">
+          <div class="info-section__header">
+            <mat-icon>payments</mat-icon>
+            Métodos de pago aceptados
+          </div>
+          <div class="payment-chips">
+            <div class="payment-chip" *ngIf="empresa.pago_efectivo === 1">
+              <mat-icon>money</mat-icon>
+              Efectivo
+            </div>
+            <div class="payment-chip" *ngIf="empresa.pago_tarjeta === 1">
+              <mat-icon>credit_card</mat-icon>
+              Tarjeta
+            </div>
+            <div class="payment-chip" *ngIf="empresa.pago_transferencia === 1">
+              <mat-icon>account_balance</mat-icon>
+              Transferencia
+            </div>
+          </div>
+        </div>
+
+        <!-- Datos bancarios -->
+        <div 
+          class="info-section info-section--bank" 
+          *ngIf="empresa.pago_transferencia === 1 && (empresa.titular || empresa.banco || empresa.clabe)">
+          <div class="info-section__header">
+            <mat-icon>account_balance_wallet</mat-icon>
+            Datos para transferencia
+          </div>
+          <div class="info-rows">
+            <div class="info-row" *ngIf="empresa.titular">
+              <div class="info-row__icon">
+                <mat-icon>person</mat-icon>
+              </div>
+              <div class="info-row__body">
+                <div class="info-row__label">Titular</div>
+                <div class="info-row__value">{{ empresa.titular }}</div>
+              </div>
+            </div>
+
+            <div class="info-row" *ngIf="empresa.banco">
+              <div class="info-row__icon">
+                <mat-icon>account_balance</mat-icon>
+              </div>
+              <div class="info-row__body">
+                <div class="info-row__label">Banco</div>
+                <div class="info-row__value">{{ empresa.banco }}</div>
+              </div>
+            </div>
+
+            <div class="info-row" *ngIf="empresa.clabe">
+              <div class="info-row__icon">
+                <mat-icon>pin</mat-icon>
+              </div>
+              <div class="info-row__body">
+                <div class="info-row__label">CLABE</div>
+                <div class="info-row__value info-row__value--clabe">{{ empresa.clabe }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna derecha: Ubicación y Horarios -->
+      <div class="company-col company-col--right">
+        <!-- Ubicación -->
+        <div class="info-section info-section--location" *ngIf="empresa.direccion || empresa.lat">
+          <div class="info-section__header">
+            <mat-icon>location_on</mat-icon>
+            Ubicación
+          </div>
+
+          <!-- Dirección -->
+          <div class="location-card">
+            <div class="location-card__icon">
+              <mat-icon>place</mat-icon>
+            </div>
+            <div class="location-card__body">
+              <div class="location-card__label">Dirección</div>
+              <div class="location-card__address">
+                <span *ngIf="displayAddress">{{ displayAddress }}</span>
+                <span *ngIf="!displayAddress && empresa.direccion && !empresa.direccion.includes('http')">
+                  {{ empresa.direccion }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Botón para ver en Google Maps con coordenadas -->
+          <button 
+            *ngIf="hasCoordinates()"
+            (click)="openMapLocation()"
+            class="location-map-btn">
+            <div class="location-map-btn__icon">
+              <mat-icon>map</mat-icon>
+            </div>
+            <div class="location-map-btn__content">
+              <div class="location-map-btn__title">Ver en Google Maps</div>
+              <div class="location-map-btn__subtitle">Abrir ubicación en el mapa</div>
+            </div>
+            <mat-icon class="location-map-btn__arrow">arrow_forward</mat-icon>
+          </button>
+          
+          <!-- Link alternativo si no hay coordenadas pero sí URL -->
+          <a 
+            *ngIf="!hasCoordinates() && resolvedExternalUrl"
+            [href]="resolvedExternalUrl"
+            target="_blank"
+            rel="noopener"
+            class="location-map-btn">
+            <div class="location-map-btn__icon">
+              <mat-icon>open_in_new</mat-icon>
+            </div>
+            <div class="location-map-btn__content">
+              <div class="location-map-btn__title">Abrir en Google Maps</div>
+              <div class="location-map-btn__subtitle">Ver ubicación externa</div>
+            </div>
+            <mat-icon class="location-map-btn__arrow">arrow_forward</mat-icon>
+          </a>
+        </div>
+
+        <!-- Horarios -->
+        <div class="info-section" *ngIf="empresa.horarios">
+          <div class="info-section__header">
+            <mat-icon>schedule</mat-icon>
+            Horarios de atención
+          </div>
+          <div class="schedule-grid">
+            <div 
+              class="schedule-row"
+              [class.schedule-row--closed]="h.horario === 'Cerrado'"
+              *ngFor="let h of getHorarios()">
+              <div class="schedule-row__day">{{ h.dia }}</div>
+              <div class="schedule-row__sep"></div>
+              <div class="schedule-row__hours">
+                <mat-icon>{{ h.horario === 'Cerrado' ? 'block' : 'access_time' }}</mat-icon>
+                {{ h.horario }}
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    </div>
+
+    <!-- Barra del menú público 
+    <div class="menu-link-bar" *ngIf="!isLoading && empresa">
+      <div class="menu-link-bar__icon-wrap">
+        <mat-icon>restaurant_menu</mat-icon>
+      </div>
+      <div class="menu-link-bar__content">
+        <div class="menu-link-bar__label">Menú Público</div>
+        <div class="menu-link-bar__sub">Comparte este enlace con tus clientes para que vean tu menú</div>
+        <div class="menu-link-bar__row">
+          <mat-form-field appearance="outline" class="menu-link-field">
+            <input matInput [value]="menuLink" readonly />
+          </mat-form-field>
+          <button
+            mat-raised-button
+            class="btn-copy"
+            (click)="copyMenuLink()"
+            [disabled]="!menuLink">
+            <mat-icon>content_copy</mat-icon>
+            Copiar enlace
+          </button>
+        </div>
+
+        @if (menuQrDataUrl) {
+          <div class="menu-qr-block">
+            <img class="menu-qr-img" [src]="menuQrDataUrl" alt="QR Menú Público" />
+            <div class="menu-qr-actions">
+              <p class="menu-qr-hint">Escanea para abrir el menú</p>
+              <button mat-stroked-button class="btn-qr-download" (click)="downloadMenuQr()">
+                <mat-icon>download</mat-icon>
+                Descargar QR
+              </button>
+            </div>
+          </div>
+        }      </div>
+    </div>-->
+
+    <!-- Barra pantalla TV -->
+    <div class="menu-link-bar menu-link-bar--tv" *ngIf="!isLoading && empresa">
+      <div class="menu-link-bar__icon-wrap menu-link-bar__icon-wrap--tv">
+        <mat-icon>tv</mat-icon>
+      </div>
+      <div class="menu-link-bar__content">
+        <div class="menu-link-bar__label">Pantalla TV</div>
+        <div class="menu-link-bar__sub">Abre este enlace en modo kiosk en tu pantalla para mostrar el menú</div>
+        <div class="menu-link-bar__row">
+          <mat-form-field appearance="outline" class="menu-link-field">
+            <input matInput [value]="tvLink" readonly />
+          </mat-form-field>
+          <button
+            mat-stroked-button
+            class="btn-copy btn-copy--tv"
+            (click)="copyTvLink()"
+            [disabled]="!tvLink">
+            <mat-icon>content_copy</mat-icon>
+            Copiar enlace
+          </button>
+          <button
+            mat-raised-button
+            class="btn-open-tv"
+            (click)="openTv()"
+            [disabled]="!tvLink">
+            <mat-icon>open_in_new</mat-icon>
+            Abrir TV
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

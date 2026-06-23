@@ -1,0 +1,105 @@
+<div class="cart-page">
+  <header class="cart-header">
+    <button class="btn-back" type="button" (click)="goBack()" aria-label="Volver">
+      ←
+    </button>
+    <h1>Carrito</h1>
+  </header>
+
+  <div class="cart-empty" *ngIf="cart.items().length === 0">
+    <h2>Tu carrito está vacío</h2>
+    <p>Agrega productos para continuar.</p>
+  </div>
+
+  <div class="cart-list" *ngIf="cart.items().length > 0">
+    <div class="cart-item" *ngFor="let item of cart.items()">
+      <div class="item-left">
+        <div class="thumb" *ngIf="item.imageUrl">
+          <img [src]="item.imageUrl" [alt]="item.name" />
+        </div>
+      </div>
+
+      <div class="item-main">
+        <div class="item-top">
+          <div class="item-name">{{ item.name }}</div>
+          <button class="btn-remove" type="button" (click)="remove(item.key)" aria-label="Quitar">
+            ✕
+          </button>
+        </div>
+
+        <div class="item-selections" *ngIf="item.selections?.length">
+          <div class="sel" *ngFor="let s of item.selections">
+            <span class="sel-title">{{ s.groupTitle }}:</span>
+            <span class="sel-extra">{{ s.extra }}</span>
+            <span class="sel-extra" *ngIf="s.precio != null"> ({{ formatPrice(s.precio) }})</span>
+          </div>
+        </div>
+
+        <div class="item-bottom">
+          <div class="item-price">
+            {{ formatPrice(item.unitPrice) }}
+          </div>
+
+          <div class="qty">
+            <button type="button" class="qty-btn" (click)="cart.decrement(item.key)" aria-label="Disminuir">−</button>
+            <div class="qty-val">{{ item.quantity }}</div>
+            <button type="button" class="qty-btn" (click)="cart.increment(item.key)" aria-label="Aumentar">+</button>
+          </div>
+
+          <div class="item-line-total">
+            {{ formatPrice(item.unitPrice * item.quantity) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cart-summary">
+      <div class="summary-shipping">
+        <div class="shipping-label">Entrega</div>
+        <div class="shipping-toggle" role="group" aria-label="Seleccionar tipo de entrega">
+          <button
+            type="button"
+            class="chip"
+            [class.active]="cart.shippingType() === 'domicilio'"
+            (click)="setShippingType('domicilio')"
+          >
+            A domicilio
+          </button>
+          <button
+            type="button"
+            class="chip"
+            [class.active]="cart.shippingType() === 'recoger'"
+            (click)="setShippingType('recoger')"
+          >
+            Recoger
+          </button>
+        </div>
+        <div class="shipping-hint" *ngIf="cart.shippingType() === 'recoger'">
+          Para recoger, confirmas tu pedido por WhatsApp.
+        </div>
+      </div>
+
+      <div class="summary-note">
+        <label for="cart-note">Comentario adicional</label>
+        <textarea
+          id="cart-note"
+          rows="3"
+          [value]="cart.note()"
+          (input)="onNoteInput($event)"
+          placeholder="Ej: Hamburguesa sin mayonesa"
+        ></textarea>
+      </div>
+
+      <div class="summary-row">
+        <span>Total</span>
+        <strong>{{ formatPrice(cart.total()) }}</strong>
+      </div>
+    </div>
+
+    <footer class="cta">
+      <button class="btn-primary" type="button" (click)="continue()">
+        Continuar
+      </button>
+    </footer>
+  </div>
+</div>

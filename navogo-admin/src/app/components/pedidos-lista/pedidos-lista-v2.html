@@ -1,0 +1,86 @@
+<div class="pedidos-page">
+  <!-- Header principal -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-title">
+        <mat-icon>receipt_long</mat-icon>
+        <h1>Pedidos</h1>
+        @if (pendingOrdersCount() > 0) {
+          <span class="pending-badge">{{ pendingOrdersCount() }}</span>
+        }
+      </div>
+      <p class="header-subtitle">
+        Sistema de pedidos en tiempo real para cocina
+      </p>
+    </div>
+  </div>
+  
+  <!-- Banner de alerta para pedidos urgentes -->
+  @if (urgentOrders().length > 0) {
+    <div class="urgent-banner" [@urgentBanner]>
+      <mat-icon>warning</mat-icon>
+      <span class="urgent-text">
+        <strong>¡ATENCIÓN!</strong> {{ urgentOrders().length }} pedido(s) con más de 20 minutos
+      </span>
+      <mat-icon class="urgent-pulse">priority_high</mat-icon>
+    </div>
+  }
+  
+  <!-- Barra de filtros -->
+  <app-orders-filter-bar
+    [(selectedDate)]="selectedDate"
+    [(filtroModo)]="filtroModo"
+    [(filtroTipo)]="filtroTipo"
+    (refresh)="onRefresh()"
+  />
+  
+  <!-- Contenido principal -->
+  <div class="orders-content">
+    @if (isLoading() && orders().length === 0) {
+      <div class="loading-state">
+        <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+        <p>Cargando pedidos...</p>
+      </div>
+    } @else if (errorMessage()) {
+      <div class="error-state">
+        <mat-icon>error_outline</mat-icon>
+        <h3>Error al cargar pedidos</h3>
+        <p>{{ errorMessage() }}</p>
+        <button mat-raised-button color="primary" (click)="onRefresh()">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+    } @else if (filteredOrders().length === 0) {
+      <div class="empty-state">
+        <mat-icon>inbox</mat-icon>
+        @if (filtroModo() === 'pendientes') {
+          <h3>No hay pedidos pendientes</h3>
+          <p>Todos los pedidos del día han sido completados</p>
+        } @else {
+          <h3>No hay pedidos</h3>
+          <p>No se encontraron pedidos para los filtros seleccionados</p>
+        }
+      </div>
+    } @else {
+      <!-- Grid de tarjetas de pedidos -->
+      <div class="orders-grid" [@listAnimation]="filteredOrders().length">
+        @for (order of filteredOrders(); track trackByFolio($index, order)) {
+          <app-order-card
+            [order]="order"
+            (statusChange)="onStatusChange($event)"
+            (cardClick)="onCardClick($event)"
+          />
+        }
+      </div>
+    }
+  </div>
+  
+  <!-- Indicador de actualización automática -->
+  @if (isLoading() && orders().length > 0) {
+    <div class="update-indicator">
+      <mat-progress-spinner mode="indeterminate" diameter="20"></mat-progress-spinner>
+      <span>Actualizando...</span>
+    </div>
+  }
+</div>

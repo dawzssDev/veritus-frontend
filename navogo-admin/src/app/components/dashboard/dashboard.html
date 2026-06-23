@@ -1,0 +1,226 @@
+<div class="dashboard-container dashboard">
+  <div class="header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1 class="title">
+          <mat-icon>dashboard</mat-icon>
+          Dashboard
+        </h1>
+        <p>
+          Empresa #{{ summary()?.empresa_id }} ·
+          Hoy: {{ range()?.today_start | date: 'shortTime' }} — {{ range()?.now | date: 'shortTime' }}
+          · Últimos 7 días desde {{ range()?.last_7d_start | date: 'mediumDate' }}
+        </p>
+      </div>
+
+      <div class="header-actions">
+        <button mat-raised-button type="button" (click)="load()">
+          <mat-icon>refresh</mat-icon>
+          Actualizar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-card dashboard__body">
+    @if (isLoading()) {
+      <div class="center">
+        <mat-progress-spinner diameter="44" mode="indeterminate"></mat-progress-spinner>
+      </div>
+    } @else {
+      @if (errorMessage()) {
+        <mat-card class="error">
+          <mat-icon>error</mat-icon>
+          <div>{{ errorMessage() }}</div>
+        </mat-card>
+      }
+
+      <div class="kpis">
+        <mat-card class="kpi kpi--primary">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">payments</mat-icon>
+            Ventas hoy
+          </div>
+          <div class="kpi__value">
+            {{ kpis()?.sales_today_total ?? 0 | currency: 'MXN':'symbol':'1.0-2' }}
+          </div>
+          <div class="kpi__sub">Pedidos hoy: {{ kpis()?.orders_today_count ?? 0 }}</div>
+        </mat-card>
+
+        <mat-card class="kpi">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">receipt_long</mat-icon>
+            Pendientes
+          </div>
+          <div class="kpi__value">{{ kpis()?.orders_pending_count ?? 0 }}</div>
+          <div class="kpi__sub">Por confirmar / atender</div>
+        </mat-card>
+
+        <mat-card class="kpi">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">people</mat-icon>
+            Usuarios
+          </div>
+          <div class="kpi__value">{{ kpis()?.usuarios_count ?? 0 }}</div>
+          <div class="kpi__sub">Registrados</div>
+        </mat-card>
+
+        <mat-card class="kpi">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">inventory_2</mat-icon>
+            Productos
+          </div>
+          <div class="kpi__value">{{ kpis()?.productos_total ?? 0 }}</div>
+          <div class="kpi__sub">
+            Descuento: {{ kpis()?.productos_con_descuento ?? 0 }} · Combos: {{ kpis()?.productos_combos ?? 0 }}
+          </div>
+        </mat-card>
+
+        <mat-card class="kpi">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">shopping_cart</mat-icon>
+            Carritos
+          </div>
+          <div class="kpi__value">{{ kpis()?.carritos_items_count ?? 0 }}</div>
+          <div class="kpi__sub">Usuarios con carrito: {{ kpis()?.carritos_usuarios_count ?? 0 }}</div>
+        </mat-card>
+
+        <mat-card class="kpi">
+          <div class="kpi__title">
+            <mat-icon class="kpi__title-icon">campaign</mat-icon>
+            Publicidad activa
+          </div>
+          <div class="kpi__value">{{ kpis()?.publicidad_activa_count ?? 0 }}</div>
+          <div class="kpi__sub">Anuncios visibles</div>
+        </mat-card>
+      </div>
+
+      <div class="grid">
+        <mat-card class="panel">
+          <div class="panel__header">
+            <div>
+              <div class="panel__title">Órdenes recientes</div>
+              <div class="panel__subtitle">Últimos movimientos</div>
+            </div>
+          </div>
+
+          @if (recentOrders().length === 0) {
+            <div class="empty-mini">Sin órdenes recientes</div>
+          } @else {
+            <div class="table-wrap">
+              <table mat-table [dataSource]="recentOrders()" class="mat-elevation-z0">
+                <ng-container matColumnDef="id">
+                  <th mat-header-cell *matHeaderCellDef>#</th>
+                  <td mat-cell *matCellDef="let o">{{ o.id }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>Estatus</th>
+                  <td mat-cell *matCellDef="let o">
+                    <span class="status-badge" [class]="orderStatusClass(o.status)">
+                      <mat-icon>info</mat-icon>
+                      {{ o.status }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="total">
+                  <th mat-header-cell *matHeaderCellDef>Total</th>
+                  <td mat-cell *matCellDef="let o">{{ o.total | currency: 'MXN':'symbol':'1.0-2' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="pago">
+                  <th mat-header-cell *matHeaderCellDef>Pago</th>
+                  <td mat-cell *matCellDef="let o">
+                    <span class="status-badge" [class]="boolBadgeClass(o.pago_confirmado)">
+                      <mat-icon>{{ o.pago_confirmado ? 'check_circle' : 'schedule' }}</mat-icon>
+                      {{ o.pago_confirmado ? 'Confirmado' : 'Pendiente' }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="envio">
+                  <th mat-header-cell *matHeaderCellDef>Envío</th>
+                  <td mat-cell *matCellDef="let o">
+                    <span class="status-badge" [class]="boolBadgeClass(o.envio_confirmado)">
+                      <mat-icon>{{ o.envio_confirmado ? 'local_shipping' : 'hourglass_empty' }}</mat-icon>
+                      {{ o.envio_confirmado ? 'Confirmado' : 'Pendiente' }}
+                    </span>
+                  </td>
+                </ng-container>
+
+                <ng-container matColumnDef="created_at">
+                  <th mat-header-cell *matHeaderCellDef>Fecha</th>
+                  <td mat-cell *matCellDef="let o">{{ o.created_at | date: 'medium' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef></th>
+                  <td mat-cell *matCellDef="let o">
+                    <button mat-stroked-button type="button" (click)="goToOrder(o.id)">
+                      <mat-icon>visibility</mat-icon>
+                      Ver
+                    </button>
+                  </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedRecentColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedRecentColumns"></tr>
+              </table>
+            </div>
+          }
+        </mat-card>
+
+        <mat-card class="panel">
+          <div class="panel__header">
+            <div>
+              <div class="panel__title">Top productos (7 días)</div>
+              <div class="panel__subtitle">Por ingresos</div>
+            </div>
+          </div>
+
+          @if (topProducts().length === 0) {
+            <div class="empty-mini">Sin datos de top productos</div>
+          } @else {
+            <div class="top-products">
+              @for (p of topProducts(); track p.product_id) {
+                <div class="top-row">
+                  <div class="top-row__name" [matTooltip]="p.product_name">{{ p.product_name }}</div>
+                  <div class="top-row__bar" aria-hidden="true">
+                    <div class="top-row__bar-fill" [style.width.%]="revenuePct(p.revenue)"></div>
+                  </div>
+                  <div class="top-row__meta">
+                    <span class="muted">{{ p.units }} u</span>
+                    <span class="strong">{{ p.revenue | currency: 'MXN':'symbol':'1.0-2' }}</span>
+                  </div>
+                </div>
+              }
+
+              <div class="table-wrap table-wrap--compact">
+                <table mat-table [dataSource]="topProducts()" class="mat-elevation-z0">
+                  <ng-container matColumnDef="product_name">
+                    <th mat-header-cell *matHeaderCellDef>Producto</th>
+                    <td mat-cell *matCellDef="let p">{{ p.product_name }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="units">
+                    <th mat-header-cell *matHeaderCellDef>Unidades</th>
+                    <td mat-cell *matCellDef="let p">{{ p.units }}</td>
+                  </ng-container>
+
+                  <ng-container matColumnDef="revenue">
+                    <th mat-header-cell *matHeaderCellDef>Ingresos</th>
+                    <td mat-cell *matCellDef="let p">{{ p.revenue | currency: 'MXN':'symbol':'1.0-2' }}</td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="displayedTopColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedTopColumns"></tr>
+                </table>
+              </div>
+            </div>
+          }
+        </mat-card>
+      </div>
+    }
+  </div>
+</div>

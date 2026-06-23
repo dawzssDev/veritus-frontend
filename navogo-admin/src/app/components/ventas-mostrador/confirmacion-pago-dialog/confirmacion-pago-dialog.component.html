@@ -1,0 +1,139 @@
+<div class="confirmacion-pago-dialog">
+  <div class="dialog-header">
+    <div class="header-icon">
+      <mat-icon>receipt_long</mat-icon>
+    </div>
+    <h2>Confirmar pago</h2>
+    <button mat-icon-button class="close-button" (click)="cancel()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-body">
+    <!-- Tipo de servicio -->
+    <div class="servicio-info">
+      <mat-icon>
+        @if (data.tipoServicio === 'mesa') {
+          table_restaurant
+        } @else if (data.tipoServicio === 'llevar') {
+          shopping_bag
+        } @else {
+          delivery_dining
+        }
+      </mat-icon>
+      <span>{{ getTipoServicioText() }}</span>
+    </div>
+
+    <!-- Lista de productos -->
+    <div class="productos-resumen">
+      @for (producto of productosVisibles; track $index) {
+        <div class="producto-linea">
+          <span class="producto-cantidad">{{ producto.cantidad }}x</span>
+          <span class="producto-nombre">{{ producto.nombre }}</span>
+          <span class="producto-subtotal">${{ producto.subtotal | number:'1.2-2' }}</span>
+        </div>
+      }
+      @if (productosOcultos > 0) {
+        <div class="productos-ocultos">
+          + {{ productosOcultos }} producto{{ productosOcultos > 1 ? 's' : '' }} más
+        </div>
+      }
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Resumen de totales -->
+    <div class="totales-resumen">
+      <div class="total-linea">
+        <span>Subtotal</span>
+        <span>${{ data.subtotal | number:'1.2-2' }}</span>
+      </div>
+
+      @if ((data.costoEnvio ?? 0) > 0) {
+        <div class="total-linea total-linea--envio">
+          <span class="envio-label">
+            <mat-icon>delivery_dining</mat-icon>
+            Costo de envío
+          </span>
+          <span>${{ data.costoEnvio | number:'1.2-2' }}</span>
+        </div>
+      }
+
+      @if ((data.propina ?? 0) > 0) {
+        <div class="total-linea">
+          <span>Propina</span>
+          <span>${{ data.propina | number:'1.2-2' }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="total-destacado">
+      <span class="total-label">TOTAL</span>
+      <span class="total-monto">${{ data.total | number:'1.2-2' }}</span>
+    </div>
+
+    <!-- Información de pago -->
+    <div class="pago-info">
+      <div class="pago-metodo">
+        <mat-icon>
+          @if (data.metodoPago === 'efectivo') {
+            payments
+          } @else if (data.metodoPago === 'tarjeta') {
+            credit_card
+          } @else if (data.metodoPago === 'transferencia') {
+            account_balance
+          } @else {
+            credit_score
+          }
+        </mat-icon>
+        <span>{{ getMetodoPagoText() }}</span>
+      </div>
+
+      @if (data.metodoPago === 'efectivo' && data.montoRecibido != null) {
+        <div class="efectivo-detalles">
+          <div class="detalle-linea">
+            <span>Monto recibido:</span>
+            <span>${{ data.montoRecibido | number:'1.2-2' }}</span>
+          </div>
+          <div class="detalle-linea cambio">
+            <span>Cambio a devolver:</span>
+            <span>${{ data.cambio || 0 | number:'1.2-2' }}</span>
+          </div>
+        </div>
+      }
+
+      @if (data.metodoPago === 'combinado' && data.pagoCombinado) {
+        <div class="combinado-detalles">
+          @if (data.pagoCombinado.efectivo > 0) {
+            <div class="detalle-linea">
+              <span><mat-icon inline>payments</mat-icon> Efectivo:</span>
+              <span>${{ data.pagoCombinado.efectivo | number:'1.2-2' }}</span>
+            </div>
+          }
+          @if (data.pagoCombinado.tarjeta > 0) {
+            <div class="detalle-linea">
+              <span><mat-icon inline>credit_card</mat-icon> Tarjeta:</span>
+              <span>${{ data.pagoCombinado.tarjeta | number:'1.2-2' }}</span>
+            </div>
+          }
+          @if (data.pagoCombinado.transferencia > 0) {
+            <div class="detalle-linea">
+              <span><mat-icon inline>account_balance</mat-icon> Transferencia:</span>
+              <span>${{ data.pagoCombinado.transferencia | number:'1.2-2' }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="dialog-footer">
+    <button mat-stroked-button type="button" (click)="cancel()">
+      Cancelar
+    </button>
+    <button mat-raised-button color="primary" type="button" (click)="confirm()">
+      <mat-icon>check_circle</mat-icon>
+      Confirmar y registrar
+    </button>
+  </div>
+</div>

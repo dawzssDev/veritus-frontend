@@ -1,0 +1,498 @@
+@import '../../../../styles/design-tokens';
+
+.order-card {
+  position: relative;
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  overflow: visible;
+  padding: 0;
+  background: #ffffff;
+  border: 2px solid #f1f3f5;
+  
+  &:hover {
+    box-shadow: var(--card-shadow-hover);
+    transform: translateY(-4px);
+  }
+  
+  // Borde izquierdo de color según tipo
+  .card-border-indicator {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--card-border-width);
+    border-radius: var(--card-radius) 0 0 var(--card-radius);
+    z-index: 2;
+  }
+  
+  // Estados especiales de timer
+  &.timer-warning {
+    border-color: var(--timer-advertencia);
+    box-shadow: 0 0 0 3px rgba(202, 138, 4, 0.15), var(--card-shadow);
+  }
+  
+  &.timer-danger {
+    border-color: var(--timer-peligro);
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.25), var(--card-shadow);
+    animation: dangerBlink 2s infinite;
+    
+    .card-border-indicator {
+      background: var(--timer-peligro) !important;
+      width: 6px;
+    }
+  }
+  
+  &.estado-finalizado {
+    opacity: 0.7;
+    background: #f9fafb;
+  }
+  
+  &.estado-cancelado {
+    opacity: 0.6;
+    background: #fef2f2;
+  }
+}
+
+@keyframes dangerBlink {
+  0%, 100% {
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.25), var(--card-shadow);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.4), var(--card-shadow-hover);
+  }
+}
+
+// Header de la tarjeta
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--spacing-lg);
+  padding-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
+  background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
+  border-bottom: 2px solid #f1f3f5;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.folio-number {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  
+  .folio-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: var(--tipo-color);
+  }
+  
+  .folio-text {
+    font-size: var(--font-size-folio);
+    font-weight: var(--font-weight-folio);
+    color: #1f2937;
+    letter-spacing: 0.5px;
+  }
+}
+
+.order-time {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 600;
+  margin-left: 32px;
+}
+
+// Timer badge
+.timer-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: var(--font-size-timer);
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  &.timer-pulse {
+    animation: timerPulse 2s infinite;
+  }
+}
+
+@keyframes timerPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+// Badge de tipo de pedido - PROMINENTE
+.tipo-badge-container {
+  padding: 0 var(--spacing-lg);
+  padding-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
+  padding-top: var(--spacing-md);
+}
+
+.tipo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 12px 20px;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  
+  .tipo-emoji {
+    font-size: 24px;
+    line-height: 1;
+  }
+  
+  .tipo-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
+}
+
+// Estado pill
+.estado-pill {
+  position: absolute;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: var(--font-size-badge);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 3;
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// Información del cliente
+.customer-info {
+  padding: var(--spacing-lg);
+  padding-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.customer-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: var(--spacing-sm);
+}
+
+.customer-phone,
+.mesa-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 600;
+  margin-top: var(--spacing-xs);
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.delivery-address-info {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: var(--spacing-xs);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: #f59e0b;
+  }
+
+  .delivery-referencia {
+    color: #b45309;
+    font-size: 11px;
+    font-style: italic;
+  }
+}
+
+// Sección de comanda - LEGIBILIDAD MÁXIMA
+.comanda-section {
+  padding: var(--spacing-lg);
+  padding-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.comanda-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  font-size: 16px;
+  font-weight: 800;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  mat-icon {
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    color: var(--tipo-color);
+  }
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.comanda-item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: var(--spacing-md);
+  align-items: start;
+  padding: var(--spacing-md);
+  background: #ffffff;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+  
+  &:hover {
+    border-color: var(--tipo-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.item-quantity {
+  font-size: var(--font-size-item-quantity);
+  font-weight: 900;
+  color: #ffffff;
+  background: var(--tipo-color);
+  padding: 6px 12px;
+  border-radius: 8px;
+  text-align: center;
+  min-width: 50px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.item-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.item-name {
+  font-size: var(--font-size-item);
+  font-weight: var(--font-weight-item);
+  color: #111827;
+  line-height: 1.4;
+}
+
+.item-modifiers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.modifier-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  background: var(--topping-bg);
+  color: var(--topping-text);
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.item-price {
+  font-size: 16px;
+  font-weight: 800;
+  color: #111827;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 2px solid #e5e7eb;
+}
+
+// Notas especiales - NUNCA SE PIERDEN VISUALMENTE
+.notas-especiales {
+  margin: var(--spacing-lg);
+  margin-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
+  padding: var(--spacing-lg);
+  background: var(--notes-bg);
+  border-left: 6px solid var(--notes-border);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+.notas-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--notes-text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: var(--notes-border);
+  }
+}
+
+.notas-content {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--notes-text);
+  font-weight: 600;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: rgba(255, 255, 255, 0.6);
+  padding: var(--spacing-md);
+  border-radius: 6px;
+}
+
+// Total
+.total-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-lg);
+  padding-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-top: 2px solid #e5e7eb;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.total-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.total-amount {
+  font-size: 24px;
+  font-weight: 900;
+  color: #111827;
+  letter-spacing: 0.5px;
+}
+
+// Acciones - BOTONES CON ETIQUETAS
+.actions-section {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  padding-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
+  background: #fafbfc;
+  border-radius: 0 0 var(--card-radius) var(--card-radius);
+}
+
+.action-btn {
+  flex: 1;
+  min-height: 48px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  &.action-btn-pago {
+    background: #16A34A;
+    color: #ffffff;
+    
+    &:hover {
+      background: #15803D;
+    }
+  }
+  
+  &.action-btn-servir {
+    background: #2563EB;
+    color: #ffffff;
+    
+    &:hover {
+      background: #1D4ED8;
+    }
+  }
+  
+  &.action-btn-cancelar {
+    border: 2px solid #DC2626;
+    color: #DC2626;
+    
+    &:hover {
+      background: #FEF2F2;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .folio-text {
+    font-size: 24px;
+  }
+  
+  .tipo-badge {
+    font-size: 16px;
+    padding: 10px 16px;
+  }
+  
+  .actions-section {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+}

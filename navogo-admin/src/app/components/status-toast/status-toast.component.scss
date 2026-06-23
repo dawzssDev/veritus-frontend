@@ -1,0 +1,47 @@
+.toast {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  min-width: min(420px, calc(100vw - 40px));
+  color: var(--mat-sys-inverse-on-surface, var(--mat-sys-on-surface));
+}
+
+.toast__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  outline: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.toast__icon mat-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+.toast__content {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toast__title {
+  font: var(--mat-sys-title-small);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toast__detail {
+  font: var(--mat-sys-body-small);
+  opacity: 0.85;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -1,0 +1,123 @@
+<div class="dialog-container">
+  <div class="dialog-header">
+    <h2>
+      <mat-icon>receipt_long</mat-icon>
+      Detalle de la Orden
+    </h2>
+    <button mat-icon-button (click)="cerrar()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content">
+    <!-- Información del servicio -->
+    <div class="info-servicio">
+      <div class="info-item">
+        <mat-icon>dining</mat-icon>
+        <div>
+          <span class="label">Tipo de servicio</span>
+          <span class="value">{{ getTipoServicioTexto() }}</span>
+        </div>
+      </div>
+      @if (data.tipoServicio === 'mesa' && data.numeroMesa) {
+        <div class="info-item">
+          <mat-icon>tag</mat-icon>
+          <div>
+            <span class="label">Número de mesa</span>
+            <span class="value">{{ data.numeroMesa }}</span>
+          </div>
+        </div>
+      }
+      @if (data.tipoServicio === 'domicilio' && data.datosCliente) {
+        <div class="info-item">
+          <mat-icon>person</mat-icon>
+          <div>
+            <span class="label">Cliente / Dirección</span>
+            <span class="value">{{ data.datosCliente }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Lista de productos -->
+    <div class="productos-lista">
+      <h3>Productos ({{ data.carrito.length }})</h3>
+      
+      @for (item of data.carrito; track $index) {
+        <div class="producto-item">
+          <!-- Header del producto -->
+          <div class="producto-header">
+            <div class="producto-imagen">
+              @if (item.producto.imagen_url) {
+                <img [src]="item.producto.imagen_url" [alt]="item.producto.nombre">
+              } @else {
+                <div class="imagen-placeholder">
+                  <mat-icon>restaurant</mat-icon>
+                </div>
+              }
+            </div>
+            <div class="producto-info">
+              <h4>{{ item.producto.nombre }}</h4>
+              <div class="producto-precio">
+                <span class="cantidad">x{{ item.cantidad }}</span>
+                <span class="precio">${{ obtenerPrecioConDescuento(item.producto) | number:'1.2-2' }}</span>
+              </div>
+            </div>
+            <div class="producto-subtotal">
+              ${{ calcularSubtotalItem(item) | number:'1.2-2' }}
+            </div>
+          </div>
+
+          <!-- Adicionales/Complementos -->
+          @if (item.selections && item.selections.length > 0) {
+            <div class="adicionales-container">
+              <span class="adicionales-titulo">
+                <mat-icon inline>add_circle</mat-icon>
+                Adicionales:
+              </span>
+              @for (selection of item.selections; track $index) {
+                <div class="adicional-item">
+                  <span class="adicional-nombre">{{ selection.groupTitle }}: {{ selection.extra }}</span>
+                  @if ((selection['precio-extra'] || selection.precio) && (selection['precio-extra'] || selection.precio)! > 0) {
+                    <span class="adicional-precio">+${{ (selection['precio-extra'] || selection.precio) | number:'1.2-2' }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Nota -->
+          @if (item.nota && item.nota.trim()) {
+            <div class="nota-container">
+              <mat-icon inline>note</mat-icon>
+              <span class="nota-texto">{{ item.nota }}</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <!-- Totales -->
+    <div class="totales-container">
+      <div class="total-linea">
+        <span>Subtotal:</span>
+        <span>${{ data.subtotal | number:'1.2-2' }}</span>
+      </div>
+      <div class="total-linea total-final">
+        <span>TOTAL:</span>
+        <span>${{ data.total | number:'1.2-2' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog-actions">
+    <button mat-raised-button color="primary" (click)="cerrar()">
+      <mat-icon>check</mat-icon>
+      Cerrar
+    </button>
+  </div>
+</div>

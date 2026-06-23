@@ -1,0 +1,37 @@
+<div class="confirmDialog" [class.kind-pago]="data.kind === 'pago'" [class.kind-envio]="data.kind === 'envio'" [class.kind-cancelar]="data.kind === 'cancelar'">
+  <div class="confirmDialog__header">
+    <div class="confirmDialog__badge" aria-hidden="true">
+      <mat-icon>{{ data.icon }}</mat-icon>
+    </div>
+
+    <div class="confirmDialog__titles">
+      <div class="confirmDialog__title">{{ data.title }}</div>
+      @if (data.meta) {
+        <div class="confirmDialog__meta">{{ data.meta }}</div>
+      }
+    </div>
+
+    <button class="confirmDialog__close" mat-icon-button type="button" (click)="cancel()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="confirmDialog__body">
+    <div class="confirmDialog__message">{{ data.message }}</div>
+    @if (data.hint) {
+      <div class="confirmDialog__hint">
+        <mat-icon class="confirmDialog__hint-icon">info</mat-icon>
+        {{ data.hint }}
+      </div>
+    }
+  </div>
+
+  <div class="confirmDialog__footer">
+    <button mat-stroked-button type="button" (click)="cancel()">{{ data.cancelText }}</button>
+    <button mat-raised-button color="primary" type="button"
+            [class.btn-confirmar--cancelar]="data.kind === 'cancelar'"
+            [class.btn-confirmar--pago]="data.kind === 'pago'"
+            [class.btn-confirmar--envio]="data.kind === 'envio'"
+            (click)="confirm()">{{ data.confirmText }}</button>
+  </div>
+</div>

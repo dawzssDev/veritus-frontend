@@ -1,0 +1,296 @@
+$verde:  #1C8C40;
+$negro:  #1A1A11;
+$fondo:  #fafaf8;
+$borde:  #e5e3df;
+$stone:  #f5f4f1;
+
+// ── Contenedor raíz ────────────────────────────────────
+.form-page {
+  min-height: 100vh;
+  background: $fondo;
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Topbar sticky ──────────────────────────────────────
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid $borde;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 24px;
+  min-height: 60px;
+
+  .topbar-title {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 700;
+    color: $negro;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .btn-volver {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #555;
+    border: 1px solid $borde;
+    border-radius: 8px;
+    height: 38px;
+    padding: 0 14px;
+    font-size: 14px;
+    flex-shrink: 0;
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  }
+
+  .btn-guardar {
+    background: $negro !important;
+    color: #fff !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 38px;
+    border-radius: 8px;
+    padding: 0 20px;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  }
+
+  .spinner-btn { display: inline-block; }
+}
+
+// ── Loading ────────────────────────────────────────────
+.loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 80px 24px;
+  color: #888;
+  font-size: 14px;
+}
+
+// ── Layout dos columnas ────────────────────────────────
+.form-body {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  align-items: flex-start;
+
+  .col-left  { flex: 1;   min-width: 0; }
+  .col-right { flex: 1.2; min-width: 0; }
+}
+
+// ── Cards ──────────────────────────────────────────────
+.card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid $borde;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 14px;
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    mat-icon {
+      color: $verde;
+      font-size: 22px;
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: $negro;
+    }
+
+    .btn-add-dir {
+      border-color: $verde;
+      color: $verde;
+      height: 36px;
+      line-height: 36px;
+      font-size: 13px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+
+      mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    }
+  }
+}
+
+.full-field { width: 100%; }
+
+// ── Estado vacío de direcciones ────────────────────────
+.empty-dirs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 36px 16px;
+  color: #bbb;
+  text-align: center;
+
+  mat-icon {
+    font-size: 52px;
+    width: 52px;
+    height: 52px;
+    color: #ddd;
+  }
+
+  p { margin: 0; font-size: 14px; }
+
+  button {
+    border-color: $verde;
+    color: $verde;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  }
+}
+
+// ── Lista de dir-cards ─────────────────────────────────
+.dirs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+// ── Tarjeta de dirección ───────────────────────────────
+.dir-card {
+  border: 1px solid $borde;
+  border-left: 3px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: border-left-color 0.2s, background 0.2s;
+
+  &.es-pred {
+    border-left-color: $verde;
+    background: rgba($verde, 0.025);
+  }
+
+  .dir-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+
+    .dir-numero {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 14px;
+      color: $negro;
+
+      mat-icon {
+        color: $verde;
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+
+      .badge-pred {
+        font-size: 11px;
+        font-weight: 600;
+        background: rgba($verde, 0.12);
+        color: $verde;
+        padding: 2px 8px;
+        border-radius: 10px;
+      }
+    }
+
+    .dir-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+
+      .btn-del-dir {
+        color: #ccc;
+        width: 32px;
+        height: 32px;
+
+        mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+        &:hover { color: #e53935; }
+      }
+    }
+  }
+}
+
+// ── Grid de campos de dirección ────────────────────────
+.dir-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 12px;
+
+  mat-form-field { width: 100%; }
+
+  .full-ref {
+    grid-column: 1 / -1;
+  }
+}
+
+// ── Responsive ─────────────────────────────────────────
+@media (max-width: 900px) {
+  .form-body {
+    flex-direction: column;
+    padding: 16px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar {
+    padding: 8px 14px;
+
+    .topbar-title { font-size: 15px; }
+
+    .btn-volver span { display: none; }
+
+    .btn-guardar {
+      padding: 0 14px;
+      font-size: 13px;
+    }
+  }
+
+  .card { padding: 16px; }
+
+  .dir-fields {
+    grid-template-columns: 1fr;
+
+    .full-ref { grid-column: 1; }
+  }
+}

@@ -1,0 +1,51 @@
+// Design Tokens para Sistema POS - Pedidos
+:root {
+  // Colores por tipo de pedido
+  --color-pedido-local: #4F46E5;       // Índigo - Comer aquí
+  --color-pedido-domicilio: #EA580C;   // Naranja - Domicilio
+  --color-pedido-llevar: #0D9488;      // Teal - Para llevar
+  
+  // Colores de estado
+  --color-estado-proceso: #2563EB;     // Azul - En proceso
+  --color-estado-pago: #D97706;        // Ámbar - Pago pendiente
+  --color-estado-servir: #16A34A;      // Verde - Pendiente servir
+  --color-estado-cancelado: #DC2626;   // Rojo - Cancelado
+  --color-estado-finalizado: #059669;  // Verde oscuro - Finalizado
+  
+  // Sistema de temporizador progresivo
+  --timer-seguro: #16A34A;             // 0-10 min - Verde
+  --timer-advertencia: #CA8A04;        // 10-20 min - Amarillo
+  --timer-peligro: #DC2626;            // 20+ min - Rojo
+  --color-urgente: #DC2626;
+  
+  // Estructura de tarjetas
+  --card-radius: 12px;
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --card-border-width: 4px;
+  
+  // Tipografía optimizada para cocina (lectura a distancia)
+  --font-size-folio: 28px;
+  --font-size-item: 16px;
+  --font-size-item-quantity: 20px;
+  --font-size-timer: 18px;
+  --font-size-badge: 14px;
+  --font-weight-folio: 900;
+  --font-weight-item: 600;
+  
+  // Espaciado
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  
+  // Colores de notas
+  --notes-bg: #FEF9C3;
+  --notes-border: #F59E0B;
+  --notes-text: #92400E;
+  
+  // Modificadores/Toppings
+  --topping-bg: #7C3AED;
+  --topping-text: #FFFFFF;
+}

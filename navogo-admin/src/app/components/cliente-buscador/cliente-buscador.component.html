@@ -1,0 +1,160 @@
+@if (!clienteActivo()) {
+  <!-- Campo de búsqueda -->
+  <div class="buscador-wrapper">
+    <mat-form-field appearance="outline" class="buscador-field">
+      <mat-label>Buscar cliente</mat-label>
+      <mat-icon matPrefix>person_search</mat-icon>
+      <input
+        matInput
+        [value]="termino()"
+        (input)="onInput($any($event.target).value)"
+        (focus)="termino().length >= 2 && mostrarDropdown.set(true)"
+        placeholder="Nombre o teléfono..."
+        autocomplete="off">
+      @if (buscando()) {
+        <mat-spinner matSuffix diameter="20"></mat-spinner>
+      }
+    </mat-form-field>
+
+    <!-- Dropdown de resultados -->
+    @if (mostrarDropdown()) {
+      <div class="resultados-dropdown">
+        @if (resultados().length === 0 && !buscando() && termino().length >= 2) {
+          <div class="resultado-item sin-resultados">
+            <mat-icon>search_off</mat-icon>
+            <span>Sin resultados para "{{ termino() }}"</span>
+          </div>
+        }
+
+        @for (cli of resultados(); track cli.id) {
+          <div class="resultado-item" (click)="seleccionar(cli)">
+            <div class="cli-avatar">
+              <mat-icon>person</mat-icon>
+            </div>
+            <div class="cli-info">
+              <span class="cli-nombre">{{ cli.nombre }}</span>
+              <span class="cli-telefono">{{ cli.telefono }}</span>
+              @if (primerAlias(cli)) {
+                <span class="cli-alias">
+                  <mat-icon>location_on</mat-icon>{{ primerAlias(cli) }}
+                </span>
+              }
+            </div>
+            @if (cli.total_pedidos > 0) {
+              <span class="cli-pedidos">{{ cli.total_pedidos }} pedidos</span>
+            }
+          </div>
+        }
+
+        <!-- Opción registrar nuevo -->
+        <div class="resultado-item resultado-nuevo" (click)="abrirNuevoCliente()">
+          <mat-icon>person_add</mat-icon>
+          <span>Registrar nuevo cliente</span>
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  <!-- Cliente seleccionado -->
+  <div class="cliente-chip-wrapper">
+    <div class="cliente-card">
+      <div class="cliente-chip">
+        <div class="cliente-chip__avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+        <div class="chip-info">
+          <span class="chip-nombre">{{ clienteActivo()!.nombre }}</span>
+          <span class="chip-tel">
+            <mat-icon>phone</mat-icon>
+            {{ clienteActivo()!.telefono }}
+          </span>
+        </div>
+        <button
+          mat-icon-button
+          class="chip-clear"
+          matTooltip="Quitar cliente"
+          (click)="limpiar()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      @if (tieneMultiplesDirecciones()) {
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="dir-select-field">
+          <mat-label>Dirección</mat-label>
+          <mat-select
+            [value]="direccionSeleccionada()"
+            (selectionChange)="onDireccionChange($event.value)">
+            @for (dir of clienteActivo()!.direcciones; track dir.id) {
+              <mat-option [value]="dir">
+                {{ dir.alias }} — {{ calleDisplay(dir) }}{{ coloniaDisplay(dir) ? ', ' + coloniaDisplay(dir) : '' }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      }
+
+      @if (direccionActiva(); as dir) {
+        <button
+          type="button"
+          class="dir-compact"
+          [class.dir-compact--open]="dirExpandida()"
+          [attr.aria-expanded]="dirExpandida()"
+          matTooltip="Ver detalle de entrega"
+          (click)="toggleDirDetalle()">
+          <mat-icon class="dir-compact__pin">location_on</mat-icon>
+          <span class="dir-compact__texto">{{ resumenDireccion(dir) }}</span>
+          <mat-icon class="dir-compact__chev">
+            {{ dirExpandida() ? 'expand_less' : 'expand_more' }}
+          </mat-icon>
+        </button>
+
+        @if (dirExpandida()) {
+          <div class="dir-panel">
+            @if (dir.alias?.trim()) {
+              <div class="dir-panel__fila">
+                <span class="dir-panel__label">Alias</span>
+                <span>{{ dir.alias }}</span>
+              </div>
+            }
+            @if (calleDisplay(dir)) {
+              <div class="dir-panel__fila">
+                <span class="dir-panel__label">Calle</span>
+                <span>{{ calleDisplay(dir) }}</span>
+              </div>
+            }
+            @if (coloniaDisplay(dir)) {
+              <div class="dir-panel__fila">
+                <span class="dir-panel__label">Colonia</span>
+                <span>{{ coloniaDisplay(dir) }}</span>
+              </div>
+            }
+            @if (dir.ciudad?.trim()) {
+              <div class="dir-panel__fila">
+                <span class="dir-panel__label">Ciudad</span>
+                <span>{{ dir.ciudad }}</span>
+              </div>
+            }
+            @if (dir.referencia?.trim()) {
+              <div class="dir-panel__fila dir-panel__fila--ref">
+                <span class="dir-panel__label">Referencia</span>
+                <span>{{ dir.referencia }}</span>
+              </div>
+            }
+          </div>
+        }
+      } @else if ((clienteActivo()!.direcciones?.length ?? 0) === 0) {
+        <div class="dir-sin-registro">
+          <mat-icon>location_off</mat-icon>
+          <span>Sin dirección</span>
+          <button
+            type="button"
+            class="btn-capturar-dir-mini"
+            matTooltip="Capturar dirección"
+            (click)="solicitaCapturarDireccion.emit(); $event.stopPropagation()">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}

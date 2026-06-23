@@ -1,0 +1,28 @@
+<!-- Si el usuario está autenticado: mostrar sidebar + header + content -->
+@if (authService.isAuthenticated()) {
+  <div class="app-container">
+    <!-- Overlay oscuro cuando sidebar está abierto en móvil -->
+    @if (sidebarAbierto) {
+      <div class="sidebar-overlay"
+           (click)="toggleSidebar()">
+      </div>
+    }
+    
+    <!-- Sidebar izquierdo -->
+    <app-sidebar [class.sidebar-abierto]="sidebarAbierto"></app-sidebar>
+
+    <!-- Área principal (header + content) -->
+    <div class="main-wrapper">
+      <!-- Header superior fijo (incluye banner de trial integrado) -->
+      <app-header></app-header>
+
+      <!-- Contenido principal -->
+      <main class="main-content">
+        <router-outlet />
+      </main>
+    </div>
+  </div>
+} @else {
+  <!-- Si NO está autenticado: mostrar solo router-outlet (login pantalla completa) -->
+  <router-outlet />
+}

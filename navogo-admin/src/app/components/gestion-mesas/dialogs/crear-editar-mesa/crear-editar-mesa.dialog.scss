@@ -1,0 +1,171 @@
+.dialog-container {
+  min-width: 400px;
+  max-width: 500px;
+
+  h2 {
+    margin: 0;
+    padding: 20px 24px;
+    font-size: 20px;
+    font-weight: 500;
+  }
+}
+
+mat-dialog-content {
+  padding: 0 24px 20px;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.mesa-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .full-width {
+    width: 100%;
+  }
+
+  mat-form-field {
+    mat-icon[matPrefix] {
+      margin-right: 8px;
+      color: rgba(0, 0, 0, 0.54);
+    }
+  }
+}
+
+.capacidad-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0;
+
+  .capacidad-label {
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;
+  }
+
+  .capacidad-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 0;
+
+    .capacidad-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      justify-content: center;
+      background: #f5f5f5;
+      padding: 12px 24px;
+      border-radius: 8px;
+
+      mat-icon {
+        color: rgba(0, 0, 0, 0.54);
+      }
+
+      .capacidad-numero {
+        font-size: 24px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.87);
+        min-width: 40px;
+        text-align: center;
+      }
+    }
+  }
+
+  .error-message {
+    color: #f44336;
+    font-size: 12px;
+    margin-top: 4px;
+    padding-left: 4px;
+  }
+}
+
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #ffebee;
+  border-left: 4px solid #f44336;
+  border-radius: 4px;
+  margin-top: 8px;
+
+  mat-icon {
+    color: #f44336;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  span {
+    color: #c62828;
+    font-size: 14px;
+    flex: 1;
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+  margin: 0;
+
+  button {
+    min-width: 100px;
+    position: relative;
+
+    .button-spinner {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+
+      ::ng-deep circle {
+        stroke: white;
+      }
+    }
+
+    span {
+      margin-left: 0;
+    }
+
+    &:has(.button-spinner) span {
+      margin-left: 28px;
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 600px) {
+  .dialog-container {
+    min-width: 280px;
+  }
+
+  mat-dialog-content {
+    padding: 0 16px 16px;
+  }
+
+  mat-dialog-actions {
+    padding: 12px 16px;
+    
+    button {
+      min-width: 80px;
+    }
+  }
+
+  .capacidad-container {
+    .capacidad-controls {
+      .capacidad-display {
+        padding: 8px 16px;
+
+        .capacidad-numero {
+          font-size: 20px;
+          min-width: 30px;
+        }
+      }
+    }
+  }
+}

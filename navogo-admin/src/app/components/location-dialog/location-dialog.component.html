@@ -1,0 +1,71 @@
+<div
+  class="modal-overlay"
+  [class.is-open]="open"
+  [attr.aria-hidden]="!open"
+  [style.opacity]="open ? 1 : 0"
+  [style.visibility]="open ? 'visible' : 'hidden'"
+  [style.pointer-events]="open ? 'auto' : 'none'"
+  (click)="onOverlayClick()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="ubicacion-title">
+  <div
+    #dialog
+    class="modal-content location-modal"
+    (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="ubicacion-title">Ubicación</h2>
+      <button
+        #closeButton
+        class="modal-close"
+        type="button"
+        (click)="close()"
+        aria-label="Cerrar modal de ubicación">
+        <span aria-hidden="true">✕</span>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="map-shell" *ngIf="mapUrl; else noMap">
+        <iframe
+          class="map-iframe"
+          [src]="mapUrl"
+          title="Mapa de Google Maps"
+          loading="eager"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+
+      <ng-template #noMap>
+        <div class="map-empty">
+          <div class="map-empty-title">No se pudo mostrar el mapa aquí</div>
+          <div class="map-empty-text">
+            <div class="mini-loader" *ngIf="isResolvingShortUrl" aria-label="Cargando"></div>
+            <span *ngIf="!isResolvingShortUrl">
+              {{ embedWarning || 'No hay datos suficientes para mostrar el mapa.' }}
+            </span>
+          </div>
+          <button
+            *ngIf="externalMapUrl"
+            class="btn-open-maps"
+            type="button"
+            (click)="openExternalMap()"
+            aria-label="Abrir ubicación en Google Maps">
+            Abrir en Google Maps
+          </button>
+        </div>
+      </ng-template>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        *ngIf="externalMapUrl"
+        class="btn-open-maps-secondary"
+        type="button"
+        (click)="openExternalMap()"
+        aria-label="Abrir ubicación en Google Maps">
+        Cómo llegar
+      </button>
+    </div>
+  </div>
+</div>

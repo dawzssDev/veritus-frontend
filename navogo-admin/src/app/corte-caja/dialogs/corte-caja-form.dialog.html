@@ -1,0 +1,157 @@
+<div mat-dialog-title class="dialog-title">
+  <div class="dialog-title__info">
+    <mat-icon color="primary">point_of_sale</mat-icon>
+    <span>{{ data.tipo === 'manana' ? 'Corte Mañana'
+             : data.tipo === 'tarde' ? 'Corte Tarde'
+             : 'Corte Diario' }}</span>
+  </div>
+  <button mat-icon-button mat-dialog-close [disabled]="guardando()">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-divider></mat-divider>
+
+<mat-dialog-content class="dialog-body">
+
+  <!-- Resumen de ventas del período -->
+  @if (data.preview) {
+    <div class="resumen-preview">
+      <p class="resumen-preview__titulo">Resumen del período</p>
+      <div class="resumen-grid">
+        <div class="resumen-item">
+          <span class="resumen-label">Órdenes</span>
+          <span class="resumen-valor">
+            {{ data.preview.total_ordenes }}
+          </span>
+        </div>
+        <div class="resumen-item">
+          <span class="resumen-label">Total ventas</span>
+          <span class="resumen-valor resumen-valor--grande">
+            ${{ data.preview.total_ventas | number:'1.2-2' }}
+          </span>
+        </div>
+        <div class="resumen-item">
+          <span class="resumen-label">Efectivo</span>
+          <span class="resumen-valor">
+            ${{ data.preview.total_efectivo | number:'1.2-2' }}
+          </span>
+        </div>
+        <div class="resumen-item">
+          <span class="resumen-label">Tarjeta</span>
+          <span class="resumen-valor">
+            ${{ data.preview.total_tarjeta | number:'1.2-2' }}
+          </span>
+        </div>
+        <div class="resumen-item">
+          <span class="resumen-label">Transferencia</span>
+          <span class="resumen-valor">
+            ${{ data.preview.total_transferencia | number:'1.2-2' }}
+          </span>
+        </div>
+        <div class="resumen-item">
+          <span class="resumen-label">Propinas</span>
+          <span class="resumen-valor">
+            ${{ data.preview.total_propinas | number:'1.2-2' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <mat-divider></mat-divider>
+
+  <!-- Formulario de arqueo -->
+  <form [formGroup]="form" class="arqueo-form">
+
+    <p class="form-subtitulo">Arqueo de efectivo</p>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Fondo inicial en caja</mat-label>
+      <span matPrefix>$&nbsp;</span>
+      <input matInput type="number" formControlName="fondo_inicial"
+             min="0" step="0.01" />
+      <mat-hint>Dinero con el que inició el turno</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Efectivo contado en caja</mat-label>
+      <span matPrefix>$&nbsp;</span>
+      <input matInput type="number" formControlName="efectivo_contado"
+             min="0" step="0.01"
+             placeholder="Cuéntalo físicamente" />
+      <mat-hint>Deja vacío si no harás arqueo</mat-hint>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Retiro de efectivo</mat-label>
+      <span matPrefix>$&nbsp;</span>
+      <input matInput type="number" formControlName="retiro_efectivo"
+             min="0" step="0.01" />
+      <mat-hint>Dinero retirado durante el turno</mat-hint>
+    </mat-form-field>
+
+    <!-- Cálculo de diferencia en tiempo real -->
+    @if (diferencia !== null) {
+      <div class="diferencia-card"
+           [class.diferencia-card--sobrante]="diferencia > 0"
+           [class.diferencia-card--faltante]="diferencia < 0"
+           [class.diferencia-card--cuadrado]="diferencia === 0">
+        <mat-icon>
+          {{ diferencia > 0 ? 'arrow_upward'
+             : diferencia < 0 ? 'arrow_downward'
+             : 'check_circle' }}
+        </mat-icon>
+        <div>
+          <p class="diferencia-label">
+            {{ diferencia > 0 ? 'Sobrante en caja'
+               : diferencia < 0 ? 'Faltante en caja'
+               : 'Caja cuadrada ✓' }}
+          </p>
+          <p class="diferencia-monto">
+            ${{ diferencia | number:'1.2-2' }}
+          </p>
+        </div>
+      </div>
+    }
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Notas del corte (opcional)</mat-label>
+      <textarea matInput formControlName="notas"
+                rows="2"
+                placeholder="Observaciones, incidencias...">
+      </textarea>
+    </mat-form-field>
+
+    @if (error()) {
+      <div class="form-error">
+        <mat-icon>warning</mat-icon>
+        {{ error() }}
+      </div>
+    }
+
+  </form>
+
+</mat-dialog-content>
+
+<mat-divider></mat-divider>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="guardando()">
+    Cancelar
+  </button>
+  <button mat-flat-button
+          color="primary"
+          [disabled]="form.invalid || guardando()"
+          (click)="cerrar()">
+    @if (guardando()) {
+      <span class="spinner-btn"></span>
+      Cerrando corte...
+    } @else {
+      <ng-container>
+        <mat-icon>point_of_sale</mat-icon>
+        Cerrar corte
+      </ng-container>
+    }
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,157 @@
+.sucursales-page {
+  padding: 24px;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  h1 { margin: 0 0 4px; }
+  p  { margin: 0; }
+}
+
+.text-secondary { color: var(--mat-sys-on-surface-variant); }
+
+.estado-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  gap: 12px;
+  text-align: center;
+
+  .vacio-icon {
+    font-size: 56px;
+    width: 56px;
+    height: 56px;
+    color: var(--mat-sys-on-surface-variant);
+    opacity: 0.4;
+  }
+
+  p { margin: 0; }
+}
+
+.sucursales-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sucursal-card {
+  transition: box-shadow 0.2s;
+  &:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1) !important; }
+  &--inactiva { opacity: 0.65; }
+}
+
+.sucursal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+
+  &__info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+}
+
+.sucursal-icono {
+  color: #1C8C40;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
+.sucursal-nombre {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--color-text-primary);
+}
+
+.sucursal-acciones {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.chip-activa {
+  font-size: 11px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  background: #EAF3DE !important;
+  color: #3B6D11 !important;
+}
+
+.chip-inactiva {
+  font-size: 11px !important;
+  height: 20px !important;
+  min-height: 20px !important;
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+}
+
+.sucursal-detalles {
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.detalle-fila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.detalle-icono {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #1C8C40;
+}
+
+.btn-usuarios {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* ============================================= */
+/* RESPONSIVE — TABLET Y MÓVIL */
+/* ============================================= */
+
+@media (max-width: 768px) {
+  .sucursales-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .sucursales-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .page-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+
+    button { width: 100%; }
+  }
+}

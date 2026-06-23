@@ -1,0 +1,98 @@
+// Estilos específicos del dialog de datos fiscales
+
+::ng-deep .dawrz-dialog .mdc-dialog__surface {
+  border-radius: 16px !important;
+}
+
+.dialog-container {
+  min-width: 0;
+}
+
+.dialog-body {
+  padding: 16px 24px !important;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #E6F1FB;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: #185FA5;
+    line-height: 1.5;
+  }
+}
+
+.fiscal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// Fila de 2 columnas
+.campo-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+
+  @media (max-width: 500px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// CP más angosto en su fila
+.campo-row .campo-cp {
+  max-width: 140px;
+
+  @media (max-width: 500px) {
+    max-width: 100%;
+  }
+}
+
+// Campo ancho completo
+.campo-full {
+  width: 100%;
+}
+
+// Todos los mat-form-field ocupan el ancho de su celda
+mat-form-field {
+  width: 100%;
+}
+
+.error-guardado {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(220,38,38,0.06);
+  border: 1px solid rgba(220,38,38,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #dc2626;
+}
+
+// Spinner pequeño en botón
+.btn-spinner-small {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+

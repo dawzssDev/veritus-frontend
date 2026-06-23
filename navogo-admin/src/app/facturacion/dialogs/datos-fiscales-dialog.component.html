@@ -1,0 +1,182 @@
+<div class="dialog-container">
+  <div mat-dialog-title class="dialog-title">
+    <div class="dialog-title-info">
+      <mat-icon color="primary">business</mat-icon>
+      <span>Datos Fiscales</span>
+    </div>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <mat-dialog-content class="dialog-body">
+
+    <!-- Aviso informativo -->
+    <div class="info-banner">
+      <mat-icon style="font-size:16px;width:16px;height:16px;
+                       color:#185FA5;flex-shrink:0">
+        info
+      </mat-icon>
+      <p class="mat-body-2">
+        Completa tus datos fiscales para recibir facturas electrónicas.
+        Puedes actualizar esta información en cualquier momento.
+      </p>
+    </div>
+
+    <form [formGroup]="form" class="fiscal-form">
+
+      <!-- Fila 1: Razón social (ancho completo) -->
+      <mat-form-field appearance="outline"
+                      subscriptSizing="dynamic"
+                      class="campo-full">
+        <mat-label>Razón Social *</mat-label>
+        <input matInput formControlName="razon_social"
+               placeholder="ej. Restaurantes El Buen Sabor S.A. de C.V." />
+        @if (form.get('razon_social')?.hasError('required')
+             && form.get('razon_social')?.touched) {
+          <mat-error>La razón social es requerida</mat-error>
+        }
+      </mat-form-field>
+
+      <!-- Fila 2: RFC + Email fiscal -->
+      <div class="campo-row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>RFC *</mat-label>
+          <input matInput formControlName="rfc"
+                 placeholder="ej. RBS920315AB3"
+                 style="text-transform:uppercase" />
+          @if (form.get('rfc')?.hasError('required')
+               && form.get('rfc')?.touched) {
+            <mat-error>El RFC es requerido</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Email fiscal</mat-label>
+          <input matInput type="email" formControlName="email_fiscal"
+                 placeholder="facturacion@tunegocio.com" />
+        </mat-form-field>
+      </div>
+
+      <!-- Fila 3: Régimen fiscal (ancho completo) -->
+      <mat-form-field appearance="outline"
+                      subscriptSizing="dynamic"
+                      class="campo-full">
+        <mat-label>Régimen Fiscal</mat-label>
+        <mat-select formControlName="regimen_fiscal">
+          <mat-option value="">Sin especificar</mat-option>
+          <mat-option value="601 - General de Ley Personas Morales">
+            601 - General de Ley Personas Morales
+          </mat-option>
+          <mat-option value="612 - Personas Físicas con Actividades Empresariales">
+            612 - Personas Físicas con Actividades Empresariales
+          </mat-option>
+          <mat-option value="626 - Régimen Simplificado de Confianza">
+            626 - RESICO
+          </mat-option>
+          <mat-option value="621 - Incorporación Fiscal">
+            621 - Incorporación Fiscal
+          </mat-option>
+          <mat-option value="605 - Sueldos y Salarios">
+            605 - Sueldos y Salarios
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Fila 4: Uso del CFDI (ancho completo) -->
+      <mat-form-field appearance="outline"
+                      subscriptSizing="dynamic"
+                      class="campo-full">
+        <mat-label>Uso del CFDI</mat-label>
+        <mat-select formControlName="uso_cfdi">
+          <mat-option value="">Sin especificar</mat-option>
+          <mat-option value="G03 - Gastos en general">
+            G03 - Gastos en general
+          </mat-option>
+          <mat-option value="G01 - Adquisición de mercancias">
+            G01 - Adquisición de mercancias
+          </mat-option>
+          <mat-option value="I04 - Equipo de computo y accesorios">
+            I04 - Equipo de computo y accesorios
+          </mat-option>
+          <mat-option value="S01 - Sin efectos fiscales">
+            S01 - Sin efectos fiscales
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Fila 5: Calle (ancho completo) -->
+      <mat-form-field appearance="outline"
+                      subscriptSizing="dynamic"
+                      class="campo-full">
+        <mat-label>Calle y número</mat-label>
+        <input matInput formControlName="calle"
+               placeholder="ej. Av. Insurgentes Sur 1234" />
+      </mat-form-field>
+
+      <!-- Fila 6: Colonia + CP -->
+      <div class="campo-row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Colonia</mat-label>
+          <input matInput formControlName="colonia"
+                 placeholder="ej. Del Valle" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline"
+                        subscriptSizing="dynamic"
+                        class="campo-cp">
+          <mat-label>Código Postal</mat-label>
+          <input matInput formControlName="cp"
+                 placeholder="ej. 03100" maxlength="5" />
+        </mat-form-field>
+      </div>
+
+      <!-- Fila 7: Municipio + Estado -->
+      <div class="campo-row">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Municipio / Alcaldía</mat-label>
+          <input matInput formControlName="municipio"
+                 placeholder="ej. Benito Juárez" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Estado</mat-label>
+          <input matInput formControlName="estado"
+                 placeholder="ej. Ciudad de México" />
+        </mat-form-field>
+      </div>
+
+      <!-- Error global -->
+      @if (errorGuardado()) {
+        <div class="error-guardado">
+          <mat-icon style="font-size:14px;width:14px;height:14px;
+                           flex-shrink:0">warning</mat-icon>
+          {{ errorGuardado() }}
+        </div>
+      }
+
+    </form>
+
+  </mat-dialog-content>
+
+  <mat-divider></mat-divider>
+
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close [disabled]="guardando()">
+      Cancelar
+    </button>
+    <button mat-flat-button
+            color="primary"
+            [disabled]="form.invalid || guardando()"
+            (click)="guardar()">
+      @if (guardando()) {
+        <span class="btn-spinner-small"></span>
+        Guardando...
+      } @else {
+        Guardar datos fiscales
+      }
+    </button>
+  </mat-dialog-actions>
+</div>

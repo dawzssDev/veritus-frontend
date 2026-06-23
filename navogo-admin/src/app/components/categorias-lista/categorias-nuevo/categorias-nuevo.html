@@ -1,0 +1,73 @@
+<div class="page">
+  
+  <!-- Overlay de carga inicial -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <div class="loading-content">
+      <div class="spinner-container">
+        <mat-spinner diameter="60"></mat-spinner>
+        <div class="spinner-logo">
+          <mat-icon>category</mat-icon>
+        </div>
+      </div>
+      <h3 class="loading-title">Cargando categoría</h3>
+      <p class="loading-subtitle">Obteniendo información...</p>
+    </div>
+  </div>
+
+  <div class="page-header">
+    <div class="page-title">
+      <button mat-icon-button type="button" (click)="cancel()" aria-label="Volver" class="btn-back">
+        <mat-icon aria-hidden="true">arrow_back</mat-icon>
+      </button>
+      <div class="page-title-text">
+        <div class="page-title-main">{{ title }}</div>
+        <div class="page-title-sub">{{ pageSubtitle }}</div>
+      </div>
+    </div>
+  </div>
+    <form [formGroup]="form" (ngSubmit)="submitType()" class="form-container">
+      <mat-card class="section-card">
+        <div class="section-header">
+          <mat-icon>category</mat-icon>
+          <h3>Información de la categoría</h3>
+        </div>
+
+        <div class="form-grid-full">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nombre</mat-label>
+            <input matInput formControlName="nombre" placeholder="Ej: Bebidas" />
+            <mat-icon matPrefix>title</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="form-grid-full">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Descripción</mat-label>
+            <textarea
+              matInput
+              formControlName="descripcion"
+              placeholder="Describe brevemente qué productos incluye esta categoría"
+              rows="3"
+            ></textarea>
+            <mat-icon matPrefix>description</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <div class="form-grid-full">
+          <div class="toggle-wrap">
+            <mat-slide-toggle formControlName="estatus">Activo</mat-slide-toggle>
+            <div class="toggle-hint">Si está inactiva, la categoría no se mostrará en el menú.</div>
+          </div>
+        </div>
+      </mat-card>
+
+      <div class="acciones-container">
+        <button mat-stroked-button type="button" (click)="cancel()" class="btn-secondary" [disabled]="isSaving">Regresar</button>
+        <button mat-raised-button color="primary" type="submit" class="btn-primary" [disabled]="isSaving || !form.valid">
+          <mat-icon *ngIf="!isSaving">{{ id > 0 ? 'save' : 'add' }}</mat-icon>
+          <mat-spinner *ngIf="isSaving" diameter="20" class="btn-spinner"></mat-spinner>
+          {{ isSaving ? 'Guardando...' : nameButton }}
+        </button>
+      </div>
+    </form>
+  </div>

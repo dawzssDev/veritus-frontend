@@ -1,0 +1,383 @@
+// ── Tokens
+$verde:        #1C8C40;
+$verde-oscuro: #0F4D2A;
+$negro:        #1A1A11;
+$gris:         #6b7280;
+$borde:        #e5e7eb;
+$error:        #dc2626;
+
+// Pasteles sofisticados
+$sage:         #f0f4f0;
+$cream:        #fafaf8;
+$stone:        #f5f5f3;
+
+// ── Reset
+.login-page {
+  display: flex;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  background: $cream;
+  font-family: -apple-system, 'SF Pro Text',
+               'Inter', 'Helvetica Neue', sans-serif;
+  overflow: hidden;
+
+  // Forzar GPU rendering en iOS — evita el bug de contenido invisible
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+}
+
+// ══════════════════════
+// PANEL IZQUIERDO
+// ══════════════════════
+.login-left {
+  display: none;
+
+  @media (min-width: 1024px) {
+    display: flex;
+    width: 44%;
+    background: $verde-oscuro;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  &__inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    padding: 48px;
+    width: 100%;
+    justify-content: space-between;
+    min-height: 100vh;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+  }
+
+  &__logo-img {
+    height: 72px;
+    max-width: 220px;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+  }
+
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 0;
+  }
+
+  &__titulo {
+    font-size: 48px;
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin: 0 0 20px;
+
+    @media (min-width: 1280px) {
+      font-size: 56px;
+    }
+  }
+
+  &__sub {
+    font-size: 18px;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.7;
+    margin: 0;
+    max-width: 360px;
+  }
+
+  &__features {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  // Círculos decorativos de fondo
+  &__deco {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    z-index: 1;
+
+    &--1 {
+      width: 500px;
+      height: 500px;
+      top: -120px;
+      right: -180px;
+    }
+
+    &--2 {
+      width: 350px;
+      height: 350px;
+      bottom: -100px;
+      left: -80px;
+      background: rgba(255,255,255,0.03);
+    }
+  }
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: rgba(255,255,255,0.75);
+  font-size: 16px;
+  font-weight: 500;
+
+  &__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.4);
+    flex-shrink: 0;
+  }
+}
+
+// ══════════════════════
+// PANEL DERECHO
+// ══════════════════════
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background: $cream;
+
+  // iOS fix: evitar que el contenido quede fuera del viewport
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+.login-form-wrapper {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  // Centrado que funciona en iOS
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  justify-content: center;
+}
+
+// Logo móvil
+.login-logo-movil {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 36px;
+
+  @media (min-width: 1024px) { display: none; }
+
+  &__icono {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    background: $verde-oscuro;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+  }
+}
+
+// Encabezado del form
+.login-form-header {
+  margin-bottom: 32px;
+
+  @media (min-width: 1024px) { margin-bottom: 36px; }
+}
+
+.login-form-titulo {
+  font-size: 28px;
+  font-weight: 800;
+  color: $negro;
+  letter-spacing: -0.03em;
+  margin: 0 0 6px;
+
+  @media (min-width: 1024px) { font-size: 32px; }
+}
+
+.login-form-sub {
+  font-size: 15px;
+  color: $gris;
+  margin: 0;
+}
+
+// ── Formulario
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.campo-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+  letter-spacing: 0.01em;
+}
+
+.campo-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: $stone;
+  border: 1.5px solid $borde;
+  border-radius: 12px;
+  padding: 0 14px;
+  transition: all 0.15s ease;
+
+  &--focus {
+    border-color: $verde;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(28,140,64,0.08);
+  }
+
+  &--error {
+    border-color: $error;
+    background: #fff5f5;
+    box-shadow: 0 0 0 3px rgba(220,38,38,0.06);
+  }
+}
+
+.campo-icono {
+  width: 17px;
+  height: 17px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.campo-input {
+  flex: 1;
+  height: 48px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: $negro;
+  font-family: inherit;
+
+  &::placeholder { color: #9ca3af; }
+}
+
+.campo-toggle-pass {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: #9ca3af;
+  transition: color 0.15s;
+
+  svg { width: 18px; height: 18px; }
+
+  &:hover { color: $negro; }
+}
+
+.campo-error {
+  font-size: 12px;
+  color: $error;
+  font-weight: 500;
+}
+
+// Error general
+.login-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: $error;
+  font-weight: 500;
+}
+
+// Botón login
+.btn-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  border-radius: 13px;
+  border: none;
+  background: $negro;
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 6px;
+  letter-spacing: 0.01em;
+
+  &:hover:not(:disabled) {
+    background: #2d2d23;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(26,26,17,0.2);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: none;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  &__spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    flex-shrink: 0;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+// Footer
+.login-footer {
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+  margin: 28px 0 0;
+}

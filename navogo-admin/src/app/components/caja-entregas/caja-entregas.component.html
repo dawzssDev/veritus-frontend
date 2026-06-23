@@ -1,0 +1,329 @@
+<div class="caja-shell">
+
+  <!-- TOP BAR -->
+  <header class="caja-topbar">
+    <div class="caja-topbar__izq">
+      <mat-icon class="caja-topbar__icono">
+        storefront
+      </mat-icon>
+      <div>
+        <span class="caja-topbar__titulo">
+          Caja Entregas
+        </span>
+        <span class="caja-topbar__sub">
+          Domicilio y para llevar
+        </span>
+      </div>
+    </div>
+
+    <div class="caja-topbar__der">
+      <div class="refresh-pill"
+           [class.refresh-pill--activo]="refrescando()"
+           (click)="cargar()">
+        <mat-icon [class.girar]="refrescando()">
+          sync
+        </mat-icon>
+        @if (!refrescando()) {
+          <span>{{ segundos() }}s</span>
+        } @else {
+          <span>Actualizando...</span>
+        }
+      </div>
+      <span class="ultima-act">
+        {{ ultimaAct() | date:'HH:mm:ss' }}
+      </span>
+    </div>
+  </header>
+
+  <!-- RESUMEN RÁPIDO -->
+  <div class="caja-resumen">
+    <div class="resumen-stat">
+      <mat-icon>shopping_bag</mat-icon>
+      <div>
+        <span class="resumen-stat__num">
+          {{ totalRecoger() }}
+        </span>
+        <span class="resumen-stat__label">
+          Para llevar
+        </span>
+      </div>
+    </div>
+    <div class="resumen-stat">
+      <mat-icon>delivery_dining</mat-icon>
+      <div>
+        <span class="resumen-stat__num">
+          {{ totalDomicilio() }}
+        </span>
+        <span class="resumen-stat__label">
+          Domicilio
+        </span>
+      </div>
+    </div>
+    <div class="resumen-stat resumen-stat--alerta"
+         [class.resumen-stat--alerta]="pendientesPago() > 0">
+      <mat-icon>payments</mat-icon>
+      <div>
+        <span class="resumen-stat__num">
+          {{ pendientesPago() }}
+        </span>
+        <span class="resumen-stat__label">
+          Pago pendiente
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="caja-filtros">
+    <button class="filtro-btn"
+            [class.filtro-btn--activo]="filtro() === 'todos'"
+            (click)="filtro.set('todos')">
+      <mat-icon>select_all</mat-icon>
+      Todos
+    </button>
+    <button class="filtro-btn"
+            [class.filtro-btn--activo]="filtro() === 'recoger'"
+            (click)="filtro.set('recoger')">
+      <mat-icon>shopping_bag</mat-icon>
+      Para llevar
+    </button>
+    <button class="filtro-btn"
+            [class.filtro-btn--activo]="filtro() === 'domicilio'"
+            (click)="filtro.set('domicilio')">
+      <mat-icon>delivery_dining</mat-icon>
+      Domicilio
+    </button>
+  </div>
+
+  <!-- CONTENIDO -->
+  <main class="caja-main">
+
+    @if (cargando()) {
+      <div class="estado-centro">
+        <mat-spinner diameter="36"></mat-spinner>
+        <span>Cargando...</span>
+      </div>
+    }
+
+    @if (!cargando() && pedidosFiltrados().length === 0) {
+      <div class="estado-centro">
+        <mat-icon>check_circle_outline</mat-icon>
+        <p>Sin pedidos pendientes</p>
+        <span>
+          Aquí aparecen domicilio y para llevar
+          con pago pendiente
+        </span>
+      </div>
+    }
+
+    @if (!cargando() && pedidosFiltrados().length > 0) {
+      <div class="caja-grid">
+        @for (pedido of pedidosFiltrados(); track pedido.id) {
+
+          <article class="pedido-card"
+                   [class.pedido-card--domicilio]="pedido.shipping_type === 'domicilio'"
+                   [class.pedido-card--pagado]="pedido.pago_confirmado">
+
+            <div class="pedido-card__franja"
+                 [class.pedido-card__franja--recoger]="pedido.shipping_type === 'recoger'"
+                 [class.pedido-card__franja--domicilio]="pedido.shipping_type === 'domicilio'">
+            </div>
+
+            <div class="pedido-card__header">
+              <div class="pedido-card__header-izq">
+                <span class="pedido-folio">
+                  #{{ pedido.folio_dia ?? pedido.id }}
+                </span>
+                <div class="tipo-badge"
+                     [class.tipo-badge--domicilio]="pedido.shipping_type === 'domicilio'">
+                  <mat-icon>
+                    {{ pedido.shipping_type === 'domicilio'
+                       ? 'delivery_dining'
+                       : 'shopping_bag' }}
+                  </mat-icon>
+                  {{ pedido.shipping_type === 'domicilio'
+                     ? 'Domicilio'
+                     : 'Para llevar' }}
+                </div>
+                <span class="pedido-timer">
+                  {{ tiempoTranscurrido(pedido.created_at) }}
+                </span>
+              </div>
+
+              <div class="pedido-card__badges">
+                <div class="estado-badge"
+                     [class.estado-badge--ok]="pedido.pago_confirmado"
+                     [class.estado-badge--pending]="!pedido.pago_confirmado">
+                  <mat-icon>
+                    {{ pedido.pago_confirmado
+                       ? 'check_circle'
+                       : 'radio_button_unchecked' }}
+                  </mat-icon>
+                  Pago
+                </div>
+
+                @if (pedido.shipping_type === 'domicilio') {
+                  <div class="estado-badge"
+                       [class.estado-badge--ok]="pedido.envio_confirmado"
+                       [class.estado-badge--pending]="!pedido.envio_confirmado">
+                    <mat-icon>
+                      {{ pedido.envio_confirmado
+                         ? 'check_circle'
+                         : 'radio_button_unchecked' }}
+                    </mat-icon>
+                    Envío
+                  </div>
+                } @else if (pedido.envio_confirmado) {
+                  <div class="estado-badge estado-badge--ok">
+                    <mat-icon>check_circle</mat-icon>
+                    Recogido
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="pedido-card__cliente">
+              <mat-icon>person</mat-icon>
+              <div>
+                <span class="cliente-nombre">
+                  {{ pedido.customer_name }}
+                </span>
+                @if (pedido.customer_phone) {
+                  <span class="cliente-tel">
+                    {{ pedido.customer_phone }}
+                  </span>
+                }
+              </div>
+            </div>
+
+            @if (pedido.shipping_type === 'domicilio'
+                 && formatDir(pedido.delivery_address)) {
+              <div class="pedido-card__dir">
+                <mat-icon>location_on</mat-icon>
+                <span>
+                  {{ formatDir(pedido.delivery_address) }}
+                </span>
+              </div>
+            }
+
+            <div class="pedido-card__pago">
+              <mat-icon>
+                {{ getMetodoPagoIcon(pedido.payment_method) }}
+              </mat-icon>
+              <span>
+                {{ getMetodoPagoLabel(pedido.payment_method) }}
+              </span>
+              <span class="pedido-total">
+                ${{ pedido.total | number:'1.2-2' }}
+              </span>
+            </div>
+
+            <div class="pedido-card__items">
+              @for (item of (pedido.items ?? []).slice(0, 3); track $index) {
+                <span class="item-chip">
+                  {{ item.quantity }}× {{ item.name }}
+                </span>
+              }
+              @if ((pedido.items?.length ?? 0) > 3) {
+                <span class="item-chip item-chip--mas">
+                  +{{ (pedido.items?.length ?? 0) - 3 }} más
+                </span>
+              }
+            </div>
+
+            <div class="pedido-card__acciones">
+
+              @if (!pedido.pago_confirmado) {
+                <button
+                  class="btn-accion btn-accion--pago"
+                  [disabled]="procesando() === pedido.id"
+                  (click)="confirmarPago(pedido)">
+                  @if (procesando() === pedido.id) {
+                    <span class="spinner-btn"></span>
+                  } @else {
+                    <mat-icon>payments</mat-icon>
+                  }
+                  Confirmar pago
+                </button>
+              } @else {
+                <div class="btn-pagado">
+                  <mat-icon>check_circle</mat-icon>
+                  Pagado
+                </div>
+              }
+
+              @if (pedido.shipping_type === 'recoger') {
+                @if (!pedido.envio_confirmado) {
+                  <button
+                    class="btn-accion btn-accion--recogido"
+                    [disabled]="procesando() === pedido.id"
+                    (click)="confirmarRecogido(pedido)">
+                    @if (procesando() === pedido.id) {
+                      <span class="spinner-btn"></span>
+                    } @else {
+                      <mat-icon>shopping_bag</mat-icon>
+                    }
+                    Recogido
+                  </button>
+                } @else {
+                  <div class="btn-pagado btn-pagado--envio">
+                    <mat-icon>check_circle</mat-icon>
+                    Recogido
+                  </div>
+                }
+              }
+
+              @if (pedido.shipping_type === 'domicilio'
+                   && !pedido.envio_confirmado) {
+                <button
+                  class="btn-accion btn-accion--envio"
+                  [disabled]="procesando() === pedido.id"
+                  (click)="confirmarEnvio(pedido)">
+                  @if (procesando() === pedido.id) {
+                    <span class="spinner-btn"></span>
+                  } @else {
+                    <mat-icon>delivery_dining</mat-icon>
+                  }
+                  Confirmar envío
+                </button>
+              } @else if (pedido.shipping_type === 'domicilio'
+                          && pedido.envio_confirmado) {
+                <div class="btn-pagado btn-pagado--envio">
+                  <mat-icon>check_circle</mat-icon>
+                  Enviado
+                </div>
+              }
+
+              <button
+                class="btn-cancelar"
+                type="button"
+                [disabled]="procesando() === pedido.id"
+                [matTooltip]="'Cancelar folio #'
+                  + (pedido.folio_dia ?? pedido.id)"
+                (click)="cancelarPedido(pedido);
+                         $event.stopPropagation()">
+                <mat-icon>close</mat-icon>
+              </button>
+
+              <button
+                class="btn-merma-caja"
+                type="button"
+                [disabled]="procesando() === pedido.id"
+                [matTooltip]="'No recogido / no entregado'"
+                (click)="marcarMerma(pedido);
+                         $event.stopPropagation()">
+                <mat-icon>delete_sweep</mat-icon>
+                Merma
+              </button>
+
+            </div>
+
+          </article>
+
+        }
+      </div>
+    }
+
+  </main>
+
+</div>
