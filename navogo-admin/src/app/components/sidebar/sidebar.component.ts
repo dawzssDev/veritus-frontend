@@ -30,6 +30,8 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent implements OnInit, OnDestroy {
+  private static readonly OVERLAY_BREAKPOINT = 1024;
+
   /** Ruta activa actual */
   activeRoute = signal('');
 
@@ -84,10 +86,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
       roles: [1, 4] // Admin y Cocina
     },
     {
-      id: 'corte-caja',
-      label: 'Corte de Caja',
+      id: 'turno-caja',
+      label: 'Caja',
       icon: 'point_of_sale',
-      route: '/corte-caja',
+      route: '/turno-caja',
       roles: [1, 2] // Admin y Caja
     },
     {
@@ -105,6 +107,20 @@ export class SidebarComponent implements OnInit, OnDestroy {
       roles: [1] // Solo admin
     },
     {
+      id: 'inventario',
+      label: 'Inventario',
+      icon: 'inventory_2',
+      route: '/inventario',
+      roles: [1, 2] // Solo admin
+    },
+    {
+      id: 'gastos',
+      label: 'Gastos',
+      icon: 'payments',
+      route: '/gastos',
+      roles: [1, 2] // Solo admin
+    },
+    {
       id: 'empresas',
       label: 'Empresa',
       icon: 'business',
@@ -112,10 +128,24 @@ export class SidebarComponent implements OnInit, OnDestroy {
       roles: [1] // Solo admin
     },
     {
+      id: 'areas-impresion',
+      label: 'Áreas de impresión',
+      icon: 'print',
+      route: '/areas-impresion',
+      roles: [1]
+    },
+    {
       id: 'facturacion',
+      label: 'Facturación',
+      icon: 'receipt_long',
+      route: '/facturacion',
+      userIds: [1],
+    },
+    {
+      id: 'suscripcion',
       label: 'Suscripción',
       icon: 'receipt',
-      route: '/facturacion',
+      route: '/suscripcion',
       roles: [1] // Solo admin
     },
     {
@@ -193,10 +223,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   /** Items del menú filtrados según el rol del usuario */
   menuItems = computed<MenuItem[]>(() => {
+    this.authService.currentUser();
     const userRoleId = this.authService.getUserRoleId();
+    const userId = this.authService.getUserId();
     if (userRoleId === null) return [];
 
-    return this.filterMenuByRole(this.allMenuItems, userRoleId);
+    return this.filterMenuByRole(this.allMenuItems, userRoleId, userId);
   });
 
   constructor(
@@ -211,6 +243,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe((event: any) => {
         this.activeRoute.set(event.urlAfterRedirects);
+        if (this.sidebarService.isOverlayMode()) {
+          this.sidebarService.closeMobileSidebar();
+        }
       });
   }
 
@@ -239,11 +274,12 @@ export class SidebarComponent implements OnInit, OnDestroy {
    */
   private handleResize(): void {
     if (typeof window !== 'undefined') {
-      // En móvil, siempre cerrar el sidebar al cambiar tamaño
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= SidebarComponent.OVERLAY_BREAKPOINT) {
         this.sidebarService.closeMobileSidebar();
-        // Asegurar que el estado collapsed esté en false
         this.sidebarService.setSidebarState(false);
+      } else {
+        this.sidebarService.closeMobileSidebar();
+        this.updateBodyClass(this.sidebarService.isCollapsed());
       }
     }
   }
@@ -268,7 +304,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.sidebarService.toggleSidebar();
     
     // Solo actualizar body class si no estamos en móvil
-    if (typeof window !== 'undefined' && window.innerWidth > 768) {
+    if (typeof window !== 'undefined'
+        && window.innerWidth > SidebarComponent.OVERLAY_BREAKPOINT) {
       const collapsed = this.sidebarService.isCollapsed();
       this.updateBodyClass(collapsed);
     }
@@ -285,7 +322,8 @@ export class SidebarComponent implements OnInit, OnDestroy {
     if (item.route) {
       this.router.navigate([item.route]);
       // En móvil, cerrar el sidebar después de navegar
-      if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      if (typeof window !== 'undefined'
+          && window.innerWidth <= SidebarComponent.OVERLAY_BREAKPOINT) {
         this.sidebarService.closeMobileSidebar();
       }
     } else if (item.children) {
@@ -361,20 +399,28 @@ export class SidebarComponent implements OnInit, OnDestroy {
    * @param userRoleId - ID del rol del usuario
    * @returns Items filtrados
    */
-  private filterMenuByRole(items: MenuItem[], userRoleId: number): MenuItem[] {
+  private filterMenuByRole(
+    items: MenuItem[],
+    userRoleId: number,
+    userId: number | null
+  ): MenuItem[] {
     return items
       .filter(item => {
-        // Si no tiene roles definidos, mostrar a todos
+        if (item.userIds?.length) {
+          if (userId === null || !item.userIds.includes(userId)) {
+            return false;
+          }
+        }
         if (!item.roles || item.roles.length === 0) return true;
-        // Verificar si el usuario tiene uno de los roles permitidos
         return item.roles.includes(userRoleId);
       })
       .map(item => {
-        // Si tiene hijos, filtrarlos recursivamente
         if (item.children && item.children.length > 0) {
           return {
             ...item,
-            children: this.filterMenuByRole(item.children, userRoleId)
+            children: this.filterMenuByRole(
+              item.children, userRoleId, userId
+            )
           };
         }
         return item;

@@ -7,7 +7,7 @@
   --brand-green: #1c8f46;
   --brand-green-lime: #32ff00;
   --brand-white: #ffffff;
-  
+
   /* Design Tokens para Sistema POS - Pedidos */
   /* Colores por tipo de pedido */
   --color-pedido-local: #4F46E5;
@@ -69,7 +69,8 @@ html, body {
 body { 
   margin: 0; 
   font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: var(--mat-sys-surface);
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
   box-sizing: border-box;
 }
 
@@ -131,16 +132,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--color-bg-surface-2);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: var(--color-border-2);
   border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: var(--color-text-faint);
 }
 
 /* Animación global para contenido */
@@ -183,7 +184,7 @@ router-outlet + * {
 }
 
 .confirmar-pago-dialog-panel .mat-mdc-dialog-surface {
-  background: #fff;
+  background: var(--color-bg-surface);
 }
 
 .confirmar-pago-dialog-panel .mat-mdc-dialog-container {
@@ -206,7 +207,7 @@ router-outlet + * {
 }
 
 .importar-catalogo-dialog-panel .mat-mdc-dialog-surface {
-  background: #fafaf8;
+  background: var(--color-bg-app);
 }
 
 .importar-catalogo-dialog-panel .mdc-dialog__title,
@@ -477,4 +478,399 @@ router-outlet + * {
 
 @media (max-width: 580px) {
   .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════
+   SISTEMA DE TEMAS — VERITUS
+   Toggle: menú de usuario → Tema oscuro
+   El sidebar usa verde oscuro en tema oscuro.
+   ══════════════════════════════════════ */
+
+/* Tema claro (valores actuales de la app) */
+:root {
+  --color-bg-app:        #fafaf8;
+  --color-bg-surface:    #FFFFFF;
+  --color-bg-surface-2:  #F9FAFB;
+  --color-bg-surface-3:  #F3F4F6;
+  --color-border:        #E5E3DF;
+  --color-border-2:      #E5E7EB;
+
+  --color-text-primary:  #1A1A11;
+  --color-text-secondary:#374151;
+  --color-text-muted:    #6B7280;
+  --color-text-faint:    #9CA3AF;
+
+  --color-brand:         #0F4D2A;
+  --color-brand-light:   rgba(15, 77, 42, 0.08);
+  --color-brand-border:  rgba(15, 77, 42, 0.20);
+
+  --color-success:       #16a34a;
+  --color-success-bg:    #f0fdf4;
+  --color-error:         #dc2626;
+  --color-error-bg:      #fef2f2;
+  --color-warning:       #d97706;
+  --color-warning-bg:    #fffbeb;
+
+  --shadow-card: 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-popup: 0 8px 24px rgba(0,0,0,0.12);
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  --notes-bg: #FEF9C3;
+  --notes-border: #F59E0B;
+  --notes-text: #92400E;
+
+  --sidebar-bg: #e8f5e9;
+  --sidebar-border: #c8e6c9;
+  --sidebar-text: #2e7d32;
+  --sidebar-text-muted: #66bb6a;
+  --sidebar-hover: #dcedc8;
+  --sidebar-hover-text: #1b5e20;
+  --sidebar-active-bg: #1b5e20;
+  --sidebar-active-fg: #ffffff;
+  --sidebar-active-hover: #2d2d23;
+  --sidebar-footer-bg: #dcedc8;
+  --sidebar-logo-text: #1b5e20;
+  --sidebar-submenu-active-bg: rgba(26, 26, 17, 0.07);
+  --sidebar-scrollbar-hover: #d5d0c8;
+}
+
+/* Tema oscuro — especificidad alta para ganar a :root */
+html.tema-oscuro:root,
+html.tema-oscuro,
+body.tema-oscuro {
+  --color-bg-app:        #0F1117;
+  --color-bg-surface:    #1A1D27;
+  --color-bg-surface-2:  #21252F;
+  --color-bg-surface-3:  #282C38;
+  --color-border:        #2E3340;
+  --color-border-2:      #363B48;
+
+  --color-text-primary:  #F0EFE9;
+  --color-text-secondary:#C9C8C0;
+  --color-text-muted:    #8B8F9A;
+  --color-text-faint:    #5C6070;
+
+  --color-brand:         #2ECC71;
+  --color-brand-light:   rgba(46, 204, 113, 0.10);
+  --color-brand-border:  rgba(46, 204, 113, 0.25);
+
+  --color-success:       #2ECC71;
+  --color-success-bg:    rgba(46,204,113,0.10);
+  --color-error:         #F87171;
+  --color-error-bg:      rgba(248,113,113,0.10);
+  --color-warning:       #FBBF24;
+  --color-warning-bg:    rgba(251,191,36,0.10);
+
+  --shadow-card: 0 1px 4px rgba(0,0,0,0.30);
+  --shadow-popup: 0 8px 32px rgba(0,0,0,0.50);
+  --card-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.55);
+
+  --notes-bg: #3d3420;
+  --notes-border: #b45309;
+  --notes-text: #fde68a;
+
+  --sidebar-bg: #0F2419;
+  --sidebar-border: #1A4D30;
+  --sidebar-text: #A8D5C0;
+  --sidebar-text-muted: #5DB87A;
+  --sidebar-hover: #163D28;
+  --sidebar-hover-text: #C8E6C9;
+  --sidebar-active-bg: #1B5E20;
+  --sidebar-active-fg: #FFFFFF;
+  --sidebar-active-hover: #2E7D32;
+  --sidebar-footer-bg: #0A1A12;
+  --sidebar-logo-text: #C8E6C9;
+  --sidebar-submenu-active-bg: rgba(255, 255, 255, 0.08);
+  --sidebar-scrollbar-hover: #2A5C40;
+}
+
+/* ── Shell de la app (sin sidebar) ── */
+.app-container,
+.main-wrapper,
+.main-content {
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Levantar orden / POS — forzar superficies del tema */
+html.tema-oscuro .levantar-orden-container,
+html.tema-oscuro .ventas-mostrador-container {
+  background: var(--color-bg-app) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.tema-oscuro .levantar-orden-container .panel-productos,
+html.tema-oscuro .levantar-orden-container .panel-orden,
+html.tema-oscuro .levantar-orden-container .search-bar,
+html.tema-oscuro .levantar-orden-container .categorias-tabs,
+html.tema-oscuro .levantar-orden-container .producto-card,
+html.tema-oscuro .levantar-orden-container .producto-info,
+html.tema-oscuro .levantar-orden-container .seleccion-mesa,
+html.tema-oscuro .levantar-orden-container .orden-footer,
+html.tema-oscuro .levantar-orden-container .orden-item,
+html.tema-oscuro .ventas-mostrador-container .panel-productos,
+html.tema-oscuro .ventas-mostrador-container .panel-orden,
+html.tema-oscuro .ventas-mostrador-container .search-bar,
+html.tema-oscuro .ventas-mostrador-container .categorias-tabs,
+html.tema-oscuro .ventas-mostrador-container .producto-card,
+html.tema-oscuro .ventas-mostrador-container .producto-info,
+html.tema-oscuro .ventas-mostrador-container .tipo-servicio-selector,
+html.tema-oscuro .ventas-mostrador-container .servicio-detalles,
+html.tema-oscuro .ventas-mostrador-container .resumen-totales,
+html.tema-oscuro .ventas-mostrador-container .seccion-pago,
+html.tema-oscuro .ventas-mostrador-container .orden-item {
+  background: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border);
+}
+
+html.tema-oscuro .levantar-orden-container .orden-productos,
+html.tema-oscuro .ventas-mostrador-container .orden-productos {
+  background: var(--color-bg-surface-2) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.tema-oscuro .levantar-orden-container .producto-nombre,
+html.tema-oscuro .ventas-mostrador-container .producto-nombre {
+  color: var(--color-text-primary) !important;
+}
+
+html.tema-oscuro .modal-content.product-modal,
+html.tema-oscuro .product-modal {
+  background: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Header superior */
+app-header .header-wrapper .header,
+app-header .header {
+  background: var(--color-bg-surface) !important;
+  border-bottom-color: var(--color-border) !important;
+  box-shadow: var(--shadow-card) !important;
+}
+
+app-header .greeting-text,
+app-header .dropdown-icon,
+app-header .menu-toggle {
+  color: var(--color-text-faint) !important;
+}
+
+app-header .user-name {
+  color: var(--color-text-primary) !important;
+}
+
+app-header .divider {
+  background: var(--color-border) !important;
+}
+
+app-header .menu-toggle:hover,
+app-header .user-menu-trigger:hover {
+  background: var(--color-bg-surface-2) !important;
+}
+
+app-header .theme-toggle-btn {
+  color: var(--color-text-muted) !important;
+}
+
+app-header .theme-toggle-btn:hover {
+  background: var(--color-bg-surface-2) !important;
+  color: var(--color-text-primary) !important;
+}
+
+/* Listados compartidos y superficies comunes del contenido */
+.main-content .content-card,
+.main-content .table-container,
+.main-content .filters-card,
+.main-content .state-card,
+.main-content .dashboard-container,
+.main-content .page-container,
+.main-content .lista-container,
+.main-content .form-card,
+.main-content .panel,
+.main-content .card,
+.main-content .mat-mdc-card {
+  background-color: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+  box-shadow: var(--shadow-card);
+}
+
+.main-content .state-card {
+  background: var(--color-bg-surface-2) !important;
+}
+
+.main-content .state-card__title {
+  color: var(--color-text-primary) !important;
+}
+
+.main-content .state-card__sub {
+  color: var(--color-text-muted) !important;
+}
+
+.main-content .modern-table,
+.main-content table,
+.main-content .mat-mdc-table {
+  background: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+}
+
+.main-content .modern-table th,
+.main-content .mat-mdc-header-cell {
+  background: var(--color-bg-surface-2) !important;
+  color: var(--color-text-secondary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.main-content .modern-table td,
+.main-content .mat-mdc-cell {
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+.main-content .modern-table tr:hover,
+.main-content .mat-mdc-row:hover {
+  background: var(--color-bg-surface-2) !important;
+}
+
+/* Textos oscuros frecuentes en páginas */
+html.tema-oscuro .main-content h1,
+html.tema-oscuro .main-content h2,
+html.tema-oscuro .main-content h3,
+html.tema-oscuro .main-content h4,
+html.tema-oscuro .main-content p,
+html.tema-oscuro .main-content label,
+html.tema-oscuro .main-content span:not(.mat-icon):not([class*="badge"]):not([class*="chip"]) {
+  color: inherit;
+}
+
+html.tema-oscuro .main-content input:not([type="checkbox"]):not([type="radio"]),
+html.tema-oscuro .main-content textarea,
+html.tema-oscuro .main-content select {
+  background-color: var(--color-bg-surface-2);
+  color: var(--color-text-primary);
+  border-color: var(--color-border);
+}
+
+/* Angular Material — override para modo oscuro */
+html.tema-oscuro .mat-mdc-card,
+html.tema-oscuro .mat-mdc-dialog-container,
+html.tema-oscuro .mat-mdc-dialog-surface,
+html.tema-oscuro .mat-mdc-menu-panel,
+html.tema-oscuro .mat-mdc-select-panel,
+html.tema-oscuro .mat-mdc-autocomplete-panel {
+  background-color: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.tema-oscuro .mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline__leading,
+html.tema-oscuro .mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline__notch,
+html.tema-oscuro .mat-mdc-form-field .mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-color: var(--color-border) !important;
+}
+
+html.tema-oscuro .mat-mdc-form-field input,
+html.tema-oscuro .mat-mdc-form-field textarea,
+html.tema-oscuro .mat-mdc-form-field .mat-mdc-select-value {
+  color: var(--color-text-primary) !important;
+}
+
+html.tema-oscuro .mat-mdc-form-field .mat-mdc-floating-label,
+html.tema-oscuro .mat-mdc-form-field .mat-mdc-form-field-hint,
+html.tema-oscuro .mat-mdc-form-field .mat-mdc-form-field-subscript-wrapper {
+  color: var(--color-text-muted) !important;
+}
+
+html.tema-oscuro .mat-mdc-tab-group {
+  background: var(--color-bg-surface);
+}
+
+html.tema-oscuro .mat-mdc-tab-group .mat-mdc-tab-header {
+  background: var(--color-bg-surface-2);
+  border-bottom: 1px solid var(--color-border);
+}
+
+html.tema-oscuro .mat-mdc-tab-group .mat-mdc-tab .mdc-tab__text-label {
+  color: var(--color-text-muted);
+}
+
+html.tema-oscuro .mat-mdc-tab-group .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: var(--color-brand);
+}
+
+html.tema-oscuro .mat-mdc-snack-bar-container {
+  background: var(--color-bg-surface-3) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.tema-oscuro .mat-mdc-paginator {
+  background: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.tema-oscuro .mat-mdc-table {
+  background: var(--color-bg-surface) !important;
+}
+
+html.tema-oscuro .mat-mdc-table .mat-mdc-row,
+html.tema-oscuro .mat-mdc-table .mat-mdc-header-row {
+  background: transparent !important;
+}
+
+html.tema-oscuro .mat-mdc-table .mat-mdc-cell,
+html.tema-oscuro .mat-mdc-table .mat-mdc-header-cell {
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+html.tema-oscuro .mat-mdc-chip {
+  background: var(--color-bg-surface-3) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.tema-oscuro .mat-divider {
+  border-color: var(--color-border) !important;
+}
+
+html.tema-oscuro .mat-mdc-tooltip .mdc-tooltip__surface {
+  background: var(--color-bg-surface-3) !important;
+  color: var(--color-text-primary) !important;
+}
+
+html.tema-oscuro .mat-mdc-option {
+  color: var(--color-text-primary) !important;
+}
+
+html.tema-oscuro .mat-mdc-option:hover:not(.mdc-list-item--disabled),
+html.tema-oscuro .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+  background: var(--color-bg-surface-2) !important;
+}
+
+html.tema-oscuro .user-dropdown .mat-mdc-menu-item:hover {
+  background: var(--color-bg-surface-2) !important;
+}
+
+html.tema-oscuro .user-dropdown .mat-mdc-menu-item mat-icon {
+  color: var(--color-text-muted) !important;
+}
+
+/* Menú de usuario en tema oscuro */
+html.tema-oscuro .user-dropdown .mat-mdc-menu-content {
+  background: var(--color-bg-surface);
+}
+
+/* ── Aplicar variables a elementos globales ── */
+body {
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.mat-mdc-card {
+  background-color: var(--color-bg-surface) !important;
+  color: var(--color-text-primary) !important;
+  border-color: var(--color-border) !important;
 }

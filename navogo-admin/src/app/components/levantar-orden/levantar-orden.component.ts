@@ -29,6 +29,7 @@ import { SeleccionarMesaDialogComponent } from '../ventas-mostrador/seleccionar-
 import { AgregarNotaDialogComponent } from '../ventas-mostrador/agregar-nota-dialog/agregar-nota-dialog.component';
 import { CreateOrderRequest, CreateOrderItemRequest } from '../../models/checkout.interface';
 import { Mesa } from '../../models/mesa.interface';
+import { TicketAreasService } from '../../services/ticket-areas/ticket-areas.service';
 
 // Tipos
 interface ProductoOrden {
@@ -71,6 +72,7 @@ export class LevantarOrdenComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
   private dialog = inject(MatDialog);
+  private ticketAreas = inject(TicketAreasService);
 
   // Signals de datos
   menuData = signal<Business | null>(null);
@@ -208,6 +210,24 @@ export class LevantarOrdenComponent implements OnInit {
 
     this.menuService.getMenuByEmpresaId(empresaId).subscribe({
       next: (data: Business) => {
+          // Log para ver estructura de categoría y producto
+  const primeraCat = data.categorias?.[0];
+  const primerProd = primeraCat?.productos?.[0];
+
+  console.log('=== CATEGORÍA ===', {
+    id:                primeraCat?.id,
+    nombre:            primeraCat?.nombre,
+    area_impresion_id: (primeraCat as any)?.area_impresion_id,
+    area_nombre:       (primeraCat as any)?.area_nombre,
+  });
+
+  console.log('=== PRODUCTO ===', {
+    id:          primerProd?.id,
+    nombre:      primerProd?.nombre,
+    categoria:   primerProd?.categoria,
+    categoria_id:(primerProd as any)?.categoria_id,
+    todasLasKeys: Object.keys(primerProd ?? {}),
+  });
         this.menuData.set(data);
         this.categorias.set(data.categorias || []);
         
@@ -491,7 +511,20 @@ export class LevantarOrdenComponent implements OnInit {
         console.log('✅ Orden levantada:', response);
         
         const ordenId = response.order_id ?? response.id;
-        
+
+        if (ordenId) {
+          this.imprimirTicketsDeArea({
+            id: ordenId,
+            items: this.orden().map(item => ({
+              name: item.producto.nombre,
+              quantity: item.cantidad,
+              nota: item.nota,
+              selections: item.selections,
+              categoria_id: item.producto.categoria_id,
+            })),
+          }, mesa);
+        }
+
         if (ordenId) {
           if (this.modoSplit && this.mesaSplitId > 0) {
             this.mesaService
@@ -584,6 +617,52 @@ export class LevantarOrdenComponent implements OnInit {
       relativeTo: this.route,
       queryParams: {},
       replaceUrl: true,
+    });
+  }
+
+  private imprimirTicketsDeArea(orden: any, mesa: Mesa): void {
+    const mapaCategoriaArea: Record<number, number> = {};
+    const areas: { id: number; nombre: string }[] = [];
+
+    this.categorias().forEach((cat) => {
+      if (cat.area_impresion_id) {
+        mapaCategoriaArea[cat.id] = cat.area_impresion_id;
+        if (!areas.find(a => a.id === cat.area_impresion_id)) {
+          areas.push({
+            id: cat.area_impresion_id,
+            nombre: cat.area_nombre ?? 'Área',
+          });
+        }
+      }
+    });
+
+    const items = (orden.items ?? []).map((item: any) => {
+      const categoriaId = item.categoria_id
+        ?? this.todosProductos().find(
+          p => p.id === item.product_id
+        )?.categoria_id
+        ?? null;
+
+      return {
+        name:     item.name ?? item.nombre,
+        quantity: item.quantity ?? item.cantidad,
+        nota:     item.note ?? item.nota,
+        selections: item.selections,
+        area_impresion_id: categoriaId
+          ? mapaCategoriaArea[categoriaId] ?? null
+          : null,
+      };
+    });
+
+    this.ticketAreas.imprimirTicketsDeArea({
+      numeroOrden:      orden.id,
+      mesa:             mesa.identificador,
+      tipoServicio:     'local',
+      items,
+      areas,
+      mapaCategoriaArea,
+      mapaCategorias:   {},
+      horaConfirmacion: new Date().toISOString(),
     });
   }
 

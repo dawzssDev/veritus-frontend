@@ -1,18 +1,24 @@
 $verde:  #1C8C40;
-$negro:  #1A1A11;
-$gris:   #6b7280;
-$borde:  #e5e3df;
-$fondo:  #fafaf8;
-$stone:  #f5f4f1;
-$blanco: #ffffff;
+$negro: var(--color-text-primary);
+$gris: var(--color-text-muted);
+$borde: var(--color-border);
+$fondo: var(--color-bg-app);
+$stone: var(--color-bg-surface-2);
+$blanco: var(--color-bg-surface);
 $amber:  #d97706;
 
-:host { display: block; background: $fondo; }
+:host {
+  display: block;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+}
 
 .catalogo-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
   font-family: -apple-system, 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -79,7 +85,7 @@ $amber:  #d97706;
   display: flex;
   align-items: center;
   gap: 6px;
-  background: $negro;
+  background: #1A1A11;
   color: white;
   border: none;
   border-radius: 10px;
@@ -99,7 +105,7 @@ $amber:  #d97706;
   display: flex;
   align-items: center;
   gap: 6px;
-  background: white;
+  background: var(--color-bg-surface);
   color: $amber;
   border: 1.5px solid $amber;
   border-radius: 10px;
@@ -111,7 +117,7 @@ $amber:  #d97706;
   transition: all 0.15s;
 
   mat-icon { font-size: 16px; width: 16px; height: 16px; }
-  &:hover:not(:disabled) { background: #fffbeb; }
+  &:hover:not(:disabled) { background: var(--color-warning-bg); }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 }
 
@@ -183,7 +189,7 @@ $amber:  #d97706;
   display: flex;
   align-items: center;
   gap: 6px;
-  background: white;
+  background: var(--color-bg-surface);
   border: 1.5px dashed $borde;
   border-radius: 10px;
   padding: 10px 16px;
@@ -368,7 +374,7 @@ $amber:  #d97706;
       text-transform: none;
       letter-spacing: 0;
       line-height: 1.35;
-      color: #9ca3af;
+      color: var(--color-text-muted);
     }
   }
 }

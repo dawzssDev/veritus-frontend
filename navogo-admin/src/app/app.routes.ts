@@ -199,12 +199,22 @@ export const routes: Routes = [
         data: { roles: [1, 4] }
     },
 
-    // Corte de Caja (Admin y Caja)
+    // Corte de Caja (Admin y Caja) — legacy, coexistir hasta validar flujo nuevo
     {
         path: 'corte-caja',
         loadComponent: () =>
             import('./corte-caja/corte-caja.component')
                 .then(m => m.CorteCajaComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { roles: [1, 2] }
+    },
+
+    // Turno de Caja (Admin y Caja)
+    {
+        path: 'turno-caja',
+        loadComponent: () =>
+            import('./turno-caja/turno-caja-page/turno-caja-page.component')
+                .then(m => m.TurnoCajaPageComponent),
         canActivate: [authGuard, roleGuard],
         data: { roles: [1, 2] }
     },
@@ -225,6 +235,26 @@ export const routes: Routes = [
         loadComponent: () =>
             import('./ventas/ventas.component')
                 .then(m => m.VentasComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { roles: [1] }
+    },
+
+    // Inventario (Solo Admin)
+    {
+        path: 'inventario',
+        loadComponent: () =>
+            import('./inventario/inventario-lista/inventario-lista.component')
+                .then(m => m.InventarioListaComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { roles: [1] }
+    },
+
+    // Gastos (Solo Admin)
+    {
+        path: 'gastos',
+        loadComponent: () =>
+            import('./gastos/gastos-lista/gastos-lista.component')
+                .then(m => m.GastosListaComponent),
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },
@@ -310,9 +340,19 @@ export const routes: Routes = [
         data: { roles: [1] }
     },
 
-    // Facturación (Solo Admin)
+    // Facturación CFDI (Solo Admin)
     {
         path: 'facturacion',
+        loadComponent: () =>
+            import('./facturacion/facturacion-page/facturacion-page.component')
+                .then(m => m.FacturacionPageComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { roles: [1] }
+    },
+
+    // Suscripción Stripe (Solo Admin)
+    {
+        path: 'suscripcion',
         loadComponent: () =>
             import('./facturacion/facturacion.component')
                 .then(m => m.FacturacionComponent),
@@ -350,6 +390,16 @@ export const routes: Routes = [
         loadComponent: () =>
             import('./sucursales/sucursales.component')
                 .then(m => m.SucursalesComponent),
+        canActivate: [authGuard, roleGuard],
+        data: { roles: [1] }
+    },
+
+    // Áreas de impresión (Solo Admin)
+    {
+        path: 'areas-impresion',
+        loadComponent: () =>
+            import('./areas-impresion/areas-impresion-page/areas-impresion-page.component')
+                .then(m => m.AreasImpresionPageComponent),
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },

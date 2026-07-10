@@ -35,7 +35,8 @@ import { HeaderComponent } from '../components/header/header.component';
     .main-layout {
       display: flex;
       min-height: 100vh;
-      background-color: #f5f5f5;
+      background-color: var(--color-bg-app);
+      color: var(--color-text-primary);
       position: relative;
     }
 

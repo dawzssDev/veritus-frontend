@@ -1,17 +1,26 @@
 @import '../../../styles/shared-listing.scss';
 
+:host {
+  display: block;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+}
+
 .ventas {
-  background: radial-gradient(circle at top left, rgba(86, 128, 255, 0.12), transparent 45%),
-    radial-gradient(circle at top right, rgba(16, 185, 129, 0.12), transparent 38%);
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
+  min-height: 100%;
 }
 
 .ventas__body {
   padding: 24px;
+  background: var(--color-bg-app);
 }
 
 .muted {
   margin: 4px 0 0;
-  opacity: 0.72;
+  color: var(--color-text-muted);
+  opacity: 1;
 }
 
 .ventas__toolbar {
@@ -22,9 +31,9 @@
   flex-wrap: wrap;
   padding: 16px 16px 12px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 12px 24px -20px rgba(15, 23, 42, 0.45);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
 }
 
 .actions {
@@ -38,9 +47,9 @@
   margin: 12px 16px 16px;
   padding: 10px 12px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 16px 28px -22px rgba(15, 23, 42, 0.35);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
 }
 
 .filters__row {
@@ -89,9 +98,10 @@
 .kpi {
   padding: 14px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  box-shadow: 0 16px 30px -24px rgba(15, 23, 42, 0.55);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
+  color: var(--color-text-primary);
   transition: transform 140ms ease, box-shadow 140ms ease;
 }
 

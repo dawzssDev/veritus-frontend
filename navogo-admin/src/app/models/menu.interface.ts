@@ -19,6 +19,9 @@ export interface MenuItem {
   
   /** Roles permitidos (opcional, para control de acceso) - roleIds: 1 = Admin, 2 = Empleado */
   roles?: number[];
+
+  /** IDs de usuario permitidos (opcional, restricción adicional) */
+  userIds?: number[];
   
   /** Badge o contador (opcional) */
   badge?: number | string;

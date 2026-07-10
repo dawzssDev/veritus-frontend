@@ -1,24 +1,26 @@
-$negro:   #1A1A11;
-$gris:    #6b7280;
-$borde:   #e5e7eb;
-$fondo:   #fafaf8;
-$blanco:  #ffffff;
-$stone:   #f5f4f1;
+$negro:   var(--color-text-primary);
+$gris:    var(--color-text-muted);
+$borde:   var(--color-border);
+$fondo:   var(--color-bg-app);
+$blanco:  var(--color-bg-surface);
+$stone:   var(--color-bg-surface-2);
 $verde:   #1C8C40;
 $error:   #dc2626;
 $amber:   #d97706;
 
 :host {
   display: block;
-  background: $fondo;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
 .ventas-page {
   padding: 24px 28px;
-  // max-width: 1280px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
 // ── Header
@@ -57,27 +59,27 @@ $amber:   #d97706;
   &--excel {
     border-color: #1e7e34 !important;
     color: #1e7e34 !important;
-    &:hover { background: #f0faf3 !important; }
+    &:hover { background: var(--color-brand-light) !important; }
   }
 
   &--pdf {
     border-color: #b71c1c !important;
     color: #b71c1c !important;
-    &:hover { background: #fff5f5 !important; }
+    &:hover { background: var(--color-error-bg) !important; }
   }
 }
 
 .ventas-titulo {
   font-size: 26px;
   font-weight: 800;
-  color: $negro;
+  color: var(--color-text-primary);
   margin: 0 0 4px;
   letter-spacing: -0.02em;
 }
 
 .ventas-sub {
   font-size: 14px;
-  color: $gris;
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
@@ -95,7 +97,7 @@ $amber:   #d97706;
 
   &__label {
     font-size: 12px;
-    color: $gris;
+    color: var(--color-text-muted);
   }
 }
 
@@ -116,10 +118,13 @@ $amber:   #d97706;
 
 .resumen-card {
   border-radius: 14px !important;
+  background: var(--color-bg-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary);
   transition: box-shadow 0.15s;
 
   &:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08) !important;
+    box-shadow: var(--shadow-card) !important;
   }
 
   mat-card-content {
@@ -133,19 +138,19 @@ $amber:   #d97706;
     font-size: 26px;
     width: 26px;
     height: 26px;
-    color: $gris;
+    color: var(--color-text-muted);
     flex-shrink: 0;
   }
 
   &--dark {
-    background: $negro !important;
-    border-color: $negro !important;
+    background: var(--color-bg-surface-3) !important;
+    border-color: var(--color-border) !important;
 
-    mat-icon         { color: rgba(255,255,255,0.7) !important; }
-    .resumen-label   { color: rgba(255,255,255,0.5) !important; }
+    mat-icon         { color: var(--color-text-secondary) !important; }
+    .resumen-label   { color: var(--color-text-muted) !important; }
     .resumen-valor   {
-      color: white !important;
-      font-size: 18px !important; // ligeramente más grande
+      color: var(--color-text-primary) !important;
+      font-size: 18px !important;
     }
   }
 }
@@ -162,13 +167,13 @@ $amber:   #d97706;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: $gris;
+  color: var(--color-text-muted);
 }
 
 .resumen-valor {
   font-size: 16px;
   font-weight: 800;
-  color: $negro;
+  color: var(--color-text-primary);
   letter-spacing: -0.02em;
   white-space: nowrap;
   overflow: hidden;
@@ -184,6 +189,9 @@ $amber:   #d97706;
 // ── Filtros
 .filtros-card {
   border-radius: 14px !important;
+  background: var(--color-bg-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary);
 }
 
 .filtros-content {
@@ -216,6 +224,9 @@ $amber:   #d97706;
 .tabla-card {
   border-radius: 14px !important;
   overflow: hidden;
+  background: var(--color-bg-surface) !important;
+  border-color: var(--color-border) !important;
+  color: var(--color-text-primary);
 }
 
 .tabla-content {
@@ -245,13 +256,13 @@ $amber:   #d97706;
   cursor: pointer;
   transition: background 0.12s;
 
-  &:hover { background: #f8f7f5 !important; }
+  &:hover { background: var(--color-bg-surface-2) !important; }
 }
 
 ::ng-deep .ventas-tabla .mat-mdc-cell {
-  border-bottom: 1px solid #f5f4f1 !important;
+  border-bottom: 1px solid var(--color-border) !important;
   font-size: 14px;
-  color: $negro;
+  color: var(--color-text-primary);
 }
 
 .col-right { text-align: right !important; }
@@ -299,18 +310,18 @@ $amber:   #d97706;
 }
 
 ::ng-deep .chip-mesa {
-  background: #f0f9f4 !important;
-  color: #166534 !important;
+  background: var(--color-brand-light) !important;
+  color: #16a34a !important;
 }
 
 ::ng-deep .chip-domicilio {
-  background: #eff6ff !important;
-  color: #1e40af !important;
+  background: rgba(37, 99, 235, 0.15) !important;
+  color: #60a5fa !important;
 }
 
 ::ng-deep .chip-llevar {
-  background: #fefce8 !important;
-  color: #854d0e !important;
+  background: var(--color-warning-bg) !important;
+  color: #f59e0b !important;
 }
 
 // Pago
@@ -345,12 +356,12 @@ $amber:   #d97706;
   font-size: 13px !important;
   width: 13px !important;
   height: 13px !important;
-  color: #6b7280;
+  color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
 .pago-metodo-sm {
-  color: #374151;
+  color: var(--color-text-secondary);
   font-weight: 500;
   min-width: 80px;
 }
@@ -370,39 +381,39 @@ $amber:   #d97706;
   height: 26px !important;
 }
 
-// Finalizado — verde oscuro sobre verde claro
+// Finalizado
 ::ng-deep .chip-finalizado {
-  background: #dcfce7 !important;
-  color: #166534 !important;
-  border: 1px solid #bbf7d0 !important;
+  background: var(--color-success-bg) !important;
+  color: #16a34a !important;
+  border: 1px solid var(--color-brand-border) !important;
 }
 
-// Cancelado — rojo claro
+// Cancelado
 ::ng-deep .chip-cancelado {
-  background: #fef2f2 !important;
+  background: var(--color-error-bg) !important;
   color: $error !important;
-  border: 1px solid #fecaca !important;
+  border: 1px solid rgba(220, 38, 38, 0.3) !important;
 }
 
-// En proceso — amber claro
+// En proceso
 ::ng-deep .chip-proceso {
-  background: #fffbeb !important;
+  background: var(--color-warning-bg) !important;
   color: $amber !important;
-  border: 1px solid #fde68a !important;
+  border: 1px solid var(--notes-border) !important;
 }
 
-// Sin iniciar / default — gris claro
+// Sin iniciar / default
 ::ng-deep .chip-default {
-  background: #f3f4f6 !important;
-  color: #374151 !important;
-  border: 1px solid #e5e7eb !important;
+  background: var(--color-bg-surface-3) !important;
+  color: var(--color-text-secondary) !important;
+  border: 1px solid var(--color-border) !important;
 }
 
 // Monto
 .monto {
   font-size: 15px;
   font-weight: 800;
-  color: $negro;
+  color: var(--color-text-primary);
   letter-spacing: -0.01em;
 }
 
@@ -415,7 +426,7 @@ $amber:   #d97706;
     font-size: 40px;
     width: 40px;
     height: 40px;
-    color: #d1d5db;
+    color: var(--color-text-faint);
     display: block;
     margin: 0 auto 12px;
   }

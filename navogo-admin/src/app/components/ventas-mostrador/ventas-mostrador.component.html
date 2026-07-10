@@ -10,6 +10,21 @@
 
   <!-- Main Content -->
   @if (!isLoading()) {
+    @if (turnoEstado.cargado()
+         && !turnoEstado.hayTurnoAbierto()) {
+      <div class="banner-caja-cerrada">
+        <mat-icon>point_of_sale</mat-icon>
+        <div class="banner-caja-cerrada__texto">
+          <strong>No hay un turno de caja abierto</strong>
+          <span>Abre un turno para poder registrar ventas</span>
+        </div>
+        <button mat-raised-button color="primary"
+                (click)="irAAbrirTurno()">
+          Abrir turno
+        </button>
+      </div>
+    }
+
     <div class="main-content" [class.vista-productos]="vistaMovil() === 'productos'" [class.vista-orden]="vistaMovil() === 'orden'">
 
       <!-- PANEL IZQUIERDO - Catálogo de Productos -->
@@ -577,7 +592,8 @@
             mat-raised-button 
             color="primary"
             class="btn-registrar-venta"
-            [disabled]="!ordenValida()"
+            [disabled]="!ordenValida()
+              || !turnoEstado.hayTurnoAbierto()"
             (click)="registrarVenta()">
             <mat-icon>check_circle</mat-icon>
             Registrar Venta

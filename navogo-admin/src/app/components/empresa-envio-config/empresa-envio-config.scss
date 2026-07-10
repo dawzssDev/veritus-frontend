@@ -2,25 +2,30 @@
 :host {
   --primary-color: #16a34a;
   --primary-dark: #15803d;
-  --primary-light: #86efac;
+  --primary-light: var(--color-brand-light);
   --accent-color: #0ea5e9;
   --warning-color: #f59e0b;
   --error-color: #ef4444;
-  --surface: #ffffff;
-  --surface-alt: #f8fafc;
-  --border: #e2e8f0;
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --surface: var(--color-bg-surface);
+  --surface-alt: var(--color-bg-surface-2);
+  --border: var(--color-border);
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-muted);
+  --shadow-sm: var(--shadow-card);
+  --shadow-md: var(--shadow-card);
+  --shadow-lg: var(--shadow-popup);
   --radius: 12px;
   --spacing: 24px;
+  display: block;
+  color: var(--color-text-primary);
+  background: var(--color-bg-app);
 }
 
 /* Container principal */
 .page {
   min-height: 100vh;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
 /* Header */
@@ -288,7 +293,7 @@
 
 /* Example card */
 .example-card {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  background: var(--color-brand-light);
   border-color: var(--primary-light);
 }
 

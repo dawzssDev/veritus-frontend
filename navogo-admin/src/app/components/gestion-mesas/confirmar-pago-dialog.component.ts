@@ -270,6 +270,8 @@ export interface ConfirmarPagoDialogResult {
       max-height: min(88vh, 520px);
       width: min(100%, 400px);
       overflow: hidden;
+      background: var(--color-bg-surface);
+      color: var(--color-text-primary);
     }
 
     .dialog-header {
@@ -278,21 +280,21 @@ export interface ConfirmarPagoDialogResult {
       gap: 10px;
       flex-shrink: 0;
       padding: 14px 16px 12px;
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-      background: #fff;
+      border-bottom: 1px solid var(--color-border);
+      background: var(--color-bg-surface);
       
       .header-icon {
         width: 26px;
         height: 26px;
         font-size: 26px;
-        color: #0F4D2A;
+        color: #1C8C40;
       }
 
       h2 {
         margin: 0;
         font-size: 18px;
         font-weight: 700;
-        color: #1a1a1a;
+        color: var(--color-text-primary);
       }
     }
 
@@ -306,6 +308,8 @@ export interface ConfirmarPagoDialogResult {
       display: flex;
       flex-direction: column;
       gap: 14px;
+      background: var(--color-bg-surface);
+      color: var(--color-text-primary);
     }
 
     .resumen-pago {
@@ -314,14 +318,15 @@ export interface ConfirmarPagoDialogResult {
       justify-content: space-between;
       gap: 12px;
       padding: 10px 12px;
-      background: #f5f5f5;
+      background: var(--color-bg-surface-2);
+      border: 1px solid var(--color-border);
       border-radius: 10px;
     }
 
     .resumen-pago__mesa {
       font-size: 14px;
       font-weight: 700;
-      color: #374151;
+      color: var(--color-text-primary);
       white-space: nowrap;
     }
 
@@ -335,7 +340,7 @@ export interface ConfirmarPagoDialogResult {
 
     .resumen-pago__label {
       font-size: 11px;
-      color: #6b7280;
+      color: var(--color-text-muted);
       text-transform: uppercase;
       letter-spacing: 0.04em;
       font-weight: 600;
@@ -344,7 +349,7 @@ export interface ConfirmarPagoDialogResult {
     .resumen-pago__total strong {
       font-size: 22px;
       font-weight: 800;
-      color: #0F4D2A;
+      color: #1C8C40;
       line-height: 1.1;
     }
 
@@ -353,7 +358,7 @@ export interface ConfirmarPagoDialogResult {
         display: block;
         font-size: 13px;
         font-weight: 700;
-        color: #1a1a1a;
+        color: var(--color-text-primary);
         margin-bottom: 8px;
       }
 
@@ -371,8 +376,8 @@ export interface ConfirmarPagoDialogResult {
         gap: 4px;
         min-height: 72px;
         padding: 8px 4px;
-        background: white;
-        border: 2px solid #e0e0e0;
+        background: var(--color-bg-surface);
+        border: 2px solid var(--color-border);
         border-radius: 10px;
         cursor: pointer;
         transition: all 0.2s;
@@ -381,32 +386,32 @@ export interface ConfirmarPagoDialogResult {
           width: 22px;
           height: 22px;
           font-size: 22px;
-          color: #666;
+          color: var(--color-text-muted);
         }
 
         span {
           font-size: 11px;
-          color: #666;
+          color: var(--color-text-muted);
           font-weight: 600;
           line-height: 1.2;
           text-align: center;
         }
 
         &:hover {
-          border-color: #0F4D2A;
-          background: rgba(15, 77, 42, 0.02);
+          border-color: #1C8C40;
+          background: var(--color-brand-light);
         }
 
         &.selected {
-          border-color: #0F4D2A;
-          background: rgba(15, 77, 42, 0.08);
+          border-color: #1C8C40;
+          background: var(--color-brand-light);
 
           mat-icon {
-            color: #0F4D2A;
+            color: #1C8C40;
           }
 
           span {
-            color: #0F4D2A;
+            color: #1C8C40;
             font-weight: 600;
           }
         }
@@ -415,7 +420,7 @@ export interface ConfirmarPagoDialogResult {
 
     .envio-section {
       padding-top: 8px;
-      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      border-top: 1px solid var(--color-border);
 
       .checkbox-container {
         display: flex;
@@ -435,13 +440,13 @@ export interface ConfirmarPagoDialogResult {
           align-items: center;
           gap: 8px;
           font-size: 14px;
-          color: #1a1a1a;
+          color: var(--color-text-primary);
 
           mat-icon {
             width: 20px;
             height: 20px;
             font-size: 20px;
-            color: #666;
+            color: var(--color-text-muted);
           }
         }
       }
@@ -453,9 +458,9 @@ export interface ConfirmarPagoDialogResult {
       gap: 10px;
       flex-shrink: 0;
       padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
-      border-top: 1px solid rgba(0, 0, 0, 0.08);
-      background: #fff;
-      box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.06);
+      border-top: 1px solid var(--color-border);
+      background: var(--color-bg-surface);
+      box-shadow: var(--shadow-card);
       z-index: 2;
 
       button {
@@ -491,7 +496,7 @@ export interface ConfirmarPagoDialogResult {
     .monto-input-wrapper {
       display: flex;
       align-items: center;
-      border: 2px solid #e0e0e0;
+      border: 2px solid var(--color-border);
       border-radius: 8px;
       overflow: hidden;
       transition: border-color 0.15s;
@@ -503,11 +508,11 @@ export interface ConfirmarPagoDialogResult {
 
     .monto-prefix {
       padding: 10px 10px;
-      background: #f5f5f5;
+      background: var(--color-bg-surface-2);
       font-size: 14px;
       font-weight: 700;
-      color: #666;
-      border-right: 2px solid #e0e0e0;
+      color: var(--color-text-muted);
+      border-right: 2px solid var(--color-border);
     }
 
     .monto-input {
@@ -518,12 +523,12 @@ export interface ConfirmarPagoDialogResult {
       outline: none;
       font-size: 16px;
       font-weight: 700;
-      color: #1a1a1a;
+      color: var(--color-text-primary);
       font-family: inherit;
-      background: white;
+      background: var(--color-bg-surface);
       scroll-margin-bottom: 120px;
 
-      &::placeholder { color: #9ca3af; }
+      &::placeholder { color: var(--color-text-muted); }
 
       &::-webkit-outer-spin-button,
       &::-webkit-inner-spin-button {
@@ -549,16 +554,16 @@ export interface ConfirmarPagoDialogResult {
       strong { font-weight: 800; }
 
       &--ok {
-        background: #dcfce7;
-        color: #166534;
+        background: var(--color-success-bg);
+        color: #16a34a;
         border: 1.5px solid #16a34a;
         font-weight: 700;
         font-size: 16px;
-        mat-icon { color: #166534; }
+        mat-icon { color: #16a34a; }
       }
 
       &--falta {
-        background: #fef2f2;
+        background: var(--color-error-bg);
         color: #dc2626;
         font-weight: 700;
         font-size: 16px;
@@ -613,7 +618,7 @@ export interface ConfirmarPagoDialogResult {
       justify-content: space-between;
       align-items: center;
       padding: 10px 12px;
-      background: #f5f5f5;
+      background: var(--color-bg-surface-2);
       border-radius: 8px;
       font-size: 14px;
       color: #374151;
@@ -629,7 +634,7 @@ export interface ConfirmarPagoDialogResult {
       align-items: flex-start;
       gap: 8px;
       padding: 10px 12px;
-      background: #fffbeb;
+      background: var(--color-warning-bg);
       border: 1px solid #fde68a;
       border-radius: 8px;
       font-size: 12px;

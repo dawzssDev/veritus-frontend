@@ -221,7 +221,7 @@ import { formatearNota }    from '../../utils/order-note.util';
 </div>
   `,
   styles: [`
-    .vd-dialog { display: flex; flex-direction: column; min-width: 0; }
+    .vd-dialog { display: flex; flex-direction: column; min-width: 0; background: var(--color-bg-surface); color: var(--color-text-primary); }
 
     .vd-header {
       display: flex; align-items: flex-start;
@@ -232,16 +232,16 @@ import { formatearNota }    from '../../utils/order-note.util';
 
     .vd-folio-badge {
       display: flex; align-items: center; gap: 6px;
-      background: #F8F9F8; border-radius: 10px;
+      background: var(--color-bg-surface-2); border-radius: 10px;
       padding: 8px 12px; flex-shrink: 0;
     }
     .vd-folio-badge mat-icon { font-size:18px; width:18px; height:18px; color:#1C8C40; }
-    .vd-folio-badge span { font-size:18px; font-weight:900; color:#1A1A11; }
+    .vd-folio-badge span { font-size:18px; font-weight:900; color: var(--color-text-primary); }
 
-    .vd-fecha { font-size: 13px; color: #6b7280; margin: 0 0 3px; }
+    .vd-fecha { font-size: 13px; color: var(--color-text-muted); margin: 0 0 3px; }
     .vd-sucursal {
       display: flex; align-items: center; gap: 4px;
-      font-size: 12px; color: #9ca3af; margin: 0;
+      font-size: 12px; color: var(--color-text-muted); margin: 0;
     }
     .vd-sucursal mat-icon { font-size:13px; width:13px; height:13px; }
 
@@ -250,7 +250,7 @@ import { formatearNota }    from '../../utils/order-note.util';
       padding: 10px 20px; font-size: 13px; font-weight: 700;
     }
     .vd-estatus-bar mat-icon { font-size:16px; width:16px; height:16px; }
-    .vd-estatus-bar--e1 { background:#f3f4f6; color:#6b7280; }
+    .vd-estatus-bar--e1 { background: var(--color-bg-surface-3); color: var(--color-text-muted); }
     .vd-estatus-bar--e2 { background:rgba(133,79,11,0.08); color:#854F0B; }
     .vd-estatus-bar--e3 { background:rgba(28,140,64,0.08); color:#1C8C40; }
     .vd-estatus-bar--e4 { background:rgba(24,95,165,0.08); color:#185FA5; }
@@ -266,7 +266,7 @@ import { formatearNota }    from '../../utils/order-note.util';
     .vd-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
     .vd-info-card {
-      background: #F8F9F8; border-radius: 10px;
+      background: var(--color-bg-surface-2); border-radius: 10px;
       padding: 12px 14px; border: 1px solid transparent;
     }
     .vd-info-card--ok {
@@ -276,16 +276,16 @@ import { formatearNota }    from '../../utils/order-note.util';
     .vd-info-card__label {
       display: flex; align-items: center; gap: 5px;
       font-size: 11px; font-weight:700; text-transform:uppercase;
-      letter-spacing:0.06em; color:#9ca3af; margin: 0 0 6px;
+      letter-spacing:0.06em; color: var(--color-text-muted); margin: 0 0 6px;
     }
     .vd-info-card__label mat-icon { font-size:14px; width:14px; height:14px; }
     .vd-info-card__valor {
       font-size: 14px; font-weight: 600;
-      color: #1A1A11; margin: 0 0 4px;
+      color: var(--color-text-primary); margin: 0 0 4px;
     }
     .vd-info-card__sub {
       display: flex; align-items: flex-start; gap: 4px;
-      font-size: 12px; color: #6b7280; margin: 0;
+      font-size: 12px; color: var(--color-text-muted); margin: 0;
     }
     .vd-info-card__sub mat-icon {
       font-size:13px; width:13px; height:13px; margin-top:1px;
@@ -301,7 +301,7 @@ import { formatearNota }    from '../../utils/order-note.util';
 
     .vd-confirmacion {
       display: inline-flex; align-items: center; gap: 4px;
-      font-size: 12px; font-weight: 600; color: #9ca3af;
+      font-size: 12px; font-weight: 600; color: var(--color-text-muted);
     }
     .vd-confirmacion mat-icon { font-size:14px; width:14px; height:14px; }
     .vd-confirmacion--ok { color: #1C8C40; }
@@ -312,7 +312,7 @@ import { formatearNota }    from '../../utils/order-note.util';
       display: flex; align-items: center; gap: 6px;
       font-size: 12px; font-weight: 700;
       text-transform: uppercase; letter-spacing: 0.06em;
-      color: #9ca3af; margin: 0;
+      color: var(--color-text-muted); margin: 0;
     }
     .vd-seccion__titulo mat-icon { font-size:15px; width:15px; height:15px; }
 
@@ -322,7 +322,7 @@ import { formatearNota }    from '../../utils/order-note.util';
     }
 
     .vd-items {
-      background: white; border: 1px solid rgba(0,0,0,0.07);
+      background: var(--color-bg-surface); border: 1px solid var(--color-border);
       border-radius: 10px; overflow: hidden;
     }
 
@@ -340,16 +340,16 @@ import { formatearNota }    from '../../utils/order-note.util';
     }
     .vd-item__nombre {
       flex: 1; font-size: 14px; font-weight: 500;
-      color: #1A1A11; margin: 0;
+      color: var(--color-text-primary); margin: 0;
     }
     .vd-item__precio {
       font-size: 14px; font-weight: 700;
-      color: #1A1A11; margin: 0; white-space: nowrap;
+      color: var(--color-text-primary); margin: 0; white-space: nowrap;
     }
 
     .vd-sin-items {
       text-align: center; font-size: 13px;
-      color: #9ca3af; padding: 20px; margin: 0;
+      color: var(--color-text-muted); padding: 20px; margin: 0;
     }
 
     .vd-nota {
@@ -371,12 +371,12 @@ import { formatearNota }    from '../../utils/order-note.util';
     }
 
     .vd-desglose {
-      background: #F8F9F8; border-radius: 10px; padding: 14px;
+      background: var(--color-bg-surface-2); border-radius: 10px; padding: 14px;
       display: flex; flex-direction: column; gap: 8px;
     }
     .vd-desglose__fila {
       display: flex; justify-content: space-between;
-      align-items: center; font-size: 13px; color: #6b7280;
+      align-items: center; font-size: 13px; color: var(--color-text-muted);
     }
     .vd-desglose__fila--total {
       font-size: 16px; font-weight: 900; color: #1C8C40;

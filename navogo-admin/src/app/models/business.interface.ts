@@ -54,6 +54,8 @@ export interface Category {
   nombre: string;
   descripcion?: string;
   orden: number;
+  area_impresion_id?: number | null;
+  area_nombre?: string | null;
   productos?: Product[];
 }
 

@@ -1,8 +1,8 @@
 $verde:  #1C8C40;
-$negro:  #1A1A11;
-$fondo:  #fafaf8;
-$borde:  #e5e3df;
-$stone:  #f5f4f1;
+$negro: var(--color-text-primary);
+$fondo: var(--color-bg-app);
+$borde: var(--color-border);
+$stone: var(--color-bg-surface-2);
 
 // ── Contenedor raíz ────────────────────────────────────
 .form-page {
@@ -17,7 +17,7 @@ $stone:  #f5f4f1;
   position: sticky;
   top: 0;
   z-index: 100;
-  background: #fff;
+  background: var(--color-bg-surface);
   border-bottom: 1px solid $borde;
   display: flex;
   align-items: center;
@@ -40,7 +40,7 @@ $stone:  #f5f4f1;
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    color: #555;
+    color: var(--color-text-secondary);
     border: 1px solid $borde;
     border-radius: 8px;
     height: 38px;
@@ -52,7 +52,7 @@ $stone:  #f5f4f1;
   }
 
   .btn-guardar {
-    background: $negro !important;
+    background: #1A1A11 !important;
     color: #fff !important;
     display: inline-flex;
     align-items: center;
@@ -78,7 +78,7 @@ $stone:  #f5f4f1;
   justify-content: center;
   gap: 16px;
   padding: 80px 24px;
-  color: #888;
+  color: var(--color-text-muted);
   font-size: 14px;
 }
 
@@ -95,7 +95,7 @@ $stone:  #f5f4f1;
 
 // ── Cards ──────────────────────────────────────────────
 .card {
-  background: #fff;
+  background: var(--color-bg-surface);
   border-radius: 16px;
   border: 1px solid $borde;
   padding: 24px;

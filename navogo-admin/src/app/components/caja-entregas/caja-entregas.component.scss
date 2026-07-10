@@ -1,16 +1,17 @@
 $verde:  #1C8C40;
-$negro:  #1A1A11;
-$gris:   #6b7280;
-$borde:  #e5e3df;
-$fondo:  #fafaf8;
-$stone:  #f5f4f1;
-$blanco: #ffffff;
+$negro:  var(--color-text-primary);
+$gris:   var(--color-text-muted);
+$borde:  var(--color-border);
+$fondo:  var(--color-bg-app);
+$stone:  var(--color-bg-surface-2);
+$blanco: var(--color-bg-surface);
 $amber:  #d97706;
 $azul:   #2563eb;
 
 :host {
   display: block;
-  background: $fondo;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
   min-height: 100%;
 }
 
@@ -85,7 +86,7 @@ $azul:   #2563eb;
   user-select: none;
   transition: background 0.15s;
 
-  &:hover { background: #ece9e3; }
+  &:hover { background: var(--color-border); }
   &--activo {
     border-color: rgba(28,140,64,0.4);
     color: $verde;
@@ -559,7 +560,7 @@ $azul:   #2563eb;
   height: 40px;
   border-radius: 10px;
   border: 1.5px solid #fecaca;
-  background: white;
+  background: var(--color-bg-surface);
   color: #dc2626;
   cursor: pointer;
   flex-shrink: 0;

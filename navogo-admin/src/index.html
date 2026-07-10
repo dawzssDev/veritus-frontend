@@ -12,6 +12,61 @@
   <link rel="icon" type="image/x-icon" href="logo.png">
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('navogo-theme') !== 'dark') return;
+        var r = document.documentElement;
+        r.classList.add('tema-oscuro');
+        r.style.colorScheme = 'dark';
+        var vars = {
+          '--color-bg-app': '#0F1117',
+          '--color-bg-surface': '#1A1D27',
+          '--color-bg-surface-2': '#21252F',
+          '--color-bg-surface-3': '#282C38',
+          '--color-border': '#2E3340',
+          '--color-border-2': '#363B48',
+          '--color-text-primary': '#F0EFE9',
+          '--color-text-secondary': '#C9C8C0',
+          '--color-text-muted': '#8B8F9A',
+          '--color-text-faint': '#9AA3B2',
+          '--color-brand': '#2ECC71',
+          '--color-brand-light': 'rgba(46, 204, 113, 0.10)',
+          '--color-brand-border': 'rgba(46, 204, 113, 0.25)',
+          '--color-success': '#2ECC71',
+          '--color-success-bg': 'rgba(46,204,113,0.10)',
+          '--color-error': '#F87171',
+          '--color-error-bg': 'rgba(248,113,113,0.10)',
+          '--color-warning': '#FBBF24',
+          '--color-warning-bg': 'rgba(251,191,36,0.10)',
+          '--shadow-card': '0 1px 4px rgba(0,0,0,0.30)',
+          '--shadow-popup': '0 8px 32px rgba(0,0,0,0.50)',
+          '--card-shadow': '0 2px 12px rgba(0, 0, 0, 0.45)',
+          '--card-shadow-hover': '0 8px 24px rgba(0, 0, 0, 0.55)',
+          '--notes-bg': '#3d3420',
+          '--notes-border': '#b45309',
+          '--notes-text': '#fde68a',
+          '--sidebar-bg': '#0F2419',
+          '--sidebar-border': '#1A4D30',
+          '--sidebar-text': '#A8D5C0',
+          '--sidebar-text-muted': '#5DB87A',
+          '--sidebar-hover': '#163D28',
+          '--sidebar-hover-text': '#C8E6C9',
+          '--sidebar-active-bg': '#1B5E20',
+          '--sidebar-active-fg': '#FFFFFF',
+          '--sidebar-active-hover': '#2E7D32',
+          '--sidebar-footer-bg': '#0A1A12',
+          '--sidebar-logo-text': '#C8E6C9',
+          '--sidebar-submenu-active-bg': 'rgba(255, 255, 255, 0.08)',
+          '--sidebar-scrollbar-hover': '#2A5C40'
+        };
+        for (var k in vars) r.style.setProperty(k, vars[k]);
+        document.addEventListener('DOMContentLoaded', function () {
+          document.body.classList.add('tema-oscuro');
+        });
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <div id="app-preload" class="app-preload" aria-live="polite" aria-busy="true">

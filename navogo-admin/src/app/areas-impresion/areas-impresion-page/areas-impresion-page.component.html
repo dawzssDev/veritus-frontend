@@ -1,0 +1,205 @@
+<div class="areas-page">
+
+  <div class="areas-header">
+    <div>
+      <h1>Áreas de impresión</h1>
+      <p class="areas-sub">
+        Configura a dónde se envía cada ticket
+        al confirmar una orden en el restaurante
+      </p>
+    </div>
+  </div>
+
+  <div class="crear-area-card">
+    <h3>
+      <mat-icon>add_circle</mat-icon>
+      Nueva área
+    </h3>
+    <div class="crear-area-form">
+      <mat-form-field appearance="outline"
+                      subscriptSizing="dynamic">
+        <mat-label>Nombre del área</mat-label>
+        <input matInput [(ngModel)]="formNombre"
+               placeholder="Ej: Cocina, Bebidas, Postres"
+               (keyup.enter)="crearArea()">
+      </mat-form-field>
+      <mat-form-field appearance="outline"
+                      subscriptSizing="dynamic">
+        <mat-label>Descripción (opcional)</mat-label>
+        <input matInput
+               [(ngModel)]="formDescripcion"
+               placeholder="Ej: Área de preparación de alimentos">
+      </mat-form-field>
+      <button mat-raised-button color="primary"
+              [disabled]="!formNombre.trim()
+                || guardando()"
+              (click)="crearArea()">
+        <mat-icon>add</mat-icon>
+        Crear área
+      </button>
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <div class="cargando-center">
+      <mat-spinner [diameter]="40"></mat-spinner>
+    </div>
+  }
+
+  @if (!cargando()) {
+
+    <div class="areas-lista">
+      @for (area of areas(); track area.id) {
+        <div class="area-card">
+
+          <div class="area-card__header">
+            @if (areaEditando() === area.id) {
+              <div class="area-edit-form">
+                <mat-form-field appearance="outline"
+                                subscriptSizing="dynamic">
+                  <mat-label>Nombre</mat-label>
+                  <input matInput
+                         [(ngModel)]="editNombre">
+                </mat-form-field>
+                <mat-form-field appearance="outline"
+                                subscriptSizing="dynamic">
+                  <mat-label>Descripción</mat-label>
+                  <input matInput
+                         [(ngModel)]="editDescripcion">
+                </mat-form-field>
+                <div class="area-edit-actions">
+                  <button mat-button
+                          (click)="areaEditando.set(null)">
+                    Cancelar
+                  </button>
+                  <button mat-flat-button
+                          class="btn-guardar"
+                          (click)="guardarEdicion(area)">
+                    <mat-icon>save</mat-icon>
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <div class="area-nombre-wrap">
+                <div class="area-badge">
+                  <mat-icon>print</mat-icon>
+                  {{ area.nombre }}
+                </div>
+                @if (area.descripcion) {
+                  <span class="area-desc">
+                    {{ area.descripcion }}
+                  </span>
+                }
+              </div>
+              <div class="area-acciones">
+                <button mat-icon-button
+                        matTooltip="Editar"
+                        (click)="iniciarEdicion(area)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button
+                        color="warn"
+                        matTooltip="Eliminar"
+                        (click)="eliminarArea(area)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+
+          <div class="area-categorias">
+            <p class="area-cat-titulo">
+              Categorías asignadas
+            </p>
+            @if ((area.categorias?.length ?? 0) === 0) {
+              <p class="area-cat-vacio">
+                Sin categorías asignadas aún
+              </p>
+            } @else {
+              <div class="chips-categorias">
+                @for (cat of area.categorias;
+                      track cat.id) {
+                  <div class="chip-cat">
+                    {{ cat.nombre }}
+                    <button class="chip-remove"
+                            matTooltip="Quitar"
+                            (click)="desasignarCategoria(
+                              cat.id)">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          @if (sinArea().length > 0) {
+            <mat-divider></mat-divider>
+            <div class="asignar-section">
+              <p class="asignar-titulo">
+                Agregar categorías a esta área
+              </p>
+              <div class="categorias-check-lista">
+                @for (cat of sinArea(); track cat.id) {
+                  <label class="cat-check-item">
+                    <input type="checkbox"
+                           [checked]="categoriasSeleccionadas()
+                             .includes(cat.id)"
+                           (change)="toggleCategoria(
+                             cat.id)">
+                    <span>{{ cat.nombre }}</span>
+                  </label>
+                }
+              </div>
+              @if (categoriasSeleccionadas().length > 0) {
+                <button mat-stroked-button
+                        class="btn-asignar"
+                        (click)="asignarCategoriasAArea(
+                          area)">
+                  <mat-icon>playlist_add</mat-icon>
+                  Asignar {{ categoriasSeleccionadas()
+                    .length }} categoría(s) aquí
+                </button>
+              }
+            </div>
+          }
+
+        </div>
+      } @empty {
+        <div class="areas-vacio">
+          <mat-icon>print_disabled</mat-icon>
+          <p>No hay áreas de impresión configuradas</p>
+          <small>
+            Crea áreas como "Cocina" y "Bebidas"
+            para enrutar los tickets automáticamente
+          </small>
+        </div>
+      }
+    </div>
+
+    @if (sinArea().length > 0) {
+      <div class="sin-area-card">
+        <h3>
+          <mat-icon>help_outline</mat-icon>
+          Categorías sin área asignada
+          ({{ sinArea().length }})
+        </h3>
+        <p class="sin-area-hint">
+          Estas categorías no generarán ticket
+          de área al confirmar una orden.
+          Asígnalas a un área arriba.
+        </p>
+        <div class="chips-categorias">
+          @for (cat of sinArea(); track cat.id) {
+            <div class="chip-cat chip-cat--gris">
+              {{ cat.nombre }}
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+  }
+
+</div>

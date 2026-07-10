@@ -2,17 +2,20 @@
 :host {
   --primary-color: #16a34a;
   --primary-dark: #15803d;
-  --primary-light: #86efac;
-  --surface: #ffffff;
-  --surface-alt: #f8fafc;
-  --border: #e2e8f0;
-  --text-primary: #0f172a;
-  --text-secondary: #64748b;
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --primary-light: var(--color-brand-light);
+  --surface: var(--color-bg-surface);
+  --surface-alt: var(--color-bg-surface-2);
+  --border: var(--color-border);
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-muted);
+  --shadow-sm: var(--shadow-card);
+  --shadow-md: var(--shadow-card);
+  --shadow-lg: var(--shadow-popup);
   --radius: 12px;
   --spacing: 24px;
+  display: block;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
 /* ── Búsqueda dentro de mat-select ── */
@@ -20,9 +23,9 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  background: white;
+  background: var(--color-bg-surface);
   padding: 8px 12px;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid var(--color-border);
 }
 
 ::ng-deep .cat-search-input {
@@ -30,18 +33,20 @@
   border: none;
   outline: none;
   font-size: 14px;
-  color: #0f172a;
+  color: var(--color-text-primary);
   padding: 4px 0;
   background: transparent;
   cursor: text;
 }
 
 ::ng-deep .cat-search-input::placeholder {
-  color: #94a3b8;
+  color: var(--color-text-muted);
 }
 
 .page {
   min-height: 100vh;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
 /* Header */
@@ -185,7 +190,7 @@
 }
 
 .light-section {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  background: var(--color-brand-light);
   border-color: var(--primary-light);
 }
 
@@ -219,7 +224,7 @@
 
 /* Imagen / preview */
 .logo-section {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  background: var(--color-brand-light);
   border-color: var(--primary-light);
 }
 
@@ -275,7 +280,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--surface-alt) 0%, #e2e8f0 100%);
+  background: linear-gradient(135deg, var(--surface-alt) 0%, var(--color-border) 100%);
   color: var(--text-secondary);
   gap: 8px;
 }
@@ -639,7 +644,7 @@
   padding: 12px;
   border: 1px dashed rgba(15, 23, 42, 0.18);
   border-radius: 12px;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 .empty-title {
@@ -708,7 +713,7 @@
 .campo-label {
   font-size: 13px;
   font-weight: 600;
-  color: #374151;
+  color: var(--color-text-secondary);
 }
 
 .campo-error {
@@ -735,10 +740,10 @@
   height: 52px;
   border-radius: 12px;
   border: 1.5px solid #e5e3df;
-  background: white;
+  background: var(--color-bg-surface);
   font-size: 12px;
   font-weight: 700;
-  color: #6b7280;
+  color: var(--color-text-muted);
   cursor: pointer;
   font-family: inherit;
   transition: all 0.15s;

@@ -19,7 +19,7 @@ body {
 .app-container {
   display: flex;
   min-height: 100vh;
-  background-color: #fafaf8;
+  background-color: var(--color-bg-app);
   overflow-x: hidden;
 }
 
@@ -39,7 +39,8 @@ body {
   flex: 1;
   /* Header (64px) + banner (aprox 32px) = 96px, pero reducimos a 72px para menos espacio 
   padding: 72px 24px 24px 24px;*/
-  background-color: #fafaf8;
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
   min-height: calc(100vh - 64px);
   overflow-y: auto;
 }
@@ -58,18 +59,10 @@ body.sidebar-collapsed .main-wrapper {
   margin-left: 64px !important;
 }
 
-/* ── TABLET (768px - 1024px) ── */
-@media (max-width: 1024px) and (min-width: 769px) {
-  .main-wrapper {
-    margin-left: 64px; /* sidebar colapsado en tablet */
-  }
-}
-
-/* ── MÓVIL (≤ 768px) ── */
-@media (max-width: 768px) {
+/* ── MÓVIL Y TABLET (≤ 1024px) ── */
+@media (max-width: 1024px) {
   .app-container {
-    flex-direction: row; /* mantener row para que sidebar
-                           esté fuera del flujo del contenido */
+    flex-direction: row;
     position: relative;
   }
 
@@ -83,12 +76,11 @@ body.sidebar-collapsed .main-wrapper {
     padding: 0;
   }
 
-  /* El overlay cubre TODO incluyendo el header */
   .sidebar-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.5);
-    z-index: 150; /* debajo del sidebar (1100) pero sobre el header (1000) */
+    z-index: 150;
   }
 }
 
@@ -127,7 +119,7 @@ body.sidebar-collapsed .main-wrapper {
   to { opacity: 1; }
 }
 
-@media (min-width: 769px) {
+@media (min-width: 1025px) {
   .sidebar-overlay {
     display: none;
   }

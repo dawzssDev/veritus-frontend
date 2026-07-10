@@ -67,46 +67,34 @@ export class MenuService {
   }
 
   /**
-   * Obtener menú completo (empresa + productos sin categorías)
+   * Obtener menú completo (categorías reales + productos).
+   * Incluye area_impresion_id / area_nombre en categorías
+   * y categoria_id en cada producto.
    */
   getMenuByEmpresaId(empresa_id: number): Observable<Business> {
     console.log('🔄 Cargando menú para empresa:', empresa_id);
-    return this.getProductosByEmpresa(empresa_id).pipe(
-      map(productos => {
-        console.log('🔄 Procesando productos...');
-        // Agrupar productos por categoría (string)
-        const grouped = new Map<string, Product[]>();
-        for (const p of productos) {
-          const raw = (p as any)?.categoria;
-          const name = (raw ?? '').toString().trim() || 'Sin categoría';
-          const list = grouped.get(name) ?? [];
-          list.push(p);
-          grouped.set(name, list);
-        }
-
-        const sortedNames = Array.from(grouped.keys()).sort((a, b) =>
-          a.localeCompare(b, 'es', { sensitivity: 'base' })
-        );
-
-        const categorias: Category[] = sortedNames.map((name, index) => ({
-          id: index + 1,
-          nombre: name,
-          orden: index + 1,
-          productos: grouped.get(name) ?? []
+    return this.http.get<Business>(`${this.apiUrl}/menu/empresa/${empresa_id}`).pipe(
+      map(business => {
+        const categorias: Category[] = (business.categorias ?? []).map((cat, index) => ({
+          ...cat,
+          orden: cat.orden ?? index + 1,
+          productos: (cat.productos ?? []).map(prod => ({
+            ...prod,
+            categoria_id: prod.categoria_id ?? cat.id,
+            categoria: prod.categoria ?? cat.nombre,
+          })),
         }));
 
-        // Crear objeto Business simplificado
-        const business: Business = {
-          id: empresa_id,
-          slug: `empresa-${empresa_id}`,
-          nombre: 'Cargando...', // Se actualizará con getEmpresaById
-          descripcion: '',
-          estado: 'activo',
-          categorias
+        const result: Business = {
+          ...business,
+          id: business.id ?? empresa_id,
+          slug: business.slug ?? `empresa-${empresa_id}`,
+          estado: business.estado ?? 'activo',
+          categorias,
         };
 
-        console.log('✅ Menú procesado:', business);
-        return business;
+        console.log('✅ Menú procesado:', result);
+        return result;
       }),
       catchError(error => {
         console.error('❌ Error en getMenuByEmpresaId:', error);

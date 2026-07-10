@@ -7,6 +7,7 @@ import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { HeaderComponent } from './components/header/header.component';
 import { AuthService } from './services/auth/auth.service';
 import { TrialService } from './services/trial/trial.service';
+import { ThemeService } from './services/theme/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -23,6 +24,8 @@ export class App implements OnInit {
   private readonly router = inject(Router);
   private readonly dialog = inject(MatDialog, { optional: true });
   trialService = inject(TrialService);
+  /** Inicializa el tema al arrancar la app autenticada */
+  private readonly themeService = inject(ThemeService);
 
   constructor(public authService: AuthService) {
     this.router.events

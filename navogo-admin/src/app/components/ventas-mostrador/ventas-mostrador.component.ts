@@ -41,6 +41,8 @@ import { VentasService } from '../../ventas/ventas.service';
 import { catchError, of } from 'rxjs';
 import { ClienteBuscadorComponent, ClienteSeleccionado } from '../cliente-buscador/cliente-buscador.component';
 import { OrdenBorradorService } from '../../services/orden/orden-borrador.service';
+import { TurnoEstadoService } from '../../turno-caja/turno-estado.service';
+import { TicketAreasService } from '../../services/ticket-areas/ticket-areas.service';
 
 // Tipos
 interface ProductoCarrito {
@@ -102,6 +104,8 @@ export class VentasMostradorComponent implements OnInit {
   private fb = inject(FormBuilder);
   private ventasService = inject(VentasService);
   private ordenBorrador = inject(OrdenBorradorService);
+  turnoEstado = inject(TurnoEstadoService);
+  private ticketAreas = inject(TicketAreasService);
 
   // Signals de datos
   menuData = signal<Business | null>(null);
@@ -304,6 +308,7 @@ export class VentasMostradorComponent implements OnInit {
     }
 
     this.cargarMenu();
+    this.turnoEstado.refrescar();
 
     // Leer queryParams para split de mesa
     const mesaId = this.route.snapshot
@@ -811,8 +816,21 @@ export class VentasMostradorComponent implements OnInit {
     }));
   }
 
+  irAAbrirTurno(): void {
+    this.router.navigate(['/turno-caja']);
+  }
+
   // Registro de venta
   async registrarVenta(): Promise<void> {
+    if (!this.turnoEstado.hayTurnoAbierto()) {
+      this.snackBar.open(
+        'No hay un turno de caja abierto. Abre un turno antes de vender.',
+        'Cerrar',
+        { duration: 4000 }
+      );
+      return;
+    }
+
     if (!this.ordenValida()) {
       this.snackBar.open('Por favor completa todos los campos requeridos', 'Cerrar', {
         duration: 3000,
@@ -1157,6 +1175,45 @@ export class VentasMostradorComponent implements OnInit {
               maxHeight: '90vh',
               disableClose: true
             });
+
+            if (tipoServicioActual === 'mesa') {
+              const mapaCategoriaArea: Record<number, number> = {};
+              const areas: { id: number; nombre: string }[] = [];
+
+              this.categorias().forEach((cat) => {
+                if (cat.area_impresion_id) {
+                  mapaCategoriaArea[cat.id] = cat.area_impresion_id;
+                  if (!areas.find(a => a.id === cat.area_impresion_id)) {
+                    areas.push({
+                      id:     cat.area_impresion_id,
+                      nombre: cat.area_nombre ?? 'Área',
+                    });
+                  }
+                }
+              });
+
+              const itemsConArea = this.carrito().map(item => ({
+                name:     item.producto.nombre,
+                quantity: item.cantidad,
+                nota:     item.nota,
+                selections: item.selections,
+                area_impresion_id:
+                  item.producto.categoria_id
+                    ? mapaCategoriaArea[item.producto.categoria_id]
+                    : null,
+              }));
+
+              this.ticketAreas.imprimirTicketsDeArea({
+                numeroOrden:      ordenId,
+                mesa:             mesaActual?.identificador,
+                tipoServicio:     'local',
+                items:            itemsConArea,
+                areas,
+                mapaCategoriaArea,
+                mapaCategorias:   {},
+                horaConfirmacion: new Date().toISOString(),
+              });
+            }
 
             // Al cerrar el dialog, limpiar el formulario
             dialogRef.afterClosed().subscribe(() => {

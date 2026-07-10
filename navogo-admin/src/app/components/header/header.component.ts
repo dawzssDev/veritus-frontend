@@ -1,15 +1,18 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { TurnoEstadoService } from '../../turno-caja/turno-estado.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { AuthService } from '../../services/auth/auth.service';
 import { SidebarService } from '../../services/sidebar/sidebar.service';
 import { TrialService } from '../../services/trial/trial.service';
+import { ThemeService } from '../../services/theme/theme.service';
 import { ProfileDialogComponent } from '../profile-dialog/profile-dialog.component';
 
 /**
@@ -27,7 +30,8 @@ import { ProfileDialogComponent } from '../profile-dialog/profile-dialog.compone
     MatButtonModule,
     MatMenuModule,
     MatDividerModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatTooltipModule
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss'
@@ -44,8 +48,11 @@ export class HeaderComponent implements OnInit {
 
   // Servicios
   public authService = inject(AuthService);
+  turnoEstado = inject(TurnoEstadoService);
+  themeService = inject(ThemeService);
   private sidebarService = inject(SidebarService);
   private dialog = inject(MatDialog);
+  private router = inject(Router);
   trialService = inject(TrialService);
 
   constructor() {}
@@ -57,6 +64,13 @@ export class HeaderComponent implements OnInit {
     
     // Cargar estado del trial
     this.trialService.cargar();
+
+    this.turnoEstado.refrescar();
+    setInterval(() => this.turnoEstado.refrescar(), 60000);
+  }
+
+  irACaja(): void {
+    this.router.navigate(['/turno-caja']);
   }
 
   /**
@@ -70,7 +84,7 @@ export class HeaderComponent implements OnInit {
    * Abre el sidebar en móvil
    */
   openMobileSidebar(): void {
-    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+    if (this.sidebarService.isOverlayMode()) {
       this.sidebarService.toggleSidebar();
     }
   }
@@ -107,6 +121,13 @@ export class HeaderComponent implements OnInit {
   goToSettings(): void {
     // Implementar navegación a configuración
     console.log('Navegar a configuración');
+  }
+
+  /**
+   * Alterna entre tema claro y oscuro
+   */
+  toggleTheme(): void {
+    this.themeService.toggleTheme();
   }
 
   /**

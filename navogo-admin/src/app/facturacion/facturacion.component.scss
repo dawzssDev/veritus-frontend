@@ -1,6 +1,6 @@
 /* Skeleton loader */
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, var(--color-border) 25%, var(--color-border) 50%, var(--color-border) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
@@ -375,7 +375,7 @@
   margin-bottom: 20px;
 
   &--cancelada {
-    border-left-color: #9ca3af !important;
+    border-left-color: var(--color-text-muted) !important;
     opacity: 0.8;
   }
 }
@@ -481,10 +481,10 @@
   align-items: center;
   gap: 6px;
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--color-text-muted);
   font-weight: 500;
 
-  mat-icon { color: #9ca3af; }
+  mat-icon { color: var(--color-text-muted); }
 }
 
 /* Overlay del dialog de confirmación */
@@ -506,7 +506,7 @@
 }
 
 .confirmacion-dialog {
-  background: white;
+  background: var(--color-bg-surface);
   border-radius: 16px;
   padding: 32px;
   max-width: 440px;
@@ -670,7 +670,7 @@
 
   &.estatus-canceled {
     background: rgba(156,163,175,0.15) !important;
-    color: #6b7280 !important;
+    color: var(--color-text-muted) !important;
   }
 
   &.estatus-unpaid {
@@ -680,7 +680,7 @@
 
   &.estatus-paused {
     background: rgba(156,163,175,0.15) !important;
-    color: #6b7280 !important;
+    color: var(--color-text-muted) !important;
   }
 }
 
@@ -773,7 +773,7 @@
 
   &.estatus-cancelada {
     background: rgba(156,163,175,0.15) !important;
-    color: #6b7280 !important;
+    color: var(--color-text-muted) !important;
   }
 }
 

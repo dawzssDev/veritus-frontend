@@ -15,6 +15,9 @@ export class SidebarService {
   /** Estado móvil - indica si el sidebar está abierto en móvil */
   private _isMobileOpen = signal(false);
   
+  /** Ancho máximo para sidebar tipo overlay (móvil + tablet) */
+  private readonly OVERLAY_BREAKPOINT = 1024;
+
   /** Getter público para el estado colapsado - retorna el valor booleano */
   isCollapsed(): boolean {
     return this._isCollapsed();
@@ -25,9 +28,19 @@ export class SidebarService {
     return this._isMobileOpen();
   }
 
-  /** Verifica si estamos en dispositivo móvil */
-  private get isMobile(): boolean {
-    return typeof window !== 'undefined' && window.innerWidth <= 768;
+  /** Sidebar fuera del flujo con overlay (móvil y tablet) */
+  isOverlayMode(): boolean {
+    return typeof window !== 'undefined'
+      && window.innerWidth <= this.OVERLAY_BREAKPOINT;
+  }
+
+  /** Alias de compatibilidad — usar isOverlayMode() */
+  isMobile(): boolean {
+    return this.isOverlayMode();
+  }
+
+  private get useOverlaySidebar(): boolean {
+    return this.isOverlayMode();
   }
 
   /**
@@ -39,13 +52,12 @@ export class SidebarService {
 
   constructor() {
     // Cargar estado desde localStorage (solo en browser y no en móvil)
-    if (this.isBrowser && !this.isMobile) {
+    if (this.isBrowser && !this.useOverlaySidebar) {
       const savedState = localStorage.getItem('sidebarCollapsed');
       if (savedState !== null) {
         this._isCollapsed.set(savedState === 'true');
       }
-    } else if (this.isMobile) {
-      // En móvil siempre empezar sin colapsar (cerrado)
+    } else if (this.useOverlaySidebar) {
       this._isCollapsed.set(false);
       this._isMobileOpen.set(false);
     }
@@ -55,10 +67,8 @@ export class SidebarService {
    * Toggle del estado del sidebar
    */
   toggleSidebar(): void {
-    // En móvil, alternar el estado mobile
-    if (this.isMobile) {
+    if (this.useOverlaySidebar) {
       this._isMobileOpen.update(value => !value);
-      // En móvil nunca aplicar el estado colapsado
       this._isCollapsed.set(false);
     } else {
       // En desktop, alternar el estado colapsado
@@ -74,8 +84,7 @@ export class SidebarService {
    */
   closeMobileSidebar(): void {
     this._isMobileOpen.set(false);
-    // Asegurar que el estado collapsed esté en false en móvil
-    if (this.isMobile) {
+    if (this.useOverlaySidebar) {
       this._isCollapsed.set(false);
     }
   }
@@ -85,8 +94,7 @@ export class SidebarService {
    * @param collapsed - Estado deseado
    */
   setSidebarState(collapsed: boolean): void {
-    // En móvil nunca aplicar collapsed
-    if (this.isMobile) {
+    if (this.useOverlaySidebar) {
       this._isCollapsed.set(false);
       return;
     }

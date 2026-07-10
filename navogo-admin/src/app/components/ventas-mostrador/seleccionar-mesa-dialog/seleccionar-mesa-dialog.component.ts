@@ -88,12 +88,24 @@ export class SeleccionarMesaDialogComponent implements OnInit {
   }
 
   seleccionarMesa(mesa: Mesa): void {
+    if (!this.mesaSeleccionable(mesa)) {
+      this.snackBar.open(
+        'Esta mesa no está disponible. Solo puedes seleccionar mesas libres.',
+        'Cerrar',
+        { duration: 3000, panelClass: ['snack-error'] }
+      );
+      return;
+    }
     this.mesaSeleccionada.set(mesa);
+  }
+
+  mesaSeleccionable(mesa: Mesa | null): boolean {
+    return mesa?.estado === 'libre';
   }
 
   confirmarSeleccion(): void {
     const mesa = this.mesaSeleccionada();
-    if (mesa) {
+    if (mesa && this.mesaSeleccionable(mesa)) {
       this.dialogRef.close(mesa);
     }
   }

@@ -109,7 +109,7 @@
   display: flex;
   gap: 16px;
   padding: 20px;
-  background: #f8f9fa;
+  background: var(--color-bg-surface-2);
   border-radius: 8px;
   margin-bottom: 20px;
   flex-wrap: wrap;
@@ -151,7 +151,7 @@
   font-size: 12px;
   font-weight: 600;
   background-color: #e9ecef;
-  color: #6c757d;
+  color: var(--color-text-muted);
 
   &.has-discount {
     background-color: #fff3cd;
@@ -168,7 +168,7 @@
   font-size: 12px;
   font-weight: 600;
   background-color: #e9ecef;
-  color: #6c757d;
+  color: var(--color-text-muted);
 
   &.is-combo {
     background-color: #d1ecf1;

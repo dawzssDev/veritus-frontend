@@ -1,0 +1,189 @@
+<div class="gastos-page">
+
+  <div class="gastos-header">
+    <div>
+      <h1 class="gastos-titulo">Gastos</h1>
+      <p class="gastos-sub">Control de egresos y compras de insumos</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="abrirCrearGasto()">
+      <mat-icon>add</mat-icon>
+      Nuevo Gasto
+    </button>
+  </div>
+
+  @if (totales()) {
+    <div class="gastos-resumen">
+      <div class="resumen-card resumen-card--principal">
+        <mat-icon>account_balance_wallet</mat-icon>
+        <div>
+          <span class="resumen-label">Total del período</span>
+          <strong class="resumen-monto">
+            ${{ montoTotalFmt() | number:'1.2-2' }}
+          </strong>
+        </div>
+      </div>
+      <div class="resumen-card">
+        <mat-icon>receipt_long</mat-icon>
+        <div>
+          <span class="resumen-label">Gastos registrados</span>
+          <strong>{{ totales()!.total_gastos }}</strong>
+        </div>
+      </div>
+      @for (cat of porCategoria(); track cat.categoria) {
+        <div class="resumen-card resumen-card--cat"
+             [style.border-left-color]="cat.color">
+          <span class="resumen-label">{{ cat.categoria }}</span>
+          <strong>${{ cat.total | number:'1.2-2' }}</strong>
+        </div>
+      }
+    </div>
+  }
+
+  <div class="gastos-filtros">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic"
+                    class="filtro-busqueda">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Buscar por concepto..."
+             (input)="onBusquedaChange($any($event.target).value)">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Categoría</mat-label>
+      <mat-select [value]="filtroCategoria()"
+                  (selectionChange)="filtroCategoria.set($event.value); aplicarFiltros()">
+        <mat-option [value]="null">Todas</mat-option>
+        @for (cat of categorias(); track cat.id) {
+          <mat-option [value]="cat.id">{{ cat.nombre }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Método de pago</mat-label>
+      <mat-select [value]="filtroMetodo()"
+                  (selectionChange)="filtroMetodo.set($event.value); aplicarFiltros()">
+        <mat-option value="">Todos</mat-option>
+        <mat-option value="efectivo">Efectivo</mat-option>
+        <mat-option value="tarjeta">Tarjeta</mat-option>
+        <mat-option value="transferencia">Transferencia</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Desde</mat-label>
+      <input matInput type="date"
+             [value]="filtroFechaInicio()"
+             (change)="filtroFechaInicio.set($any($event.target).value); aplicarFiltros()">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Hasta</mat-label>
+      <input matInput type="date"
+             [value]="filtroFechaFin()"
+             (change)="filtroFechaFin.set($any($event.target).value); aplicarFiltros()">
+    </mat-form-field>
+
+    <button mat-stroked-button class="btn-limpiar" (click)="limpiarFiltros()">
+      <mat-icon>filter_alt_off</mat-icon>
+      Limpiar
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="gastos-loading">
+      <mat-spinner [diameter]="48"></mat-spinner>
+    </div>
+  }
+
+  @if (!cargando()) {
+    <div class="gastos-lista">
+      @for (gasto of gastos(); track gasto.id) {
+        <div class="gasto-card" (click)="abrirDetalle(gasto)">
+          <div class="gasto-card__icono"
+               [style.background]="(gasto.categoria?.color ?? '#6b7280') + '22'">
+            <mat-icon [style.color]="gasto.categoria?.color ?? '#6b7280'">
+              {{ gasto.categoria?.icono ?? 'category' }}
+            </mat-icon>
+          </div>
+
+          <div class="gasto-card__info">
+            <div class="gasto-card__top">
+              <span class="gasto-concepto">{{ gasto.concepto }}</span>
+              @if (gasto.es_compra_insumo) {
+                <span class="badge-insumos">
+                  <mat-icon>inventory_2</mat-icon>
+                  Insumos
+                </span>
+              }
+            </div>
+            <div class="gasto-card__meta">
+              <span class="gasto-cat"
+                    [style.color]="gasto.categoria?.color">
+                {{ gasto.categoria?.nombre }}
+              </span>
+              <span class="gasto-fecha">
+                {{ gasto.fecha_gasto | date:'dd/MM/yyyy' }}
+              </span>
+              <span class="gasto-metodo">
+                <mat-icon>{{ getIconoMetodo(gasto.metodo_pago) }}</mat-icon>
+                {{ getLabelMetodo(gasto.metodo_pago) }}
+              </span>
+              @if (gasto.proveedor) {
+                <span class="gasto-proveedor">
+                  <mat-icon>local_shipping</mat-icon>
+                  {{ gasto.proveedor.nombre }}
+                </span>
+              }
+            </div>
+          </div>
+
+          <div class="gasto-card__monto">
+            <strong>${{ gasto.monto | number:'1.2-2' }}</strong>
+          </div>
+
+          <div class="gasto-card__acciones" (click)="$event.stopPropagation()">
+            @if (!gasto.es_compra_insumo) {
+              <button class="btn-accion btn-accion--editar"
+                      matTooltip="Editar"
+                      (click)="abrirEditarGasto(gasto, $event)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+            <button class="btn-accion btn-accion--eliminar"
+                    matTooltip="Eliminar"
+                    (click)="eliminarGasto(gasto, $event)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      } @empty {
+        <div class="gastos-vacio">
+          <mat-icon>payments</mat-icon>
+          <p>No hay gastos registrados</p>
+          <button mat-raised-button color="primary" (click)="abrirCrearGasto()">
+            Registrar primer gasto
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (ultimaPagina() > 1) {
+      <div class="gastos-paginacion">
+        <button mat-stroked-button
+                [disabled]="paginaActual() <= 1"
+                (click)="irPagina(paginaActual() - 1)">
+          <mat-icon>chevron_left</mat-icon>
+          Anterior
+        </button>
+        <span>Página {{ paginaActual() }} de {{ ultimaPagina() }}</span>
+        <button mat-stroked-button
+                [disabled]="paginaActual() >= ultimaPagina()"
+                (click)="irPagina(paginaActual() + 1)">
+          Siguiente
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    }
+  }
+
+</div>

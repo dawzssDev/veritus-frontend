@@ -250,10 +250,10 @@ export class EmplatadoComponent implements OnInit {
                       `${vista.folio} — servido en mesa`,
                       '',
                       {
-                        duration: 3000,
-                        panelClass: ['snack-ok'],
+                        duration:           3000,
+                        panelClass:         ['snack-ok'],
                         horizontalPosition: 'center',
-                        verticalPosition: 'top',
+                        verticalPosition:   'top',
                       }
                     );
                   },

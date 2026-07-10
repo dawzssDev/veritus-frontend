@@ -82,7 +82,9 @@
                 [class.ocupada]="mesa.estado === 'ocupada'"
                 [class.cuenta-pendiente]="mesa.estado === 'cuenta_pendiente'"
                 [class.reservada]="mesa.estado === 'reservada'"
-                [class.seleccionada]="mesaSeleccionada()?.id === mesa.id"
+                [class.no-seleccionable]="!mesaSeleccionable(mesa)"
+                [class.seleccionada]="mesaSeleccionada()?.id === mesa.id
+                  && mesaSeleccionable(mesa)"
                 [style.position]="'absolute'"
                 [style.left.px]="mesa.posicion_x"
                 [style.top.px]="mesa.posicion_y"
@@ -95,7 +97,8 @@
                     <mat-icon class="mesa-icono">{{ getEstadoIcon(mesa.estado) }}</mat-icon>
                     <span class="mesa-identificador">{{ mesa.identificador }}</span>
                     
-                    @if (mesaSeleccionada()?.id === mesa.id) {
+                    @if (mesaSeleccionada()?.id === mesa.id
+                         && mesaSeleccionable(mesa)) {
                       <mat-icon class="check-icon">check_circle</mat-icon>
                     }
                   </div>
@@ -140,7 +143,7 @@
       <button 
         mat-raised-button 
         color="primary"
-        [disabled]="!mesaSeleccionada()"
+        [disabled]="!mesaSeleccionable(mesaSeleccionada())"
         (click)="confirmarSeleccion()">
         <mat-icon>check</mat-icon>
         Confirmar Selección

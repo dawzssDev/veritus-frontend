@@ -2,15 +2,15 @@
 :host {
   display: block;
   min-height: 100%;
-  background: #F8F9F8;
+  background: var(--color-bg-app);
 }
 
 $c-bg:          var(--mat-sys-background);
-$c-surface:     white;
-$c-surface-2:   #F8F9F8;
-$c-border:      rgba(0,0,0,0.08);
-$c-text:        #1A1A11;
-$c-text-muted:  #6b7280;
+$c-surface:     var(--color-bg-surface);
+$c-surface-2:   var(--color-bg-surface-2);
+$c-border:      var(--color-border);
+$c-text:        var(--color-text-primary);
+$c-text-muted:  var(--color-text-muted);
 $c-green:       #1C8C40;
 $c-green-light: #1C8C40;
 
@@ -22,8 +22,8 @@ $tablet:  768px;
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: #F8F9F8;
-  color: #1A1A11;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
   font-family: 'DM Sans', 'Arial', sans-serif;
 }
 
@@ -36,9 +36,9 @@ $tablet:  768px;
   justify-content: space-between;
   gap: 16px;
   padding: 14px 20px;
-  background: white;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-  color: #1A1A11;
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text-primary);
   flex-wrap: wrap;
   position: sticky;
   top: 0;
@@ -47,7 +47,7 @@ $tablet:  768px;
   &__titulo {
     font-size: 22px;
     font-weight: 800;
-    color: #1A1A11;
+    color: var(--color-text-primary);
     margin: 0 16px 0 0;
   }
 
@@ -100,8 +100,8 @@ $tablet:  768px;
   &--sin-iniciar {
     background: rgba(107,114,128,0.08);
     border-color: rgba(107,114,128,0.2);
-    .contador__num { color: #6b7280; }
-    .contador__label { color: #6b7280; }
+    .contador__num { color: var(--color-text-muted); }
+    .contador__label { color: var(--color-text-muted); }
   }
 
   &--en-proceso {
@@ -124,8 +124,8 @@ $tablet:  768px;
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  border: 1.5px solid rgba(0,0,0,0.1);
-  background: #F8F9F8;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-app);
   color: #1C8C40;
   cursor: pointer;
   display: flex;
@@ -145,13 +145,13 @@ $tablet:  768px;
   }
 
   &--off {
-    color: #9ca3af;
-    border-color: rgba(0,0,0,0.08);
+    color: var(--color-text-faint);
+    border-color: var(--color-border);
 
     &:hover {
-      background: #f0f0f0;
-      border-color: rgba(0,0,0,0.15);
-      color: #6b7280;
+      background: var(--color-bg-surface-3);
+      border-color: var(--color-border);
+      color: var(--color-text-muted);
     }
   }
 }
@@ -160,17 +160,17 @@ $tablet:  768px;
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #F8F9F8;
-  border: 1.5px solid rgba(0,0,0,0.1);
+  background: var(--color-bg-app);
+  border: 1.5px solid var(--color-border);
   border-radius: 20px;
   padding: 6px 12px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   cursor: pointer;
   transition: background 0.15s;
   user-select: none;
 
-  &:hover { background: #f0f0f0; }
+  &:hover { background: var(--color-bg-surface-3); }
 
   &--activo {
     border-color: rgba(28,140,64,0.4);
@@ -199,8 +199,8 @@ $tablet:  768px;
   display: flex;
   flex-direction: column;
   gap: 0;
-  background: white;
-  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 65px; // justo debajo del top-bar
   z-index: 99;
@@ -221,7 +221,7 @@ $tablet:  768px;
 
   // Fila 1 tiene borde inferior sutil
   &--1 {
-    border-bottom: 1px solid rgba(0,0,0,0.05);
+    border-bottom: 1px solid var(--color-border);
   }
 
   // Fila 2: chips de filtro
@@ -242,7 +242,7 @@ $tablet:  768px;
 .filtros-separador {
   width: 1px;
   height: 24px;
-  background: rgba(0,0,0,0.1);
+  background: var(--color-border);
   flex-shrink: 0;
   margin: 0 4px;
 
@@ -256,8 +256,8 @@ $tablet:  768px;
   display: flex;
   align-items: center;
   gap: 8px;
-  background: #F8F9F8;
-  border: 1.5px solid rgba(0,0,0,0.12);
+  background: var(--color-bg-app);
+  border: 1.5px solid var(--color-border);
   border-radius: 10px;
   padding: 0 12px;
   transition: border-color 0.15s;
@@ -272,7 +272,7 @@ $tablet:  768px;
   font-size: 18px;
   width: 18px;
   height: 18px;
-  color: #9ca3af;
+  color: var(--color-text-faint);
   flex-shrink: 0;
 }
 
@@ -280,25 +280,25 @@ $tablet:  768px;
   background: transparent;
   border: none;
   outline: none;
-  color: #1A1A11;
+  color: var(--color-text-primary);
   font-size: 14px;
   font-family: inherit;
   padding: 9px 0;
   flex: 1;
   min-width: 0;
-  &::placeholder { color: #9ca3af; }
+  &::placeholder { color: var(--color-text-faint); }
 }
 
 .busqueda-clear {
   background: none;
   border: none;
   cursor: pointer;
-  color: #9ca3af;
+  color: var(--color-text-faint);
   display: flex;
   align-items: center;
   padding: 0;
   mat-icon { font-size: 16px; width: 16px; height: 16px; }
-  &:hover { color: #1A1A11; }
+  &:hover { color: var(--color-text-primary); }
 }
 
 // ── Selector de período (reemplaza fecha-selector)
@@ -314,9 +314,9 @@ $tablet:  768px;
   height: 34px;
   padding: 0 14px;
   border-radius: 8px;
-  border: 1.5px solid rgba(0,0,0,0.1);
-  background: #F8F9F8;
-  color: #6b7280;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-app);
+  color: var(--color-text-muted);
   font-size: 13px;
   font-weight: 500;
   font-family: inherit;
@@ -328,7 +328,7 @@ $tablet:  768px;
   align-items: center;
   gap: 4px;
 
-  &:hover { background: #f0f0f0; color: #1A1A11; }
+  &:hover { background: var(--color-bg-surface-3); color: var(--color-text-primary); }
 
   &--activo {
     background: #1C8C40;
@@ -370,10 +370,10 @@ $tablet:  768px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: #F8F9F8;
-  border: 1.5px solid rgba(0,0,0,0.1);
+  background: var(--color-bg-app);
+  border: 1.5px solid var(--color-border);
   border-radius: 8px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-size: 12px;
   font-family: inherit;
   font-weight: 500;
@@ -389,7 +389,7 @@ $tablet:  768px;
     height: 13px;
   }
 
-  &:hover { background: #f0f0f0; color: #1A1A11; }
+  &:hover { background: var(--color-bg-surface-3); color: var(--color-text-primary); }
 
   &--activo {
     background: #1C8C40 !important;
@@ -400,7 +400,7 @@ $tablet:  768px;
   // Colores por tipo cuando está activo
   &-sin-iniciar.filtro-btn--activo  {
     background: #6b7280 !important;
-    border-color: #6b7280 !important;
+    border-color: var(--color-text-muted) !important;
   }
   &-en-proceso.filtro-btn--activo {
     background: #854F0B !important;
@@ -408,7 +408,7 @@ $tablet:  768px;
   }
   &-finalizados.filtro-btn--activo {
     background: #374151 !important;
-    border-color: #374151 !important;
+    border-color: var(--color-text-secondary) !important;
   }
   &-cancelados.filtro-btn--activo {
     background: #dc2626 !important;
@@ -436,9 +436,9 @@ $tablet:  768px;
   align-items: center;
   gap: 4px;
   background: transparent;
-  border: 1.5px solid rgba(0,0,0,0.1);
+  border: 1.5px solid var(--color-border);
   border-radius: 8px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-size: 12px;
   font-family: inherit;
   padding: 5px 10px;
@@ -449,10 +449,10 @@ $tablet:  768px;
 
   mat-icon { font-size: 13px; width: 13px; height: 13px; }
 
-  &:hover { background: #F8F9F8; color: #1A1A11; }
+  &:hover { background: var(--color-bg-app); color: var(--color-text-primary); }
 
   &--activo {
-    background: #F8F9F8;
+    background: var(--color-bg-app);
     border-color: #1C8C40;
     color: #1C8C40;
     font-weight: 600;
@@ -507,8 +507,8 @@ $tablet:  768px;
 // TARJETA DE PEDIDO
 // ════════════════════════════════
 .pedido-card {
-  background: white;
-  border: 1px solid rgba(0,0,0,0.08);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   border-radius: 14px;
   overflow: hidden;
   position: relative;
@@ -586,7 +586,7 @@ $tablet:  768px;
 .pedido-folio {
   font-size: 20px;
   font-weight: 900;
-  color: #1A1A11;
+  color: var(--color-text-primary);
   letter-spacing: -0.02em;
 }
 
@@ -698,12 +698,12 @@ $tablet:  768px;
 
   &__icono { font-size: 12px; width: 12px; height: 12px; }
 
-  &--e1 { background: rgba(107,114,128,0.12); color: #6b7280; }
+  &--e1 { background: rgba(107,114,128,0.12); color: var(--color-text-muted); }
   &--e2 { background: rgba(217,119,6,0.12);   color: #d97706; }
   &--e3 { background: rgba(28,140,64,0.12);   color: #1C8C40; }
   &--e4 { background: rgba(59,130,246,0.12);  color: #3b82f6; }
   &--e5 { background: rgba(139,92,246,0.12);  color: #8b5cf6; }
-  &--e6 { background: rgba(107,114,128,0.12); color: #6b7280; }
+  &--e6 { background: rgba(107,114,128,0.12); color: var(--color-text-muted); }
   &--e7 { background: rgba(220,38,38,0.12);   color: #dc2626; }
   &--e8 { background: rgba(146,64,14,0.12);   color: #92400e; }
 }
@@ -738,7 +738,7 @@ $tablet:  768px;
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   mat-icon { font-size: 13px; width: 13px; height: 13px; }
 
   &--combinado {
@@ -765,18 +765,18 @@ $tablet:  768px;
   font-size: 13px !important;
   width: 13px !important;
   height: 13px !important;
-  color: #6b7280;
+  color: var(--color-text-muted);
   flex-shrink: 0;
 }
 
 .pago-metodo-sm {
-  color: #374151;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
 .pago-monto-sm {
   margin-left: auto;
-  color: #111827;
+  color: var(--color-text-primary);
   font-weight: 600;
 }
 
@@ -807,7 +807,7 @@ $tablet:  768px;
 
 .pedido-divider {
   height: 1px;
-  background: rgba(0,0,0,0.06);
+  background: var(--color-border);
   margin: 0 14px;
 }
 
@@ -877,7 +877,7 @@ $tablet:  768px;
 }
 
 .item-nombre {
-  color: #1A1A11;
+  color: var(--color-text-primary);
   font-weight: 500;
   // Permitir wrap en nombres largos
   white-space: normal;
@@ -909,7 +909,7 @@ $tablet:  768px;
 
 .item-sels {
   font-size: 11px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-style: italic;
   // Mostrar comentarios completos sin cortar
   white-space: normal;
@@ -921,7 +921,7 @@ $tablet:  768px;
 .item-precio {
   font-size: 12px;
   font-weight: 700;
-  color: #6b7280;
+  color: var(--color-text-muted);
   flex-shrink: 0;      // ← precio siempre visible
   white-space: nowrap;
 }
@@ -931,7 +931,7 @@ $tablet:  768px;
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   margin-top: 2px;
 
   mat-icon { font-size: 14px; width: 14px; height: 14px; }
@@ -996,7 +996,7 @@ $tablet:  768px;
 .total-monto {
   font-size: 20px;     // ← era 22px, ligeramente menor
   font-weight: 900;
-  color: #1A1A11;
+  color: var(--color-text-primary);
   letter-spacing: -0.02em;
   white-space: nowrap;
   flex-shrink: 0;
@@ -1013,7 +1013,7 @@ $tablet:  768px;
   align-items: center;
   gap: 3px;
   font-size: 11px;
-  color: #9ca3af;     // ← más sutil cuando está pendiente
+  color: var(--color-text-faint);     // ← más sutil cuando está pendiente
   white-space: nowrap;
 
   mat-icon {
@@ -1087,8 +1087,8 @@ $tablet:  768px;
   padding: 0 12px;
   border-radius: 10px;
   border: 1.5px solid #d1d5db;
-  background: #f9fafb;
-  color: #374151;
+  background: var(--color-bg-surface-2);
+  color: var(--color-text-secondary);
   font-size: 12px;
   font-weight: 600;
   font-family: inherit;
@@ -1100,7 +1100,7 @@ $tablet:  768px;
   mat-icon { font-size: 15px; width: 15px; height: 15px; flex-shrink: 0; }
 
   &:hover:not(:disabled) {
-    background: #f0fdf4;
+    background: var(--color-success-bg);
     border-color: #1C8C40;
     color: #1C8C40;
   }
@@ -1148,9 +1148,9 @@ $tablet:  768px;
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  border: 1.5px solid rgba(0,0,0,0.1);
-  background: #F8F9F8;
-  color: #6b7280;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-app);
+  color: var(--color-text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1159,7 +1159,7 @@ $tablet:  768px;
 
   mat-icon { font-size: 16px; width: 16px; height: 16px; }
 
-  &:hover { background: #f0f0f0; color: #1A1A11; }
+  &:hover { background: var(--color-bg-surface-3); color: var(--color-text-primary); }
 
   &--pago:hover {
     background: rgba(28,140,64,0.1);
@@ -1185,9 +1185,9 @@ $tablet:  768px;
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  border: 1.5px solid rgba(0,0,0,0.1);
-  background: #F8F9F8;
-  color: #6b7280;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-bg-app);
+  color: var(--color-text-muted);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1306,7 +1306,7 @@ $tablet:  768px;
   width: 72px;
   height: 72px;
   border-radius: 50%;
-  background: #F8F9F8;
+  background: var(--color-bg-app);
   border: 2px solid rgba(0,0,0,0.08);
   display: flex;
   align-items: center;
@@ -1316,20 +1316,20 @@ $tablet:  768px;
     font-size: 32px;
     width: 32px;
     height: 32px;
-    color: #6b7280;
+    color: var(--color-text-muted);
   }
 }
 
 .vacio-titulo {
   font-size: 18px;
   font-weight: 700;
-  color: #1A1A11;
+  color: var(--color-text-primary);
   margin: 0;
 }
 
 .vacio-sub {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   margin: 0;
 }
 
@@ -1357,8 +1357,8 @@ $tablet:  768px;
 // SKELETON LOADER
 // ════════════════════════════════
 .skeleton-card {
-  background: white;
-  border: 1px solid rgba(0,0,0,0.08);
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
   border-radius: 14px;
   padding: 16px;
   display: flex;
@@ -1450,7 +1450,7 @@ $tablet:  768px;
 
   .item-nombre {
     text-decoration: line-through;
-    color: #9ca3af;
+    color: var(--color-text-faint);
   }
 }
 
@@ -1521,7 +1521,7 @@ $tablet:  768px;
   }
 }
 
-.item-qty--gris { color: #9ca3af; }
+.item-qty--gris { color: var(--color-text-faint); }
 
 .spinner-item-check {
   width: 22px;

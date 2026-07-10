@@ -1,21 +1,23 @@
 $verde:  #1C8C40;
-$negro:  #1A1A11;
-$gris:   #6b7280;
-$borde:  rgba(0,0,0,0.08);
-$fondo:  #F8F9F8;
-$blanco: #ffffff;
+$negro:  var(--color-text-primary);
+$gris:   var(--color-text-muted);
+$borde:  var(--color-border);
+$fondo:  var(--color-bg-app);
+$blanco: var(--color-bg-surface);
 
 :host {
   display: block;
   min-height: 100%;
-  background: $fondo;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
 }
 
 .emplatado-shell {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background: $fondo;
+  background: var(--color-bg-app);
+  color: var(--color-text-primary);
   font-family: -apple-system, 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -86,7 +88,7 @@ $blanco: #ffffff;
   user-select: none;
   transition: background 0.15s;
 
-  &:hover { background: #f0f0f0; }
+  &:hover { background: var(--color-bg-surface-3); }
 
   &--activo {
     border-color: rgba(28,140,64,0.4);

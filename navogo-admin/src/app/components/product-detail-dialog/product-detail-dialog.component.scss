@@ -1,10 +1,10 @@
 // Dialog tipo bottom-sheet (Didi) homologado con Schedule/Location
 
-$gray-light: #e2e8f0;
-$gray: #718096;
-$gray-dark: #2d3748;
-$dark: #1a202c;
-$white: #ffffff;
+$gray-light: var(--color-border);
+$gray: var(--color-text-muted);
+$gray-dark: var(--color-text-secondary);
+$dark: var(--color-text-primary);
+$white: var(--color-bg-surface);
 $primary: #0f4d2a;
 $secondary: #1c8f46;
 $danger: #ef4444;
@@ -29,7 +29,9 @@ $spacing-lg: 24px;
 }
 
 .modal-content {
-  background: $white;
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
   border-radius: $spacing-lg;
   max-width: 560px;
   width: 100%;
@@ -37,13 +39,14 @@ $spacing-lg: 24px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-popup);
   animation: slideUpModal 0.28s ease-out;
 }
 
 .modal-header {
   padding: $spacing-lg;
-  border-bottom: 1px solid $gray-light;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -52,14 +55,14 @@ $spacing-lg: 24px;
     margin: 0;
     font-size: 20px;
     font-weight: 800;
-    color: $dark;
+    color: var(--color-text-primary);
   }
 
   .modal-close {
     width: 36px;
     height: 36px;
     border-radius: 999px;
-    background: $gray-light;
+    background: var(--color-bg-surface-3);
     border: none;
     cursor: pointer;
     display: inline-flex;
@@ -67,11 +70,11 @@ $spacing-lg: 24px;
     justify-content: center;
     transition: all 0.2s ease;
     font-size: 20px;
-    color: $gray-dark;
+    color: var(--color-text-secondary);
 
     &:hover {
-      background: $gray;
-      color: $white;
+      background: var(--color-text-muted);
+      color: #ffffff;
       transform: rotate(90deg);
     }
 
@@ -87,11 +90,13 @@ $spacing-lg: 24px;
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
 }
 
 .state {
   font-weight: 700;
-  color: $gray;
+  color: var(--color-text-muted);
   padding: $spacing-md 0;
 
   &.state-error {
@@ -109,8 +114,8 @@ $spacing-lg: 24px;
   position: relative;
   border-radius: $border-radius;
   overflow: hidden;
-  border: 1px solid $gray-light;
-  background: #f7fafc;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-surface-2);
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
@@ -256,12 +261,12 @@ $spacing-lg: 24px;
     margin: 0;
     font-size: 20px;
     font-weight: 900;
-    color: $dark;
+    color: var(--color-text-primary);
   }
 
   .product-description {
     margin: $spacing-sm 0 0;
-    color: $gray-dark;
+    color: var(--color-text-secondary);
     line-height: 1.5;
     font-weight: 600;
   }
@@ -320,7 +325,7 @@ $spacing-lg: 24px;
   .price-final {
     font-size: 22px;
     font-weight: 900;
-    color: $dark;
+    color: var(--color-text-primary);
 
     &.is-discount {
       color: $primary;
@@ -350,7 +355,7 @@ $spacing-lg: 24px;
       margin-bottom: 6px;
       font-size: 13px;
       font-weight: 700;
-      color: $gray-dark;
+      color: var(--color-text-secondary);
     }
 
     .price-variable-input-wrap {
@@ -362,19 +367,19 @@ $spacing-lg: 24px;
     .price-currency {
       font-size: 22px;
       font-weight: 900;
-      color: $dark;
+      color: var(--color-text-primary);
     }
 
     .price-variable-input {
       width: 140px;
-      border: 2px solid $gray-light;
+      border: 2px solid var(--color-border);
       border-radius: 10px;
       padding: 6px 10px;
-      background: $white;
+      background: var(--color-bg-surface-2);
       font: inherit;
       font-size: 22px;
       font-weight: 900;
-      color: $dark;
+      color: var(--color-text-primary);
 
       &:focus {
         outline: none;
@@ -423,13 +428,13 @@ $spacing-lg: 24px;
     margin: 0 0 $spacing-md;
     font-size: 16px;
     font-weight: 900;
-    color: $dark;
+    color: var(--color-text-primary);
   }
 }
 
 .addon-group {
   padding: $spacing-md 0;
-  border-top: 1px solid $gray-light;
+  border-top: 1px solid var(--color-border);
 
   &.missing {
     .group-title {
@@ -440,7 +445,7 @@ $spacing-lg: 24px;
   .group-title {
     font-size: 13px;
     font-weight: 900;
-    color: $gray;
+    color: var(--color-text-muted);
     text-transform: uppercase;
     letter-spacing: 0.6px;
     margin-bottom: $spacing-sm;
@@ -481,8 +486,8 @@ $spacing-lg: 24px;
     gap: $spacing-sm;
     padding: $spacing-sm $spacing-md;
     border-radius: $border-radius;
-    border: 2px solid $gray-light;
-    background: $white;
+    border: 2px solid var(--color-border);
+    background: var(--color-bg-surface-2);
     cursor: pointer;
     user-select: none;
     transition: transform 0.12s ease, border-color 0.12s ease, background 0.12s ease;
@@ -493,12 +498,19 @@ $spacing-lg: 24px;
 
     .option-text {
       font-weight: 800;
-      color: $dark;
+      color: var(--color-text-primary);
+    }
+
+    .option-price,
+    .option-price-extra {
+      margin-left: auto;
+      color: var(--color-text-muted);
+      font-weight: 700;
     }
 
     &.selected {
-      border-color: rgba(102, 126, 234, 0.55);
-      background: rgba(102, 126, 234, 0.08);
+      border-color: #1c8f46;
+      background: var(--color-brand-light);
     }
 
     &:hover {
@@ -559,7 +571,8 @@ $spacing-lg: 24px;
 
 .modal-footer {
   padding: $spacing-lg;
-  border-top: 1px solid $gray-light;
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-surface);
   display: grid;
   grid-template-columns: auto 1fr;
   gap: $spacing-md;
@@ -569,20 +582,20 @@ $spacing-lg: 24px;
 .qty {
   display: inline-flex;
   align-items: center;
-  border: 2px solid $gray-light;
+  border: 2px solid var(--color-border);
   border-radius: 999px;
   overflow: hidden;
-  background: $white;
+  background: var(--color-bg-surface-2);
 }
 
 .qty-btn {
   width: 40px;
   height: 40px;
   border: none;
-  background: $white;
+  background: var(--color-bg-surface-2);
   cursor: pointer;
   font-weight: 900;
-  color: $gray-dark;
+  color: var(--color-text-primary);
 
   &:disabled {
     opacity: 0.5;
@@ -594,7 +607,7 @@ $spacing-lg: 24px;
   width: 36px;
   text-align: center;
   font-weight: 900;
-  color: $dark;
+  color: var(--color-text-primary);
 }
 
 .btn-add-cart {

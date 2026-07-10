@@ -318,28 +318,5 @@
     </div>
   }
 
-  <!-- FOOTER ACCIONES -->
-  @if (!isLoading && order && puedeAvanzar()) {
-    <div class="detalle-footer">
-      <button class="btn-cancelar"
-              [disabled]="procesando"
-              (click)="cancelar()">
-        <mat-icon>close</mat-icon>
-        Cancelar pedido
-      </button>
-
-      <button class="btn-avanzar-principal"
-              [disabled]="procesando"
-              (click)="avanzarEstatus()">
-        @if (procesando) {
-          <span class="spinner-sm"></span>
-          Procesando...
-        } @else {
-          <mat-icon>{{ getIconoAccion() }}</mat-icon>
-          {{ getTextoAccion() }}
-        }
-      </button>
-    </div>
-  }
 
 </div>

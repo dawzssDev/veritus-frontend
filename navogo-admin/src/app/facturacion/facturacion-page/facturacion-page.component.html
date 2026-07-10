@@ -1,0 +1,441 @@
+<div class="facturacion-page">
+
+  <div class="fact-header">
+    <div>
+      <h1>Facturación</h1>
+      <p class="fact-sub">
+        Emisión y administración de CFDI
+      </p>
+    </div>
+    @if (configurado()) {
+      <div class="config-badge">
+        <mat-icon>check_circle</mat-icon>
+        FacturAPI configurado
+      </div>
+    } @else {
+      <div class="config-badge config-badge--warn">
+        <mat-icon>warning</mat-icon>
+        Pendiente configurar
+      </div>
+    }
+  </div>
+
+  <mat-tab-group
+    [selectedIndex]="tabActivo()"
+    (selectedIndexChange)="tabActivo.set($event)"
+    class="fact-tabs">
+
+    <mat-tab label="Facturas emitidas">
+      <div class="tab-content">
+
+        <div class="filtros-row">
+          <mat-form-field appearance="outline"
+                          subscriptSizing="dynamic">
+            <mat-label>Buscar por RFC</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput
+                   [ngModel]="filtroRfc()"
+                   (ngModelChange)="filtroRfc.set($event); cargarFacturas()"
+                   placeholder="RFC del cliente">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline"
+                          subscriptSizing="dynamic">
+            <mat-label>Estatus</mat-label>
+            <mat-select [ngModel]="filtroEstatus()"
+                        (ngModelChange)="filtroEstatus.set($event); cargarFacturas()">
+              <mat-option value="">Todos</mat-option>
+              <mat-option value="valid">Vigente</mat-option>
+              <mat-option value="cancelled">Cancelada</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline"
+                          subscriptSizing="dynamic">
+            <mat-label>Desde</mat-label>
+            <input matInput type="date"
+                   [ngModel]="filtroFechaInicio()"
+                   (ngModelChange)="filtroFechaInicio.set($event); cargarFacturas()">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline"
+                          subscriptSizing="dynamic">
+            <mat-label>Hasta</mat-label>
+            <input matInput type="date"
+                   [ngModel]="filtroFechaFin()"
+                   (ngModelChange)="filtroFechaFin.set($event); cargarFacturas()">
+          </mat-form-field>
+        </div>
+
+        @if (cargandoFact()) {
+          <div class="cargando-center">
+            <mat-spinner [diameter]="40"></mat-spinner>
+          </div>
+        }
+
+        @if (!cargandoFact()) {
+          <div class="facturas-lista">
+            @for (f of facturas(); track f.id) {
+              <div class="factura-card"
+                   [class.factura-card--cancelada]="
+                     f.estatus === 'cancelled'">
+
+                <div class="factura-card__header">
+                  <div class="factura-folio">
+                    <mat-icon>receipt_long</mat-icon>
+                    <span>
+                      {{ f.serie }}{{ f.folio_factura }}
+                    </span>
+                  </div>
+                  <span class="estatus-chip"
+                        [class]="getEstatusClass(f.estatus)">
+                    {{ getEstatusLabel(f.estatus) }}
+                  </span>
+                </div>
+
+                <div class="factura-card__info">
+                  <div class="info-col">
+                    <span class="info-label">RFC</span>
+                    <span class="info-valor">
+                      {{ f.rfc_receptor }}
+                    </span>
+                  </div>
+                  <div class="info-col">
+                    <span class="info-label">Razón social</span>
+                    <span class="info-valor">
+                      {{ f.razon_social_receptor }}
+                    </span>
+                  </div>
+                  <div class="info-col">
+                    <span class="info-label">Fecha</span>
+                    <span class="info-valor">
+                      {{ f.created_at | date:'d MMM y, h:mm a' }}
+                    </span>
+                  </div>
+                  <div class="info-col">
+                    <span class="info-label">Total</span>
+                    <span class="info-valor info-total">
+                      ${{ f.total | number:'1.2-2' }}
+                    </span>
+                  </div>
+                </div>
+
+                @if (f.uuid) {
+                  <p class="factura-uuid">
+                    UUID: {{ f.uuid }}
+                  </p>
+                }
+
+                <div class="factura-card__acciones">
+                  <button mat-stroked-button
+                          class="btn-accion-pdf"
+                          (click)="descargarPdf(f)">
+                    <mat-icon>picture_as_pdf</mat-icon>
+                    PDF
+                  </button>
+                  <button mat-stroked-button
+                          class="btn-accion-xml"
+                          (click)="descargarXml(f)">
+                    <mat-icon>code</mat-icon>
+                    XML
+                  </button>
+                  <button mat-stroked-button
+                          (click)="abrirEnviarEmail(f)">
+                    <mat-icon>email</mat-icon>
+                    Enviar
+                  </button>
+                  @if (f.estatus === 'valid') {
+                    <button mat-stroked-button
+                            color="warn"
+                            (click)="abrirCancelar(f)">
+                      <mat-icon>cancel</mat-icon>
+                      Cancelar
+                    </button>
+                  }
+                </div>
+
+              </div>
+            } @empty {
+              <div class="lista-vacia">
+                <mat-icon>receipt_long</mat-icon>
+                <p>No hay facturas emitidas</p>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Nueva factura">
+      <div class="tab-content">
+
+        @if (!configurado()) {
+          <div class="aviso-config">
+            <mat-icon>warning</mat-icon>
+            <div>
+              <strong>Configuración pendiente</strong>
+              <p>Debes configurar tus datos de FacturAPI
+                antes de emitir facturas.</p>
+            </div>
+            <button mat-raised-button color="primary"
+                    (click)="tabActivo.set(3)">
+              Ir a configuración
+            </button>
+          </div>
+        } @else {
+
+          <div class="buscador-section">
+            <h3>Buscar orden para facturar</h3>
+            <div class="buscador-row">
+              <mat-form-field appearance="outline"
+                              subscriptSizing="dynamic">
+                <mat-label>Número de folio</mat-label>
+                <mat-icon matPrefix>tag</mat-icon>
+                <input matInput
+                       [ngModel]="busquedaFolio()"
+                       (ngModelChange)="busquedaFolio.set($event)"
+                       placeholder="Ej: 123"
+                       inputmode="numeric">
+              </mat-form-field>
+
+              <span class="buscador-o">o</span>
+
+              <mat-form-field appearance="outline"
+                              subscriptSizing="dynamic">
+                <mat-label>Fecha</mat-label>
+                <input matInput type="date"
+                       [ngModel]="busquedaFecha()"
+                       (ngModelChange)="busquedaFecha.set($event)">
+              </mat-form-field>
+
+              <button mat-raised-button color="primary"
+                      [disabled]="buscando()"
+                      (click)="buscarOrdenes()">
+                @if (buscando()) {
+                  <mat-spinner diameter="18"></mat-spinner>
+                } @else {
+                  <mat-icon>search</mat-icon>
+                }
+                Buscar
+              </button>
+            </div>
+          </div>
+
+          @if (ordenesEncontradas().length > 0) {
+            <div class="ordenes-encontradas">
+              @for (orden of ordenesEncontradas();
+                    track orden.id) {
+                <div class="orden-item"
+                     [class.orden-item--facturada]="
+                       orden.tiene_factura">
+                  <div class="orden-item__info">
+                    <span class="orden-folio">
+                      Folio #{{ orden.folio }}
+                    </span>
+                    <span class="orden-meta">
+                      {{ orden.customer_name }} ·
+                      {{ orden.created_at
+                         | date:'d MMM y, h:mm a' }}
+                    </span>
+                    <span class="orden-items">
+                      {{ orden.items.length }} producto(s)
+                    </span>
+                  </div>
+                  <div class="orden-item__der">
+                    <span class="orden-total">
+                      ${{ orden.total | number:'1.2-2' }}
+                    </span>
+                    @if (orden.tiene_factura) {
+                      <span class="badge-facturada">
+                        <mat-icon>check_circle</mat-icon>
+                        Facturada
+                      </span>
+                    } @else {
+                      <button mat-raised-button color="primary"
+                              (click)="abrirNuevaFactura(orden)">
+                        <mat-icon>receipt_long</mat-icon>
+                        Facturar
+                      </button>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          @if (!buscando()
+               && ordenesEncontradas().length === 0
+               && (busquedaFolio() || busquedaFecha())) {
+            <div class="lista-vacia">
+              <mat-icon>search_off</mat-icon>
+              <p>No se encontraron órdenes</p>
+              <small>Verifica el folio o la fecha ingresada</small>
+            </div>
+          }
+
+        }
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Clientes fiscales">
+      <div class="tab-content">
+
+        <div class="clientes-toolbar">
+          <h3>Clientes fiscales registrados</h3>
+          <button mat-raised-button color="primary"
+                  (click)="abrirNuevoCliente()">
+            <mat-icon>add</mat-icon>
+            Nuevo cliente
+          </button>
+        </div>
+
+        @if (cargandoCli()) {
+          <div class="cargando-center">
+            <mat-spinner [diameter]="40"></mat-spinner>
+          </div>
+        }
+
+        @if (!cargandoCli()) {
+          <div class="clientes-lista">
+            @for (c of clientes(); track c.id) {
+              <div class="cliente-card">
+                <div class="cliente-card__info">
+                  <div class="cliente-rfc">
+                    {{ c.rfc }}
+                  </div>
+                  <div class="cliente-nombre">
+                    {{ c.razon_social }}
+                  </div>
+                  <div class="cliente-meta">
+                    CP: {{ c.codigo_postal }} ·
+                    Régimen: {{ c.regimen_fiscal }}
+                    @if (c.email) {
+                      · {{ c.email }}
+                    }
+                  </div>
+                </div>
+                <div class="cliente-card__acciones">
+                  <button mat-icon-button
+                          matTooltip="Editar"
+                          (click)="abrirEditarCliente(c)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button
+                          color="warn"
+                          matTooltip="Eliminar"
+                          (click)="eliminarCliente(c)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </div>
+            } @empty {
+              <div class="lista-vacia">
+                <mat-icon>person_outline</mat-icon>
+                <p>No hay clientes fiscales registrados</p>
+                <small>
+                  Agrega clientes para agilizar
+                  la emisión de facturas
+                </small>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Configuración">
+      <div class="tab-content tab-content--config">
+
+        <div class="config-card">
+          <h3>
+            <mat-icon>settings</mat-icon>
+            Datos de FacturAPI
+          </h3>
+
+          <div class="config-info-box">
+            <mat-icon>verified_user</mat-icon>
+            <div>
+              <strong>Integración gestionada por VERITUS</strong>
+              <p>La conexión con FacturAPI está configurada
+                por el sistema. Solo necesitas ingresar los
+                datos fiscales de tu negocio.</p>
+            </div>
+          </div>
+
+          <mat-form-field appearance="outline"
+                          class="full-width">
+            <mat-label>RFC del negocio</mat-label>
+            <input matInput [(ngModel)]="configForm.rfc"
+                   placeholder="XAXX010101000"
+                   (input)="configForm.rfc =
+                     $any($event.target).value.toUpperCase()">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline"
+                          class="full-width">
+            <mat-label>Razón social</mat-label>
+            <input matInput [(ngModel)]="configForm.razon_social"
+                   placeholder="Mi Restaurante SA de CV">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline"
+                          class="full-width">
+            <mat-label>Régimen fiscal</mat-label>
+            <mat-select [(ngModel)]="configForm.regimen_fiscal">
+              @for (r of regimenes; track r.value) {
+                <mat-option [value]="r.value">
+                  {{ r.label }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline"
+                          class="full-width">
+            <mat-label>Código postal fiscal</mat-label>
+            <input matInput [(ngModel)]="configForm.codigo_postal"
+                   placeholder="12345" maxlength="5"
+                   inputmode="numeric">
+          </mat-form-field>
+
+          <button mat-raised-button color="primary"
+                  class="btn-guardar-config"
+                  [disabled]="guardandoConfig()
+                    || !configForm.rfc
+                    || !configForm.razon_social
+                    || !configForm.codigo_postal"
+                  (click)="guardarConfig()">
+            @if (guardandoConfig()) {
+              <mat-spinner diameter="18"></mat-spinner>
+              {{ configurado()
+                 ? 'Actualizando...'
+                 : 'Creando organización...' }}
+            } @else {
+              <mat-icon>save</mat-icon>
+              {{ configurado()
+                 ? 'Actualizar configuración'
+                 : 'Configurar facturación' }}
+            }
+          </button>
+
+          @if (configurado() && config()) {
+            <div class="config-activa">
+              <mat-icon>check_circle</mat-icon>
+              <div>
+                <strong>FacturAPI activo</strong>
+                <p>RFC: {{ config()!.rfc }} ·
+                   {{ config()!.razon_social }}</p>
+              </div>
+            </div>
+          }
+
+        </div>
+
+      </div>
+    </mat-tab>
+
+  </mat-tab-group>
+
+</div>

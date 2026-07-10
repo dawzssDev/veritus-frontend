@@ -17,21 +17,22 @@ html {
     typography: Roboto,
     density: 0,
   ));
+
+  color-scheme: light;
+}
+
+html.tema-oscuro {
+  color-scheme: dark;
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
-  background-color: var(--mat-sys-surface);
-  color: var(--mat-sys-on-surface);
+  // El tema se controla con la clase `tema-oscuro` en <html>
+  // (ver ThemeService). Material adapta sus tokens vía color-scheme.
+  background-color: var(--color-bg-app, var(--mat-sys-surface));
+  color: var(--color-text-primary, var(--mat-sys-on-surface));
   font: var(--mat-sys-body-medium);
 
   // Reset the user agent margin.
   margin: 0;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }

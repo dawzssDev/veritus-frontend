@@ -48,6 +48,8 @@ import { ReservaService } from './reserva.service';
 import { Reserva } from './reserva.interface';
 import { ReservaFormDialogComponent } from './dialogs/reserva-form/reserva-form.dialog';
 import { AgregarNotaDialogComponent } from '../ventas-mostrador/agregar-nota-dialog/agregar-nota-dialog.component';
+import { TurnoEstadoService } from '../../turno-caja/turno-estado.service';
+import { TicketAreasService } from '../../services/ticket-areas/ticket-areas.service';
 
 type ItemComanda = OrderItem;
 
@@ -95,6 +97,8 @@ export class GestionMesasComponent implements OnInit, OnDestroy {
   private snackBar = inject(MatSnackBar);
   private dialog = inject(MatDialog);
   private ventasService = inject(VentasService);
+  turnoEstado = inject(TurnoEstadoService);
+  private ticketAreas = inject(TicketAreasService);
 
   @ViewChild('mapaContainer') mapaContainer!: ElementRef;
 
@@ -349,6 +353,7 @@ export class GestionMesasComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.cargarMesas();
+    this.turnoEstado.refrescar();
 
     // Cargar nombre y dirección de empresa al iniciar
     const empresaId = this.authService.getEmpresaId();
@@ -2529,10 +2534,22 @@ export class GestionMesasComponent implements OnInit, OnDestroy {
     return { esAdicional: true, totalAdicionales, itemsAdicionales };
   }
 
+  irAAbrirTurno(): void {
+    this.router.navigate(['/turno-caja']);
+  }
+
   /**
    * Abre dialog para confirmar pago con selección de método
    */
   abrirDialogPago(): void {
+    if (!this.turnoEstado.hayTurnoAbierto()) {
+      this.mostrarMensaje(
+        'No hay un turno de caja abierto. Abre un turno antes de cobrar.',
+        'error'
+      );
+      return;
+    }
+
     const mesa = this.mesaSeleccionada();
     const orden = mesa ? this.getOrdenActiva(mesa) : null;
     
@@ -2712,6 +2729,8 @@ export class GestionMesasComponent implements OnInit, OnDestroy {
       'Pago confirmado correctamente', 'success'
     );
 
+    this.imprimirTicketsAreaMesa(orden, mesa);
+
     this.abrirTicketConNombre(
       ordenConFolio,
       result.metodoPago ?? 'efectivo',
@@ -2721,23 +2740,179 @@ export class GestionMesasComponent implements OnInit, OnDestroy {
       result.cambio
     );
 
-    this.mesaService
-      .cambiarEstado(mesa.id, 'libre', {})
-      .subscribe({
-        next: () => {
-          this.volverAlMapa();
-          this.cargarMesas();
-        },
-        error: () => {
-          this.volverAlMapa();
-          this.cargarMesas();
-        },
-      });
+    const todasLasOrdenes = this.getOrdenesActivas(mesa);
+    const otrasCuentasPendientes = todasLasOrdenes.filter(
+      o => o.id !== orden.id
+        && !o.pago_confirmado
+        && o.estatus !== 6
+        && o.estatus !== 7
+        && o.estatus !== 8
+    );
+
+    if (otrasCuentasPendientes.length > 0) {
+      this.mostrarToast(
+        'Cuenta cobrada. Quedan '
+        + otrasCuentasPendientes.length
+        + ' cuenta(s) pendiente(s) en esta mesa.',
+        'info'
+      );
+      this.volverAlMapa();
+      this.cargarMesas();
+    } else {
+      this.mesaService
+        .cambiarEstado(mesa.id, 'libre', {})
+        .subscribe({
+          next: () => {
+            this.volverAlMapa();
+            this.cargarMesas();
+          },
+          error: () => {
+            this.volverAlMapa();
+            this.cargarMesas();
+          },
+        });
+    }
   }
 
-  /**
-   * Imprime un ticket con la comanda actual
-   */
+  private imprimirTicketsAreaMesa(
+    orden: Order,
+    mesa: Mesa
+  ): void {
+    const mapaCategoriaArea: Record<number, number> = {};
+    const areas: { id: number; nombre: string }[] = [];
+
+    this.categoriasMenu().forEach((cat) => {
+      if (cat.area_impresion_id) {
+        mapaCategoriaArea[cat.id] = cat.area_impresion_id;
+        if (!areas.find(a => a.id === cat.area_impresion_id)) {
+          areas.push({
+            id:     cat.area_impresion_id,
+            nombre: cat.area_nombre ?? 'Área',
+          });
+        }
+      }
+    });
+
+    const items = (orden.items ?? []).map((item) => {
+      const categoriaId = this.resolverCategoriaIdItem(item);
+
+      return {
+        name:     item.name,
+        quantity: item.quantity,
+        nota:     item.note ?? (item as any).nota,
+        selections: item.selections,
+        area_impresion_id: categoriaId
+          ? mapaCategoriaArea[categoriaId] ?? null
+          : null,
+      };
+    });
+
+    this.ticketAreas.imprimirTicketsDeArea({
+      numeroOrden:      orden.id,
+      mesa:             mesa.identificador ?? undefined,
+      tipoServicio:     'local',
+      items,
+      areas,
+      mapaCategoriaArea,
+      mapaCategorias:   {},
+      horaConfirmacion: new Date().toISOString(),
+    });
+  }
+
+  private resolverCategoriaIdItem(item: OrderItem): number | null {
+    if ((item as any).categoria_id) {
+      return (item as any).categoria_id;
+    }
+    if (item.product_id) {
+      const prod = this.todosProductosMenu().find(
+        p => p.id === item.product_id
+      );
+      return prod?.categoria_id ?? null;
+    }
+    return null;
+  }
+
+  liberarMesaManual(): void {
+    const mesa  = this.mesaSeleccionada();
+    const orden = mesa ? this.getOrdenActiva(mesa) : null;
+    if (!mesa || !orden) return;
+
+    this.guardandoPago.set(true);
+
+    this.mesaService.getById(mesa.id).subscribe({
+      next: (mesaRes) => {
+        const mesaActual = mesaRes.data ?? mesa;
+
+        const todasLasOrdenes = this.getOrdenesActivas(
+          mesaActual
+        );
+
+        const otrasCuentasPendientes = todasLasOrdenes
+          .filter(o =>
+            o.id !== orden.id
+            && !o.pago_confirmado
+            && o.estatus !== 6
+            && o.estatus !== 7
+            && o.estatus !== 8
+          );
+
+        this.orderService
+          .actualizarOrden(orden.id, {
+            estatus:          6,
+            pago_confirmado:  true,
+            envio_confirmado: true,
+          })
+          .subscribe({
+            next: () => {
+              if (otrasCuentasPendientes.length > 0) {
+                this.guardandoPago.set(false);
+                this.mostrarToast(
+                  'Cuenta liberada. Quedan '
+                  + otrasCuentasPendientes.length
+                  + ' cuenta(s) pendiente(s) en esta mesa.',
+                  'info'
+                );
+                this.cargarMesas();
+                this.volverAlMapa();
+              } else {
+                this.mesaService
+                  .cambiarEstado(mesa.id, 'libre', {})
+                  .subscribe({
+                    next: () => {
+                      this.guardandoPago.set(false);
+                      this.mostrarToast(
+                        'Mesa liberada correctamente',
+                        'success'
+                      );
+                      this.cargarMesas();
+                      this.volverAlMapa();
+                    },
+                    error: () => {
+                      this.guardandoPago.set(false);
+                      this.cargarMesas();
+                      this.volverAlMapa();
+                    }
+                  });
+              }
+            },
+            error: () => {
+              this.guardandoPago.set(false);
+              this.mostrarToast(
+                'Error al liberar la cuenta', 'error'
+              );
+            }
+          });
+      },
+      error: () => {
+        this.guardandoPago.set(false);
+        this.mostrarToast(
+          'Error al verificar el estado de la mesa',
+          'error'
+        );
+      }
+    });
+  }
+
   imprimirTicket(): void {
     const mesa  = this.mesaSeleccionada();
     const orden = mesa?.orden;
@@ -3271,6 +3446,14 @@ export class GestionMesasComponent implements OnInit, OnDestroy {
   }
 
   // ─── Split / Merge ───────────────────────────────────────
+
+  getOrdenesActivas(mesa: Mesa): Order[] {
+    const ordenes = mesa.ordenes_activas ?? [];
+    if (ordenes.length > 0) {
+      return ordenes as Order[];
+    }
+    return mesa.orden ? [mesa.orden] : [];
+  }
 
   getOrdenActiva(mesa: Mesa): Order | null {
     const id = this.cuentaActivaId();

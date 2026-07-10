@@ -40,6 +40,30 @@
         </mat-icon>
       </button>-->
 
+      <button class="badge-turno-caja"
+              [class.badge-turno-caja--abierto]="
+                turnoEstado.hayTurnoAbierto()"
+              [class.badge-turno-caja--cerrado]="
+                turnoEstado.cargado() && !turnoEstado.hayTurnoAbierto()"
+              (click)="irACaja()">
+        <span class="badge-dot"></span>
+        @if (turnoEstado.hayTurnoAbierto()) {
+          Caja abierta
+        } @else {
+          Caja cerrada
+        }
+      </button>
+
+      <button
+        mat-icon-button
+        class="theme-toggle-btn"
+        type="button"
+        (click)="toggleTheme()"
+        [attr.aria-label]="themeService.theme() === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+        [matTooltip]="themeService.theme() === 'dark' ? 'Tema claro' : 'Tema oscuro'">
+        <mat-icon>{{ themeService.theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+      </button>
+
       <!-- Separador -->
       <div class="divider"></div>
 
@@ -84,6 +108,11 @@
           <button mat-menu-item (click)="goToProfile()">
             <mat-icon>person</mat-icon>
             <span>Mi Perfil</span>
+          </button>
+
+          <button mat-menu-item class="theme-menu-item" (click)="toggleTheme()">
+            <mat-icon>{{ themeService.theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            <span>{{ themeService.theme() === 'dark' ? 'Tema claro' : 'Tema oscuro' }}</span>
           </button>
 
           <mat-divider></mat-divider>

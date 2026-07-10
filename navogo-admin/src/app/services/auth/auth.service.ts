@@ -227,6 +227,15 @@ export class AuthService {
   }
 
   /**
+   * Obtiene el id del usuario autenticado
+   */
+  getUserId(): number | null {
+    const user = this._currentUser();
+    if (!user?.id) return null;
+    return user.id;
+  }
+
+  /**
    * Verifica si el usuario tiene uno de los roles permitidos
    * @param allowedRoles - Array de roleIds permitidos
    * @returns true si el usuario tiene uno de los roles

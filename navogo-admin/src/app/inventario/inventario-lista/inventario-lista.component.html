@@ -1,0 +1,164 @@
+<div class="inventario-page">
+
+  <!-- Header -->
+  <div class="inv-header">
+    <div>
+      <h1 class="inv-titulo">Inventario</h1>
+      <p class="inv-sub">
+        Control de insumos y materia prima
+      </p>
+    </div>
+    <button mat-raised-button color="primary"
+            (click)="abrirCrearInsumo()">
+      <mat-icon>add</mat-icon>
+      Nuevo Insumo
+    </button>
+  </div>
+
+  <!-- Alerta stock bajo -->
+  @if (totalStockBajo() > 0) {
+    <button
+      class="alerta-stock-bajo"
+      [class.alerta-stock-bajo--activa]="soloStockBajo()"
+      (click)="toggleStockBajo()">
+      <mat-icon>warning</mat-icon>
+      <span>
+        {{ totalStockBajo() }} insumo(s) con stock bajo
+      </span>
+      <span class="alerta-stock-bajo__accion">
+        {{ soloStockBajo() ? 'Ver todos' : 'Ver solo estos' }}
+      </span>
+    </button>
+  }
+
+  <!-- Filtros -->
+  <div class="inv-filtros">
+    <mat-form-field appearance="outline"
+                     subscriptSizing="dynamic"
+                     class="inv-busqueda">
+      <mat-icon matPrefix>search</mat-icon>
+      <input matInput placeholder="Buscar insumo..."
+             (input)="onBusquedaChange($any($event.target).value)">
+    </mat-form-field>
+
+    <div class="inv-categorias-chips">
+      <button class="cat-chip"
+              [class.cat-chip--activo]="filtroCategoria() === 'todas'"
+              (click)="filtroCategoria.set('todas')">
+        Todas
+      </button>
+      @for (cat of categorias(); track cat) {
+        <button class="cat-chip"
+                [class.cat-chip--activo]="filtroCategoria() === cat"
+                (click)="filtroCategoria.set(cat)">
+          {{ cat }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (cargando()) {
+    <div class="inv-loading">
+      <mat-spinner [diameter]="48"></mat-spinner>
+    </div>
+  }
+
+  <!-- Grid de insumos -->
+  @if (!cargando()) {
+    <div class="inv-grid">
+      @for (insumo of insumosFiltrados(); track insumo.id) {
+        <div class="insumo-card"
+             [class.insumo-card--bajo]="insumo.stock_bajo"
+             (click)="abrirKardex(insumo)">
+
+          <div class="insumo-card__header">
+            <div class="insumo-card__icono">
+              <mat-icon>
+                {{ getIconoCategoria(insumo.categoria) }}
+              </mat-icon>
+            </div>
+            <div class="insumo-card__titulo">
+              <span class="insumo-nombre">
+                {{ insumo.nombre }}
+              </span>
+              @if (insumo.categoria) {
+                <span class="insumo-categoria">
+                  {{ insumo.categoria }}
+                </span>
+              }
+            </div>
+            @if (insumo.stock_bajo) {
+              <mat-icon class="badge-alerta"
+                        matTooltip="Stock por debajo del mínimo">
+                warning
+              </mat-icon>
+            }
+          </div>
+
+          <div class="insumo-card__stock">
+            <div class="stock-actual">
+              <span class="stock-valor">
+                {{ insumo.stock_actual | number:'1.0-2' }}
+              </span>
+              <span class="stock-unidad">
+                {{ insumo.unidad_medida }}
+              </span>
+            </div>
+            <div class="stock-minimo">
+              Mínimo: {{ insumo.stock_minimo | number:'1.0-2' }}
+              {{ insumo.unidad_medida }}
+            </div>
+          </div>
+
+          <div class="insumo-card__costo">
+            <span>Costo promedio</span>
+            <strong>
+              ${{ insumo.costo_promedio | number:'1.2-2' }}
+            </strong>
+          </div>
+
+          <div class="insumo-card__acciones"
+               (click)="$event.stopPropagation()">
+            <button class="btn-accion btn-accion--entrada"
+                    matTooltip="Registrar entrada"
+                    (click)="abrirEntrada(insumo, $event)">
+              <mat-icon>add_circle</mat-icon>
+            </button>
+            <button class="btn-accion btn-accion--salida"
+                    matTooltip="Registrar salida"
+                    (click)="abrirSalida(insumo, $event)">
+              <mat-icon>remove_circle</mat-icon>
+            </button>
+            <button class="btn-accion btn-accion--ajuste"
+                    matTooltip="Ajustar inventario"
+                    (click)="abrirAjuste(insumo, $event)">
+              <mat-icon>tune</mat-icon>
+            </button>
+            <button class="btn-accion btn-accion--editar"
+                    matTooltip="Editar"
+                    (click)="abrirEditarInsumo(insumo, $event)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button class="btn-accion btn-accion--eliminar"
+                    matTooltip="Desactivar"
+                    (click)="eliminarInsumo(insumo, $event)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+
+        </div>
+      } @empty {
+        <div class="inv-vacio">
+          <mat-icon>inventory_2</mat-icon>
+          <p>No hay insumos registrados</p>
+          <button mat-raised-button color="primary"
+                  (click)="abrirCrearInsumo()">
+            Crear primer insumo
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+</div>

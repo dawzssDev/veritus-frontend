@@ -8,8 +8,8 @@
   cursor: pointer;
   overflow: visible;
   padding: 0;
-  background: #ffffff;
-  border: 2px solid #f1f3f5;
+  background: var(--color-bg-surface);
+  border: 2px solid var(--color-border);
   
   &:hover {
     box-shadow: var(--card-shadow-hover);
@@ -46,7 +46,7 @@
   
   &.estado-finalizado {
     opacity: 0.7;
-    background: #f9fafb;
+    background: var(--color-bg-surface-2);
   }
   
   &.estado-cancelado {
@@ -71,8 +71,8 @@
   align-items: flex-start;
   padding: var(--spacing-lg);
   padding-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
-  background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
-  border-bottom: 2px solid #f1f3f5;
+  background: linear-gradient(135deg, var(--color-bg-surface-2) 0%, var(--color-bg-surface) 100%);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .header-left {
@@ -96,14 +96,14 @@
   .folio-text {
     font-size: var(--font-size-folio);
     font-weight: var(--font-weight-folio);
-    color: #1f2937;
+    color: var(--color-text-primary);
     letter-spacing: 0.5px;
   }
 }
 
 .order-time {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-weight: 600;
   margin-left: 32px;
 }
@@ -199,13 +199,13 @@
 .customer-info {
   padding: var(--spacing-lg);
   padding-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
-  border-bottom: 1px solid #f1f3f5;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .customer-name {
   font-size: 18px;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text-primary);
   margin-bottom: var(--spacing-sm);
 }
 
@@ -215,7 +215,7 @@
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   font-weight: 600;
   margin-top: var(--spacing-xs);
   
@@ -231,7 +231,7 @@
   align-items: flex-start;
   gap: 6px;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--color-text-muted);
   margin-top: var(--spacing-xs);
 
   mat-icon {
@@ -255,7 +255,7 @@
   padding: var(--spacing-lg);
   padding-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
   background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .comanda-header {
@@ -265,7 +265,7 @@
   margin-bottom: var(--spacing-md);
   font-size: 16px;
   font-weight: 800;
-  color: #374151;
+  color: var(--color-text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   
@@ -289,9 +289,9 @@
   gap: var(--spacing-md);
   align-items: start;
   padding: var(--spacing-md);
-  background: #ffffff;
+  background: var(--color-bg-surface);
   border-radius: 8px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--color-border);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   transition: all 0.2s ease;
   
@@ -322,7 +322,7 @@
 .item-name {
   font-size: var(--font-size-item);
   font-weight: var(--font-weight-item);
-  color: #111827;
+  color: var(--color-text-primary);
   line-height: 1.4;
 }
 
@@ -340,18 +340,18 @@
   font-size: 13px;
   font-weight: 700;
   border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-card);
 }
 
 .item-price {
   font-size: 16px;
   font-weight: 800;
-  color: #111827;
+  color: var(--color-text-primary);
   white-space: nowrap;
-  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  background: linear-gradient(135deg, var(--color-bg-surface-2) 0%, var(--color-bg-surface-3) 100%);
   padding: 6px 14px;
   border-radius: 8px;
-  border: 2px solid #e5e7eb;
+  border: 2px solid var(--color-border);
 }
 
 // Notas especiales - NUNCA SE PIERDEN VISUALMENTE
@@ -404,14 +404,14 @@
   padding: var(--spacing-lg);
   padding-left: calc(var(--spacing-lg) + var(--card-border-width) + var(--spacing-sm));
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-  border-top: 2px solid #e5e7eb;
-  border-bottom: 2px solid #e5e7eb;
+  border-top: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-border);
 }
 
 .total-label {
   font-size: 16px;
   font-weight: 700;
-  color: #6b7280;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -419,7 +419,7 @@
 .total-amount {
   font-size: 24px;
   font-weight: 900;
-  color: #111827;
+  color: var(--color-text-primary);
   letter-spacing: 0.5px;
 }
 

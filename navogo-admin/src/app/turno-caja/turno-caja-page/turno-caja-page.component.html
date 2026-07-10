@@ -1,0 +1,306 @@
+<div class="turno-page">
+
+  <div class="turno-page-header">
+    <div>
+      <h1>Caja</h1>
+    </div>
+    <button mat-stroked-button
+            (click)="imprimirTicketDia()">
+      <mat-icon>today</mat-icon>
+      Corte del día
+    </button>
+  </div>
+
+  @if (cargando()) {
+    <div class="turno-loading">
+      <mat-spinner [diameter]="48"></mat-spinner>
+    </div>
+  }
+
+  @if (!cargando()) {
+
+    <!-- ═══ SIN TURNO ABIERTO ═══ -->
+    @if (!turno()) {
+      <div class="sin-turno">
+        <div class="sin-turno__icono">
+          <mat-icon>point_of_sale</mat-icon>
+        </div>
+        <h2>No hay un turno de caja abierto</h2>
+        <p>Abre un turno para comenzar a registrar
+           ventas y movimientos de efectivo.</p>
+        <button mat-raised-button color="primary"
+                class="btn-abrir-grande"
+                (click)="abrirTurno()">
+          <mat-icon>lock_open</mat-icon>
+          Abrir turno de caja
+        </button>
+      </div>
+    }
+
+    <!-- ═══ TURNO ABIERTO ═══ -->
+    @if (turno(); as t) {
+      <div class="turno-activo">
+
+        <!-- Header del turno -->
+        <div class="turno-header">
+          <div class="turno-header__info">
+            <span class="turno-badge">
+              <span class="turno-badge__dot"></span>
+              Turno abierto
+            </span>
+            <h1>Caja en curso</h1>
+            <p class="turno-meta">
+              Desde {{ t.hora_apertura | date:'d MMM, h:mm a' }}
+              · {{ t.usuarioApertura?.nombreCompleto ?? '—' }}
+            </p>
+          </div>
+          <button mat-raised-button color="warn"
+                  class="btn-cerrar-turno"
+                  (click)="abrirCerrarTurno()">
+            <mat-icon>lock</mat-icon>
+            Cerrar turno
+          </button>
+        </div>
+
+        <!-- Cards de métricas en vivo -->
+        <div class="metricas-grid">
+
+          <div class="metrica-card metrica-card--destacado">
+            <mat-icon>payments</mat-icon>
+            <div>
+              <span class="metrica-label">Efectivo esperado</span>
+              <span class="metrica-valor">
+                ${{ (t.efectivo_esperado ?? 0) | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="metrica-card">
+            <mat-icon>point_of_sale</mat-icon>
+            <div>
+              <span class="metrica-label">Ventas totales</span>
+              <span class="metrica-valor">
+                ${{ (t.metricas_en_vivo?.total_ventas ?? 0) | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="metrica-card">
+            <mat-icon>receipt_long</mat-icon>
+            <div>
+              <span class="metrica-label">Órdenes</span>
+              <span class="metrica-valor">
+                {{ t.metricas_en_vivo?.total_ordenes ?? 0 }}
+              </span>
+            </div>
+          </div>
+
+          <div class="metrica-card">
+            <mat-icon>credit_card</mat-icon>
+            <div>
+              <span class="metrica-label">Tarjeta</span>
+              <span class="metrica-valor">
+                ${{ (t.metricas_en_vivo?.total_tarjeta ?? 0) | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="metrica-card">
+            <mat-icon>account_balance</mat-icon>
+            <div>
+              <span class="metrica-label">Transferencia</span>
+              <span class="metrica-valor">
+                ${{ (t.metricas_en_vivo?.total_transferencia ?? 0) | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+
+          <div class="metrica-card">
+            <mat-icon>volunteer_activism</mat-icon>
+            <div>
+              <span class="metrica-label">Propinas</span>
+              <span class="metrica-valor">
+                ${{ (t.metricas_en_vivo?.total_propinas ?? 0) | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Desglose del fondo -->
+        <div class="desglose-fondo">
+          <div class="desglose-fila">
+            <span>Fondo inicial</span>
+            <span>
+              ${{ t.fondo_inicial | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="desglose-fila">
+            <span>+ Ventas en efectivo</span>
+            <span>
+              ${{ (t.metricas_en_vivo?.total_efectivo ?? 0)
+                  | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="desglose-fila desglose-fila--positivo">
+            <span>+ Entradas de caja</span>
+            <span>
+              ${{ (t.total_entradas_caja ?? 0)
+                  | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="desglose-fila desglose-fila--negativo">
+            <span>− Salidas de caja</span>
+            <span>
+              ${{ (t.total_salidas_caja ?? 0)
+                  | number:'1.2-2' }}
+            </span>
+          </div>
+
+          <div class="desglose-fila desglose-fila--total">
+            <span>Efectivo esperado</span>
+            <span>
+              ${{ (t.efectivo_esperado ?? 0)
+                  | number:'1.2-2' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Movimientos del turno -->
+        <div class="movimientos-section">
+          <div class="movimientos-header">
+            <h2>Movimientos de caja</h2>
+            <button mat-stroked-button (click)="abrirMovimiento()">
+              <mat-icon>add</mat-icon>
+              Nuevo movimiento
+            </button>
+          </div>
+
+          @if ((t.movimientos?.length ?? 0) === 0) {
+            <div class="movimientos-vacio">
+              <mat-icon>swap_horiz</mat-icon>
+              <p>Sin movimientos manuales en este turno</p>
+            </div>
+          } @else {
+            <div class="movimientos-lista">
+              @for (mov of t.movimientos; track mov.id) {
+                <div class="movimiento-item">
+                  <mat-icon
+                    [class.icono-entrada]="mov.tipo === 'entrada'"
+                    [class.icono-salida]="mov.tipo === 'salida'">
+                    {{ getIconoMovimiento(mov.tipo) }}
+                  </mat-icon>
+                  <div class="movimiento-info">
+                    <span class="movimiento-motivo">{{ mov.motivo }}</span>
+                    <span class="movimiento-meta">
+                      {{ mov.created_at | date:'h:mm a' }}
+                      · {{ mov.usuario?.nombreCompleto ?? '—' }}
+                    </span>
+                  </div>
+                  <span class="movimiento-monto"
+                        [class.monto-entrada]="mov.tipo === 'entrada'"
+                        [class.monto-salida]="mov.tipo === 'salida'">
+                    {{ mov.tipo === 'entrada' ? '+' : '−' }}
+                    ${{ mov.monto | number:'1.2-2' }}
+                  </span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+      </div>
+    }
+
+  }
+
+  <!-- ═══ HISTORIAL DE TURNOS ═══ -->
+  <div class="historial-section">
+
+  <div class="historial-header">
+    <h2>Historial de turnos</h2>
+  </div>
+
+  @if (cargandoHist()) {
+    <div class="hist-loading">
+      <mat-spinner [diameter]="32"></mat-spinner>
+    </div>
+  }
+
+  @if (!cargandoHist()) {
+    <div class="historial-lista">
+      @for (t of historial(); track t.id) {
+        <div class="hist-item" (click)="verDetalle(t)">
+
+          <div class="hist-item__estado"
+               [class.estado-abierto]="t.estatus==='abierto'"
+               [class.estado-cerrado]="t.estatus==='cerrado'">
+            <mat-icon>
+              {{ t.estatus === 'abierto' ? 'lock_open' : 'lock' }}
+            </mat-icon>
+          </div>
+
+          <div class="hist-item__info">
+            <span class="hist-fecha">
+              {{ t.hora_apertura | date:'d MMM y, h:mm a' }}
+            </span>
+            <span class="hist-usuario">
+              {{ t.usuarioApertura?.nombreCompleto ?? '—' }}
+              · {{ formatDuracion(t.duracion_minutos ?? 0) }}
+            </span>
+          </div>
+
+          <div class="hist-item__ventas">
+            <span class="hist-total">
+              ${{ t.total_ventas | number:'1.2-2' }}
+            </span>
+            <span class="hist-ordenes">
+              {{ t.total_ordenes }} órdenes
+            </span>
+          </div>
+
+          <div class="hist-item__arqueo">
+            @if (t.diferencia !== null) {
+              <span [class]="getColorDiferencia(t.diferencia)">
+                {{ +t.diferencia > 0 ? '+' : '' }}
+                ${{ t.diferencia | number:'1.2-2' }}
+              </span>
+            } @else {
+              <span class="sin-arqueo">Sin arqueo</span>
+            }
+          </div>
+
+          <mat-icon class="hist-chevron">chevron_right</mat-icon>
+
+          <button mat-icon-button
+                  matTooltip="Imprimir ticket"
+                  (click)="imprimirTicketTurno(t);
+                           $event.stopPropagation()">
+            <mat-icon>print</mat-icon>
+          </button>
+
+        </div>
+      } @empty {
+        <div class="hist-vacio">
+          <mat-icon>history</mat-icon>
+          <p>No hay turnos registrados aún</p>
+        </div>
+      }
+    </div>
+
+    <mat-paginator
+      [length]="totalHist()"
+      [pageSize]="perPage"
+      [pageIndex]="paginaHist() - 1"
+      (page)="onPageHist($event)"
+      hidePageSize
+      showFirstLastButtons>
+    </mat-paginator>
+  }
+
+  </div>
+
+</div>
