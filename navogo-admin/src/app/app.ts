@@ -49,6 +49,12 @@ export class App implements OnInit {
   }
   
   ngOnInit(): void {
+    // La app arrancó correctamente: resetear el flag de recarga
+    // para que futuros deploys puedan volver a auto-recuperarse
+    if (typeof sessionStorage !== 'undefined') {
+      sessionStorage.removeItem('chunk_reload_attempted');
+    }
+
     // Cargar estado del trial solo si el usuario está logueado
     if (this.authService.isAuthenticated()) {
       this.trialService.cargar();
