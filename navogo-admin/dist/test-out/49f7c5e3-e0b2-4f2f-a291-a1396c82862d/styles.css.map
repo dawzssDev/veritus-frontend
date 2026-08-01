@@ -1,7 +1,0 @@
-{
-  "version": 3,
-  "sources": ["src/styles.css"],
-  "sourcesContent": ["/* You can add global styles to this file, and also import other style files */\n\nhtml, body { \n  height: 100%; \n}\n\nbody { \n  margin: 0; \n  font-family: Roboto, \"Helvetica Neue\", sans-serif;\n  background-color: #f5f7fa;\n}\n\n/* Scrollbar personalizado */\n::-webkit-scrollbar {\n  width: 10px;\n  height: 10px;\n}\n\n::-webkit-scrollbar-track {\n  background: #f1f1f1;\n}\n\n::-webkit-scrollbar-thumb {\n  background: #c1c1c1;\n  border-radius: 5px;\n}\n\n::-webkit-scrollbar-thumb:hover {\n  background: #a8a8a8;\n}\n\n/* Animaci\u00F3n global para contenido */\nrouter-outlet + * {\n  animation: fadeInPage 0.3s ease-in;\n}\n\n@keyframes fadeInPage {\n  from {\n    opacity: 0;\n    transform: translateY(10px);\n  }\n  to {\n    opacity: 1;\n    transform: translateY(0);\n  }\n}\n"],
-  "mappings": ";AAEA;AAAM;AACJ,UAAQ;AACV;AAEA;AACE,UAAQ;AACR;AAAA,IAAa,MAAM;AAAA,IAAE,gBAAgB;AAAA,IAAE;AACvC,oBAAkB;AACpB;AAGA;AACE,SAAO;AACP,UAAQ;AACV;AAEA;AACE,cAAY;AACd;AAEA;AACE,cAAY;AACZ,iBAAe;AACjB;AAEA,yBAAyB;AACvB,cAAY;AACd;AAGA,cAAc,EAAE;AACd,aAAW,WAAW,KAAK;AAC7B;AAEA,WAHa;AAIX;AACE,aAAS;AACT,eAAW,WAAW;AACxB;AACA;AACE,aAAS;AACT,eAAW,WAAW;AACxB;AACF;",
-  "names": []
-}

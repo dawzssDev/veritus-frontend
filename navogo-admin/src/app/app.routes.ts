@@ -27,6 +27,35 @@ import { PickupCheckoutPageComponent } from './pages/public/pickup-checkout-page
 import { NotFoundComponent } from './pages/public/not-found/not-found.component';
 import { Dashboard } from './components/dashboard/dashboard';
 import { MenuPublicoComponent } from './pages/public/menu-publico/menu-publico.component';
+// Estos estaban como loadComponent — pasarlos a import directo
+import { CorteCajaComponent }
+  from './corte-caja/corte-caja.component';
+import { TurnoCajaPageComponent }
+  from './turno-caja/turno-caja-page/turno-caja-page.component';
+import { CajaEntregasComponent }
+  from './components/caja-entregas/caja-entregas.component';
+import { VentasComponent }
+  from './ventas/ventas.component';
+import { InventarioListaComponent }
+  from './inventario/inventario-lista/inventario-lista.component';
+import { GastosListaComponent }
+  from './gastos/gastos-lista/gastos-lista.component';
+import { FacturacionPageComponent }
+  from './facturacion/facturacion-page/facturacion-page.component';
+import { FacturacionComponent }
+  from './facturacion/facturacion.component';
+import { SucursalesComponent }
+  from './sucursales/sucursales.component';
+import { AreasImpresionPageComponent }
+  from './areas-impresion/areas-impresion-page/areas-impresion-page.component';
+import { TutorialesComponent }
+  from './tutoriales/tutoriales.component';
+import { SoporteComponent }
+  from './soporte/soporte.component';
+import { ClienteFormComponent }
+  from './components/clientes/cliente-form/cliente-form.component';
+import { CatalogoComplementosComponent }
+  from './components/catalogo-complementos/catalogo-complementos.component';
 
 /**
  * Configuración de rutas
@@ -164,9 +193,7 @@ export const routes: Routes = [
     },
     {
         path: 'catalogo/complementos',
-        loadComponent: () =>
-            import('./components/catalogo-complementos/catalogo-complementos.component')
-                .then(m => m.CatalogoComplementosComponent),
+        component: CatalogoComplementosComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },
@@ -202,9 +229,7 @@ export const routes: Routes = [
     // Corte de Caja (Admin y Caja) — legacy, coexistir hasta validar flujo nuevo
     {
         path: 'corte-caja',
-        loadComponent: () =>
-            import('./corte-caja/corte-caja.component')
-                .then(m => m.CorteCajaComponent),
+        component: CorteCajaComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1, 2] }
     },
@@ -212,9 +237,7 @@ export const routes: Routes = [
     // Turno de Caja (Admin y Caja)
     {
         path: 'turno-caja',
-        loadComponent: () =>
-            import('./turno-caja/turno-caja-page/turno-caja-page.component')
-                .then(m => m.TurnoCajaPageComponent),
+        component: TurnoCajaPageComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1, 2] }
     },
@@ -222,9 +245,7 @@ export const routes: Routes = [
     // Caja Entregas (Admin y Caja)
     {
         path: 'caja-entregas',
-        loadComponent: () =>
-            import('./components/caja-entregas/caja-entregas.component')
-                .then(m => m.CajaEntregasComponent),
+        component: CajaEntregasComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1, 2] }
     },
@@ -232,9 +253,7 @@ export const routes: Routes = [
     // Historial de Ventas (Solo Admin)
     {
         path: 'ventas',
-        loadComponent: () =>
-            import('./ventas/ventas.component')
-                .then(m => m.VentasComponent),
+        component: VentasComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },
@@ -242,9 +261,7 @@ export const routes: Routes = [
     // Inventario (Solo Admin)
     {
         path: 'inventario',
-        loadComponent: () =>
-            import('./inventario/inventario-lista/inventario-lista.component')
-                .then(m => m.InventarioListaComponent),
+        component: InventarioListaComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },
@@ -252,9 +269,7 @@ export const routes: Routes = [
     // Gastos (Solo Admin)
     {
         path: 'gastos',
-        loadComponent: () =>
-            import('./gastos/gastos-lista/gastos-lista.component')
-                .then(m => m.GastosListaComponent),
+        component: GastosListaComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },
@@ -323,9 +338,7 @@ export const routes: Routes = [
     // Tutoriales (todos los roles)
     {
         path: 'tutoriales',
-        loadComponent: () =>
-            import('./tutoriales/tutoriales.component')
-                .then(m => m.TutorialesComponent),
+        component: TutorialesComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1, 2, 3, 4] }
     },
@@ -333,9 +346,7 @@ export const routes: Routes = [
     // Soporte (todos los roles)
     {
         path: 'soporte',
-        loadComponent: () =>
-            import('./soporte/soporte.component')
-                .then(m => m.SoporteComponent),
+        component: SoporteComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },
@@ -343,9 +354,7 @@ export const routes: Routes = [
     // Facturación CFDI (Solo Admin)
     {
         path: 'facturacion',
-        loadComponent: () =>
-            import('./facturacion/facturacion-page/facturacion-page.component')
-                .then(m => m.FacturacionPageComponent),
+        component: FacturacionPageComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },
@@ -353,9 +362,7 @@ export const routes: Routes = [
     // Suscripción Stripe (Solo Admin)
     {
         path: 'suscripcion',
-        loadComponent: () =>
-            import('./facturacion/facturacion.component')
-                .then(m => m.FacturacionComponent),
+        component: FacturacionComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },
@@ -369,27 +376,21 @@ export const routes: Routes = [
     },
     {
         path: 'clientes/nuevo',
-        loadComponent: () =>
-            import('./components/clientes/cliente-form/cliente-form.component')
-                .then(m => m.ClienteFormComponent),
+        component: ClienteFormComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1, 2] }
     },
     {
         path: 'clientes/:id/editar',
-        loadComponent: () =>
-            import('./components/clientes/cliente-form/cliente-form.component')
-                .then(m => m.ClienteFormComponent),
+        component: ClienteFormComponent,
         canActivate: [authGuard, roleGuard],
-        data: { roles: [1, 2] }
+        data: { roles: [1] }
     },
 
     // Sucursales (Solo Admin)
     {
         path: 'sucursales',
-        loadComponent: () =>
-            import('./sucursales/sucursales.component')
-                .then(m => m.SucursalesComponent),
+        component: SucursalesComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },
@@ -397,9 +398,7 @@ export const routes: Routes = [
     // Áreas de impresión (Solo Admin)
     {
         path: 'areas-impresion',
-        loadComponent: () =>
-            import('./areas-impresion/areas-impresion-page/areas-impresion-page.component')
-                .then(m => m.AreasImpresionPageComponent),
+        component: AreasImpresionPageComponent,
         canActivate: [authGuard, roleGuard],
         data: { roles: [1] }
     },

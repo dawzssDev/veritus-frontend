@@ -36,19 +36,20 @@
               "src/custom-theme.scss",
               "src/styles.css"
             ],
-            "scripts": [],
-            "server": "src/main.server.ts",
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            "scripts": []
           },
           "configurations": {
             "production": {
+              "namedChunks": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractLicenses": true,
+              "optimization": true,
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2MB",
-                  "maximumError": "5MB"
+                  "maximumWarning": "4MB",
+                  "maximumError": "8MB"
                 },
                 {
                   "type": "anyComponentStyle",
@@ -56,7 +57,6 @@
                   "maximumError": "200kB"
                 }
               ],
-              "outputHashing": "all",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -94,4 +94,22 @@
               "zone.js",
               "zone.js/testing"
             ],
-            "tsConfig": "tsco,"cli": {"analytics":"d8a9b041-cd56-490c-a164-18affe0bf086"},"cli": {"analytics":"067d46d7-4441-42ab-9228-bb62babd5b78"},"cli": {"analytics":"8a6fcf99-58cd-4250-9cd1-c43b04753a02"},"cli": {"analytics":"1d2c6302-82b9-48a8-90b6-0146525478f5"},"cli": {"analytics":"970e0143-0ed8-48ec-ac5d-4af917f3508c"},"cli": {"analytics":"16e9bc4a-f5cb-42e5-ad99-57cd06db9794"},"cli": {"analytics":"15113174-b506-4e55-8e14-e904a476eeaa"},"cli": {"analytics":"f248b5a7-3ccf-4155-b188-3639261e6b23"},"cli": {"analytics":"063da6d3-aa09-44b6-8b98-2fef6ba93100"}
+            "tsConfig": "tsconfig.spec.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "src/styles.css"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "cli": {
+    "analytics": "0ce55a8c-1fa8-4f3a-9c4f-c20873769022"
+  }
+}
